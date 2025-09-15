@@ -1,6 +1,7 @@
 import Button from "@/components/button";
 import Input from "@/components/input";
 import Spacer from "@/components/spacer";
+import { Key, Lock, MoveRight, UserRound } from "lucide-react";
 import Image from "next/image";
 
 export default function Home() {
@@ -38,17 +39,23 @@ export default function Home() {
           </div>
 
           {/* Form Heading */}
-          <div className="text-2xl font-semibold mb-5 text-accent-dim">
-            Login to your account.
+          <div className="text-2xl font-bold mb-5 text-accent-dim">
+            Login to your Exam.
           </div>
 
           <form>
-            <Input placeholder="Enter your username" />
+            <Input
+              placeholder="Enter your username"
+              icon={<UserRound size={16} />}
+            />
             <Spacer size="sm" />
-            <Input placeholder="Enter your password" />
+            <Input placeholder="Enter your password" icon={<Key size={16} />} />
 
             <Spacer size="lg" />
-            <Button title="Proceed" />
+            <Button
+              title="Proceed to Exam"
+              icon={<MoveRight size={20} strokeWidth={2} />}
+            />
           </form>
         </div>
       </div>

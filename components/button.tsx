@@ -1,13 +1,15 @@
-import { ArrowRight, ChevronRight } from "lucide-react";
-import React from "react";
+import { JSX } from "react";
 type ButtonType = {
   title: string;
+  icon?: JSX.Element;
 };
-const Button = ({ title }: ButtonType) => {
+const Button = ({ title, icon }: ButtonType) => {
   return (
-    <button className="flex items-center justify-center h-12 w-full bg-accent hover:bg-accent-dim text-white font-semibold rounded-md leading-0 gap-2 shadow-sm cursor-pointer animate-all duration-200 ease-in-out">
+    <button
+      className={`flex items-center justify-center h-10 w-full font-medium rounded-md leading-0 gap-2 cursor-pointer animate-all duration-200 ease-in text-sm bg-accent text-accent-light`}
+    >
       <span>{title}</span>
-      <ArrowRight size={20} />
+      {icon ? icon : ""}
     </button>
   );
 };

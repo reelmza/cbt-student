@@ -1,7 +1,7 @@
 import React, { JSX } from "react";
 type InputType = {
   placeholder: string;
-  icon: JSX.Element;
+  icon?: JSX.Element;
 };
 
 const Input = ({ placeholder, icon }: InputType) => {

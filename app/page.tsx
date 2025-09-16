@@ -1,3 +1,4 @@
+"use client";
 import Button from "@/components/button";
 import Input from "@/components/input";
 import SideBox from "@/components/sections/side-box";
@@ -5,8 +6,18 @@ import Spacer from "@/components/spacer";
 import { Key, Lock, MoveRight, UserRound } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 export default function Home() {
+  const router = useRouter();
+
+  // User authentication logic
+  const doLogin = async (e: React.SyntheticEvent) => {
+    e.preventDefault();
+    router.push("/dashboard");
+    return;
+  };
+
   return (
     <div className="grid h-full grid-cols-12 font-sans">
       {/* Side Box */}
@@ -14,7 +25,7 @@ export default function Home() {
 
       {/* Form Box */}
       <div className="col-span-6 flex flex-col justify-center items-center">
-        <div className="w-5/10 bg-reds-50 rounded-lg">
+        <div className="w-5/10 rounded-lg">
           {/* School Name */}
           <div className="text-sm font-sans font-semibold bg-accent-light text-accent-dim w-fit  rounded-full px-3 mb-5 py-1 leading-none">
             Adamawa State University, Mubi.
@@ -25,7 +36,7 @@ export default function Home() {
             Login to your Exam.
           </div>
 
-          <form>
+          <form onSubmit={doLogin}>
             <Input
               placeholder="Enter your username"
               icon={<UserRound size={16} />}

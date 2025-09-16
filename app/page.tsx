@@ -1,5 +1,6 @@
 import Button from "@/components/button";
 import Input from "@/components/input";
+import SideBox from "@/components/sections/side-box";
 import Spacer from "@/components/spacer";
 import { Key, Lock, MoveRight, UserRound } from "lucide-react";
 import Image from "next/image";
@@ -8,27 +9,7 @@ export default function Home() {
   return (
     <div className="grid h-full grid-cols-12 font-sans">
       {/* Side Box */}
-      <div className="col-span-6 bg-blue-50 flex flex-col items-center justify-center">
-        <Image
-          src={"/images/students_collage.png"}
-          width={384}
-          height={384}
-          alt="Sauki CBT"
-          className="aspect-square flex"
-        />
-
-        <div className="w-5/10 text-accent-dim">
-          <div className="text-3xl font-bold leading-tight">
-            Built for Schools, <br />
-            Trusted by Educators.
-          </div>
-          <Spacer size="sm" />
-          <p className="text-xs leading-normal">
-            Register confidently with a platform designed specifically for
-            education institutions.
-          </p>
-        </div>
-      </div>
+      <SideBox />
 
       {/* Form Box */}
       <div className="col-span-6 flex flex-col justify-center items-center">

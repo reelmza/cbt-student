@@ -1,9 +1,11 @@
 import {
   BellDot,
+  Check,
   Cog,
   GaugeCircle,
   GraduationCap,
   Library,
+  Monitor,
   Shield,
   UserRound,
   UsersRound,
@@ -32,6 +34,18 @@ export const sideBarPages = [
     name: "Exams",
     route: "/exams",
     icon: <Library size={18} />,
+    children: [
+      {
+        name: "Ongoing",
+        route: "/exams",
+        icon: <Monitor size={16} />,
+      },
+      {
+        name: "Completed Exams",
+        route: "/exams/complete",
+        icon: <Check size={16} />,
+      },
+    ],
   },
   {
     name: "Notifications",

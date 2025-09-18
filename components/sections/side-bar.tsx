@@ -19,9 +19,11 @@ const SideBar = () => {
         <Spacer size="md" />
       </div>
 
+      {/* Sidebar Links */}
       <ul className="grow flex flex-col gap-y-2 w-full">
         {sideBarPages.map((item, key) => (
           <li key={key} className={`w-full h-fit`}>
+            {/* Main Link */}
             <Link
               href={item.route}
               className={`h-10 flex items-center w-full gap-2 text-sm px-2 ${
@@ -41,7 +43,11 @@ const SideBar = () => {
                   <Link
                     href={itemChild.route}
                     key={key}
-                    className="relative flex items-center text-sm text-theme-gray hover:text-accent gap-2 mb-4"
+                    className={`relative flex items-center text-sm ${
+                      path.includes(itemChild.route)
+                        ? "text-accent font-semibold"
+                        : "text-theme-gray"
+                    } hover:text-accent gap-2 mb-4`}
                   >
                     {itemChild?.icon}
                     <span>{itemChild.name}</span>

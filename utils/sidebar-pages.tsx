@@ -1,6 +1,7 @@
 import {
   BellDot,
   Check,
+  CircleQuestionMark,
   Cog,
   GaugeCircle,
   GraduationCap,
@@ -22,7 +23,7 @@ export const sideBarPages = [
     route: "/users",
     icon: <UserRound size={18} />,
     children: [
-      { name: "Staff", route: "/staff", icon: <UsersRound size={16} /> },
+      { name: "Staff", route: "/users", icon: <UsersRound size={16} /> },
       {
         name: "Students",
         route: "/students",
@@ -30,9 +31,10 @@ export const sideBarPages = [
       },
     ],
   },
+
   {
-    name: "Exams",
-    route: "/exams",
+    name: "Assessments",
+    route: "/assessment",
     icon: <Library size={18} />,
     children: [
       {
@@ -52,7 +54,6 @@ export const sideBarPages = [
     route: "/notifications",
     icon: <BellDot size={18} />,
   },
-
   {
     name: "Security",
     route: "/security",

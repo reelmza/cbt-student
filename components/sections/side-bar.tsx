@@ -12,6 +12,7 @@ const SideBar = () => {
   if (path === "/" || path.includes("/reset-password")) {
     return;
   }
+
   return (
     <div className="flex flex-col w-2/10 h-full shrink-0 border-r border-neutral-200 bg-background py-10 px-5 font-sans">
       <div className="h-fit">
@@ -28,7 +29,7 @@ const SideBar = () => {
               href={item.route}
               className={`h-10 flex items-center w-full gap-2 text-sm px-2 ${
                 path.includes(item.route)
-                  ? "bg-accent-light text-accent-dim font-semibold hover:bg-accent-light/70"
+                  ? "bg-accent-light text-accent font-semibold hover:bg-accent-light/70"
                   : "text-theme-gray hover:bg-theme-gray-light"
               } rounded-md animate-all duration-200 ease-in`}
             >

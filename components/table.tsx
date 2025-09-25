@@ -3,7 +3,8 @@ type TableType = {
   tableData: {
     value: string | number;
     colSpan: string;
-    type?: "warning" | "info" | "success" | "error";
+    color?: "warning" | "info" | "success" | "error";
+    type?: "badge" | "button";
   }[][];
   showSearch?: boolean | undefined;
   showOptions?: boolean | undefined;
@@ -34,24 +35,34 @@ const Table = ({
       {/* Table Content */}
       {tableData.map((row, key) => (
         <div
-          className={`h-12 grid grid-cols-12  border-b border-theme-gray-mid`}
+          className={`h-12 grid grid-cols-12  border-b border-theme-gray-mid hover:bg-theme-gray-light/20 cursor-default`}
           key={key}
         >
           {row.map((rowCol, key) => (
             <div
-              className={`h-full flex items-center pl-2 text-sm text-theme-gray ${rowCol.colSpan}`}
+              className={`h-full flex items-center pl-2 text-sm text-theme-gray ${
+                rowCol.colSpan
+              } ${
+                rowCol.color === "warning"
+                  ? "text-theme-warning"
+                  : rowCol.color === "info"
+                  ? "text-theme-info "
+                  : rowCol.color === "success"
+                  ? "text-theme-succes"
+                  : "text-theme-error"
+              }`}
               key={key}
             >
-              {rowCol.type !== undefined ? (
+              {rowCol.type === "badge" ? (
                 <span
                   className={`text-xs rounded-sm py-[1px] px-1.5 ${
-                    rowCol.type === "warning"
-                      ? "text-theme-warning bg-theme-warning/5"
-                      : rowCol.type === "info"
-                      ? "text-theme-info bg-theme-info/5"
-                      : rowCol.type === "success"
-                      ? "text-theme-success bg-theme-success/5"
-                      : "text-theme-error bg-theme-error/5"
+                    rowCol.color === "warning"
+                      ? "bg-theme-warning/5"
+                      : rowCol.color === "info"
+                      ? "bg-theme-info/5"
+                      : rowCol.color === "success"
+                      ? "bg-theme-success/5"
+                      : "bg-theme-error/5"
                   }`}
                 >
                   {rowCol.value}

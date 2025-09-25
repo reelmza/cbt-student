@@ -36,7 +36,8 @@ const Exams = () => {
           {
             value: item.status,
             colSpan: "col-span-1",
-            type: `${
+            type: "badge",
+            color: `${
               item.status === "Pending"
                 ? "warning"
                 : item.status === "Ongoing"

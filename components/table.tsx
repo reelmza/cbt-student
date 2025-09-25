@@ -25,11 +25,23 @@ const Table = ({
       <div className="h-10 grid grid-cols-12 bg-accent-light font-medium text-accent rounded-md">
         {tableHeading.map((rowCol, key) => (
           <div
-            className={`h-full flex items-center pl-2 text-sm leading-none ${
+            className={`h-full flex items-center pl-2 text-sm leading-none gap-2 ${
               key < tableHeading.length - 1 ? "border-r" : ""
             } border-accent-mid ${rowCol.colSpan}`}
             key={key}
           >
+            {/* Select  */}
+            {key === 0 ? (
+              <input
+                type="checkbox"
+                className="text-theme-gray"
+                name={key.toLocaleString()}
+                id={key.toString()}
+              />
+            ) : (
+              ""
+            )}
+
             {rowCol.value}
           </div>
         ))}
@@ -41,9 +53,9 @@ const Table = ({
           className={`h-12 grid grid-cols-12  border-b border-theme-gray-mid hover:bg-theme-gray-light/20 cursor-default`}
           key={key}
         >
-          {row.map((rowCol, key) => (
+          {row.map((rowCol, rowColKey) => (
             <div
-              className={`h-full flex items-center pl-2 text-sm text-theme-gray ${
+              className={`h-full flex items-center pl-2 text-sm text-theme-gray gap-2 ${
                 rowCol.colSpan
               } ${
                 rowCol.color === "warning"
@@ -54,8 +66,20 @@ const Table = ({
                   ? "text-theme-succes"
                   : "text-theme-error"
               }`}
-              key={key}
+              key={rowColKey}
             >
+              {/* Select  */}
+              {rowColKey === 0 ? (
+                <input
+                  type="checkbox"
+                  className="text-theme-gray"
+                  name={rowColKey.toLocaleString()}
+                  id={rowColKey.toString()}
+                />
+              ) : (
+                ""
+              )}
+
               {/* Unset Row Column Type */}
               {rowCol.type === undefined ? rowCol.value : ""}
 

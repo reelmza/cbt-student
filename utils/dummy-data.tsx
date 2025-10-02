@@ -1,7 +1,7 @@
 export const assessmentTableData = [
   {
     id: "1",
-    name: "CYB 101 - Computing Algorithms",
+    name: "CYB 101 - Algorithms",
     sections: 3,
     questions: 50,
     due: "15 June, 2025 - 8:00AM",
@@ -11,7 +11,7 @@ export const assessmentTableData = [
   },
   {
     id: "2",
-    name: "CHE 101 - Introduction to Chemistry",
+    name: "CHE 101 - Chemistry",
     sections: 4,
     questions: 60,
     due: "26 September, 2025 - 7:40AM",
@@ -81,7 +81,7 @@ export const assessmentTableData = [
   },
   {
     id: "9",
-    name: "PHY 301 - Applied Mechanics",
+    name: "PHY 301 - Fluid Mechanics",
     sections: 5,
     questions: 58,
     due: "2 November, 2025 - 10:00AM",

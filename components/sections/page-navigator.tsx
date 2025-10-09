@@ -2,13 +2,13 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-const PageNavigator = () => {
+const PageNavigator = ({
+  navList,
+}: {
+  navList: { name: string; route: string }[];
+}) => {
   const path = usePathname();
-  const navList = [
-    { name: "All Assessment", route: "/assessment" },
-    { name: "Completed", route: "/assessment/complete" },
-    { name: "Pending", route: "/assessment/pending" },
-  ];
+
   return (
     <div className="relative h-10 w-fit">
       <div className="absolute bottom-[0px] w-full h-[1px] bg-theme-gray-light"></div>

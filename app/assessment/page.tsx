@@ -6,7 +6,13 @@ import { assessmentTableData } from "@/utils/dummy-data";
 const Exams = () => {
   return (
     <div className="w-full h-full p-10 font-sans">
-      <PageNavigator />
+      <PageNavigator
+        navList={[
+          { name: "All Assessment", route: "/assessment" },
+          { name: "Completed", route: "/assessment/complete" },
+          { name: "Pending", route: "/assessment/pending" },
+        ]}
+      />
       <Spacer size="lg" />
       <Table
         tableHeading={[
@@ -40,8 +46,8 @@ const Exams = () => {
           },
           { value: key, colSpan: "col-span-1", type: "link" },
         ])}
-        showSearch={false}
-        showOptions={false}
+        showSearch={true}
+        showOptions={true}
       />
     </div>
   );

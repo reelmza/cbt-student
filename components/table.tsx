@@ -30,29 +30,32 @@ const Table = ({
   return (
     <div className="w-full h-fit flex flex-col font-sans">
       {/* Options Row */}
-
       <div className="flex items-center justify-between">
         {/* Search Box */}
-        <TableSearchBox />
+        {showSearch ? <TableSearchBox /> : ""}
 
-        {/* Buttons */}
-        <div className="w-fit flex items-center gap-2">
-          <div className="w-48">
-            <Button
-              title="Create Assesment"
-              icon={<Plus size={16} strokeWidth={2.5} />}
-              variant="fill"
-            />
-          </div>
+        {/* Options Buttons */}
+        {showOptions ? (
+          <div className="w-fit flex items-center gap-2">
+            <div className="w-48">
+              <Button
+                title="Create Assesment"
+                icon={<Plus size={16} strokeWidth={2.5} />}
+                variant="fill"
+              />
+            </div>
 
-          <div className="w-48">
-            <Button
-              title="Upload Assessment"
-              icon={<CloudUpload size={16} strokeWidth={2.5} />}
-              variant="outline"
-            />
+            <div className="w-48">
+              <Button
+                title="Upload Assessment"
+                icon={<CloudUpload size={16} strokeWidth={2.5} />}
+                variant="outline"
+              />
+            </div>
           </div>
-        </div>
+        ) : (
+          ""
+        )}
       </div>
 
       <Spacer size="lg" />

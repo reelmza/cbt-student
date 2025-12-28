@@ -6,18 +6,20 @@ import Spacer from "@/components/spacer";
 import { localAxios } from "@/lib/axios";
 import { AxiosError } from "axios";
 import { Key, Mail, MapPin, MoveRight, Phone, UserRound } from "lucide-react";
-import { signIn } from "next-auth/react";
+import { SessionProvider, signIn, useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 
-export default function Home() {
+export function Page() {
   const router = useRouter();
+  const { data: session } = useSession();
+  console.log(session);
 
   // States
   const [loading, setLoading] = useState<string | null>(null);
 
-  // Signup Logic
+  // Login Logic
   const login = async (e: React.SyntheticEvent) => {
     e.preventDefault();
 
@@ -27,7 +29,6 @@ export default function Home() {
     };
 
     setLoading("login");
-
     const res = await signIn("credentials", {
       email: target.email.value,
       password: target.password.value,
@@ -55,38 +56,6 @@ export default function Home() {
       });
       setLoading(null);
     }
-
-    // try {
-    //   const res = await localAxios.post("/school/login", {
-    //     email: target.email.value,
-    //     password: target.password.value,
-    //   });
-
-    //   if (res.status == 200) {
-    //     toast.success("Login successful.");
-    //   }
-
-    //   setLoading(null);
-    // } catch (error: any) {
-    //   console.log(error);
-
-    //   // School not found error from server
-    //   if (error.status === 400) {
-    //     toast.error("Wrong email or password entered.");
-    //   }
-
-    //   // Validation error from server
-    //   if (error.status === 422) {
-    //     toast.error(error.response.data.message);
-    //   }
-
-    //   // Some other unspecified error
-    //   if (!error.status) {
-    //     toast.error("An error occured, please try again.");
-    //   }
-
-    //   setLoading(null);
-    // }
   };
 
   return (
@@ -140,3 +109,13 @@ export default function Home() {
     </div>
   );
 }
+
+const PageWrapper = () => {
+  return (
+    <SessionProvider>
+      <Page />
+    </SessionProvider>
+  );
+};
+
+export default PageWrapper;

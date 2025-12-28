@@ -17,7 +17,7 @@ declare module "next-auth" {
 
   // User returned from database
   interface User {
-    userId: string;
+    _id: string;
     token: string;
     name: string;
     profilePhoto: string;
@@ -52,12 +52,12 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       if (user) {
         // User is available during sign-in
         // Extract data from database user returned from login endpoint
-        token.id = user.userId;
+        token.id = user._id;
         token.token = user.token;
         token.name = user.name;
         token.email = user.email;
-        token.profilePhoto = user.profilePhoto;
-        token.userType = user.userType;
+        // token.profilePhoto = user.profilePhoto;
+        // token.userType = user.userType;
       }
 
       if (trigger === "update") {
@@ -66,7 +66,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 
         if (session?.token) token.token = session.token;
         if (session?.name) token.name = session.name;
-        if (session?.profilePhoto) token.profilePhoto = session.profilePhoto;
+        // if (session?.profilePhoto) token.profilePhoto = session.profilePhoto;
       }
       return token;
     },
@@ -76,8 +76,10 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       session.user.id = token.id as string;
       session.user.token = token.token as string;
       session.user.name = token.name as string;
-      session.user.profilePhoto = token.profilePhoto as string;
-      session.user.userType = token.userType as string;
+      session.user.email = token.email as string;
+
+      // session.user.profilePhoto = token.profilePhoto as string;
+      // session.user.userType = token.userType as string;
 
       return session;
     },

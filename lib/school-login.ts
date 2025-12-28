@@ -26,32 +26,10 @@ export const schooLogin: (
     }
 
     // Parse user response body
-    const targetUserBody = await targetUser.json();
-    console.log(targetUserBody);
+    const res = await targetUser.json();
+    user = { ...res.data.school, token: res.data.token };
+    console.log(res);
 
-    // Get user details from DB
-    // const userProfile = await fetch(
-    //   `https://sbareads.surprises.ng/api/user/profile`,
-    //   {
-    //     method: "GET",
-    //     headers: {
-    //       Authorization: `Bearer ${targetUserBody.data.token}`,
-    //       "Content-Type": "application/json",
-    //       "x-app-version": "0.0.1",
-    //       "x-device-id": "9fb1a2b7-5ddf-429d-99a9-88ff47b419dd",
-    //       "x-platform": "ios",
-    //       "x-app-id": "com.sbareads",
-    //     },
-    //   }
-    // );
-
-    // Parse user details
-    // const userProfileBody = await userProfile.json();
-    // console.log(userProfileBody);
-
-    // Save merged user and session to user object
-    // user = { ...targetUserBody.data, ...userProfileBody.data };
-    user = targetUserBody.data;
     if (!user) {
       return null;
     }

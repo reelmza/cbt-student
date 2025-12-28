@@ -85,7 +85,7 @@ export default function Home() {
             </div>
 
             {/* Password */}
-            <div className="w-[49%]">
+            <div className="w-[100%]">
               <Input
                 name="password"
                 type="password"

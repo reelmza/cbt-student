@@ -3,10 +3,11 @@ type InputType = {
   name: string;
   type: string;
   placeholder: string;
+  required?: boolean;
   icon?: JSX.Element;
 };
 
-const Input = ({ name, type, placeholder, icon }: InputType) => {
+const Input = ({ name, type, placeholder, required, icon }: InputType) => {
   return (
     <div className={`w-full h-12 flex border border-accent-light rounded-md`}>
       {/* Input Icon */}
@@ -21,6 +22,7 @@ const Input = ({ name, type, placeholder, icon }: InputType) => {
         name={name}
         type={type}
         placeholder={placeholder || "Some input"}
+        required={required || true}
         className="grow h-full text-sm outline-none px-3 text-accent-dim"
       />
     </div>

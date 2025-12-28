@@ -1,8 +1,11 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
+
+//@ts-expect-error Next Error
 import "./globals.css";
 import { ArrowRight, Info } from "lucide-react";
 import SideBar from "@/components/sections/side-bar";
+import { Toaster } from "@/components/ui/sonner";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -47,6 +50,8 @@ export default function RootLayout({
           <SideBar />
           {children}
         </div>
+
+        <Toaster />
       </body>
     </html>
   );

@@ -3,9 +3,12 @@ import Button from "@/components/button";
 import Input from "@/components/input";
 import SideBox from "@/components/sections/side-box";
 import Spacer from "@/components/spacer";
+import { localAxios } from "@/lib/axios";
+import { AxiosError } from "axios";
 import { Key, Mail, MapPin, MoveRight, Phone, UserRound } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { toast } from "sonner";
 
 export default function Home() {
   const router = useRouter();
@@ -16,19 +19,57 @@ export default function Home() {
   // Signup Logic
   const createSchool = async (e: React.SyntheticEvent) => {
     e.preventDefault();
-    setLoading("createSchool");
 
     const target = e.target as typeof e.target & {
       name: { value: string };
       email: { value: string };
       phoneNumber: { value: string };
       address: { value: string };
+      password: { value: string };
+      confirmPassword: { value: string };
     };
 
-    setTimeout(() => {
+    // Manage unmatching password
+    if (target.password.value !== target.confirmPassword.value) {
+      toast.error("Passwords do not match.");
+      return;
+    }
+
+    setLoading("createSchool");
+    try {
+      const res = await localAxios.post("/school/signup", {
+        name: target.name.value,
+        email: target.email.value,
+        phoneNumber: target.phoneNumber.value,
+        password: target.password.value,
+        address: target.address.value,
+      });
+
+      if (res.status == 201) {
+        toast.success("School created successfully, please login.");
+      }
+
       setLoading(null);
-    }, 2000);
-    return;
+    } catch (error: any) {
+      console.log(error);
+
+      // Email already exist
+      if (error.status === 409) {
+        toast.error("School or Email already exists.");
+      }
+
+      // Validation error from server
+      if (error.status === 422) {
+        toast.error(error.response.data.message);
+      }
+
+      // Some other unspecified error
+      if (!error.status) {
+        toast.error("An error occured, please try again.");
+      }
+
+      setLoading(null);
+    }
   };
 
   return (
@@ -59,6 +100,17 @@ export default function Home() {
               <Spacer size="sm" />
             </div>
 
+            {/* School Email */}
+            <div className="w-[100%]">
+              <Input
+                name="email"
+                type="text"
+                placeholder="E-mail address"
+                icon={<Mail size={16} />}
+              />
+              <Spacer size="sm" />
+            </div>
+
             {/* School Address */}
             <div className="w-[100%]">
               <Input
@@ -70,18 +122,8 @@ export default function Home() {
               <Spacer size="sm" />
             </div>
 
-            {/* School Email */}
-            <div className="w-[49%]">
-              <Input
-                name="email"
-                type="text"
-                placeholder="E-mail"
-                icon={<Mail size={16} />}
-              />
-            </div>
-
             {/* School Phone Number */}
-            <div className="w-[49%]">
+            <div className="w-[100%]">
               <Input
                 name="phoneNumber"
                 type="text"

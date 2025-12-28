@@ -33,16 +33,16 @@ export default function Home() {
       });
 
       if (res.status == 200) {
-        toast.success("Login successful");
+        toast.success("Login successful.");
       }
 
       setLoading(null);
     } catch (error: any) {
       console.log(error);
 
-      // Email already exist
-      if (error.status === 409) {
-        toast.error("School or Email already exists.");
+      // School not found error from server
+      if (error.status === 400) {
+        toast.error("Wrong email or password entered.");
       }
 
       // Validation error from server

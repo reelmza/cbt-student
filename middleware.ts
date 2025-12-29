@@ -7,7 +7,8 @@ export default auth((req) => {
       req.nextUrl.pathname === "/" ||
       req.nextUrl.pathname === "/set-password" ||
       req.nextUrl.pathname === "/reset-password" ||
-      req.nextUrl.pathname === "/signup"
+      req.nextUrl.pathname.includes("/signup") ||
+      req.nextUrl.pathname.includes("/login")
     ) &&
     !req.auth
   ) {
@@ -15,7 +16,7 @@ export default auth((req) => {
     return Response.redirect(newUrl);
   }
 
-  // If auth and user is trying to visit login page
+  // If auth and user is trying to visit preauth page
   if (
     (req.nextUrl.pathname === "/" ||
       req.nextUrl.pathname.includes("/set-password") ||

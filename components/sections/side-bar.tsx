@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import Spacer from "../spacer";
 import { Divide, LogOut } from "lucide-react";
+import { signOut } from "next-auth/react";
 
 const SideBar = () => {
   const path = usePathname();
@@ -20,8 +21,8 @@ const SideBar = () => {
 
   return (
     <div className="flex flex-col w-2/10 h-full shrink-0 border-r border-neutral-200 bg-background py-10 px-5 font-sans">
-      <div className="h-fit opacity-0">
-        <h1 className="font-bold text-xl">SUPER ADMIN</h1>
+      <div className="h-fit">
+        <h1 className="font-bold text-xl text-accent font-sans">Sauki CBT</h1>
         <Spacer size="md" />
       </div>
 
@@ -69,10 +70,13 @@ const SideBar = () => {
         ))}
       </ul>
 
-      <div className="shrink-0 flex items-center gap-2 px-2 rounded-md h-10 w-full hover:bg-theme-gray-light cursor-pointer text-sm">
+      <button
+        className="shrink-0 flex items-center gap-2 px-2 rounded-md h-10 w-full hover:bg-theme-gray-light cursor-pointer text-sm"
+        onClick={() => signOut({ redirectTo: "/" })}
+      >
         <LogOut size={16} />
         <span>Logout</span>
-      </div>
+      </button>
     </div>
   );
 };

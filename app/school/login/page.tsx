@@ -14,7 +14,6 @@ import { toast } from "sonner";
 export function Page() {
   const router = useRouter();
   const { data: session } = useSession();
-  console.log(session);
 
   // States
   const [loading, setLoading] = useState<string | null>(null);
@@ -40,6 +39,7 @@ export function Page() {
       toast.success("Login successfull.", {
         position: "bottom-left",
       });
+      router.push("/school/dashboard");
       setLoading(null);
     }
 

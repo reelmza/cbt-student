@@ -21,14 +21,13 @@ export const schooLogin: (
     );
 
     // Check if user exist
-    if (targetUser.status === 401 || targetUser.status === 400) {
+    if (targetUser.status === 422 || targetUser.status === 400) {
       return user;
     }
 
     // Parse user response body
     const res = await targetUser.json();
     user = { ...res.data.school, token: res.data.token };
-    console.log(res);
 
     if (!user) {
       return null;

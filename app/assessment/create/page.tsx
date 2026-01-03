@@ -25,7 +25,29 @@ import { Spinner } from "@/components/ui/spinner";
 import { attachHeaders, localAxios } from "@/lib/axios";
 import { Plus, RefreshCcw, Trash2Icon, X } from "lucide-react";
 import { SessionProvider, useSession } from "next-auth/react";
-import { useEffect, useState } from "react";
+import { Dispatch, SetStateAction, useEffect, useState } from "react";
+
+// Types
+type SectionType = {
+  title: string;
+  type: string;
+  instructions: string;
+  questions: {
+    question: string;
+    type: string;
+    score: number;
+    options: { label: string; text: string }[];
+    correctAnswer: string;
+  }[];
+};
+
+type AssessmentType = {
+  course: string;
+  session: string;
+  term: string;
+  startDate: string;
+  dueDate: string;
+};
 
 const Create = () => {
   const controller = new AbortController();
@@ -38,18 +60,9 @@ const Create = () => {
   const [courses, setCourses] = useState<
     { _id: string; code: string; title: string }[] | null
   >(null);
-  const [assDetails, setAssDetails] = useState<{
-    course: string;
-    session: string;
-    term: string;
-    startDate: string;
-    dueDate: string;
-  } | null>(null);
+  const [assDetails, setAssDetails] = useState<AssessmentType | null>(null);
   const [activeSection, setActiveSection] = useState<null | string>(null);
-  const [sections, setSections] = useState<
-    | { title: string; type: string; instructions: string; questions: [] }[]
-    | null
-  >(null);
+  const [sections, setSections] = useState<SectionType[] | null>(null);
 
   useEffect(() => {
     if (!session) return;
@@ -113,7 +126,9 @@ const Create = () => {
             <Spacer size="md" />
 
             {/* Questions */}
-            {activeSection === "objective" && <ObjQuestionForm />}
+            {activeSection === "objective" && (
+              <ObjQuestionForm sectionParams={{ sections, setSections }} />
+            )}
           </div>
 
           {/* Sidebar */}
@@ -378,17 +393,54 @@ const Page = () => {
   );
 };
 
-const ObjQuestionForm = () => {
+const ObjQuestionForm = ({
+  sectionParams,
+}: {
+  sectionParams: {
+    sections: SectionType[] | null;
+    setSections: Dispatch<SetStateAction<SectionType[] | null>>;
+  };
+}) => {
+  const { sections, setSections } = sectionParams;
+  const [question, setQuestion] = useState("");
   const [options, setOptions] = useState<string[]>([]);
   const [correctAnswer, setCorrectAnswer] = useState<string | null>("A");
+
+  const addQuestion = (e: React.SyntheticEvent) => {
+    e.preventDefault();
+    const opt: any = { 0: "A", 1: "B", 2: "C", 3: "D" };
+
+    let formatedQuestion = {
+      question: question,
+      type: "multiple_choice",
+      score: 5,
+      options: options.map((item, key) => {
+        return { label: opt[`${key}`], text: item };
+      }),
+      correctAnswer,
+    };
+
+    setSections((prev) => {
+      let newArr = [...prev];
+      newArr
+        .find((sect) => sect.type == "multiple_choice")
+        .questions.push(formatedQuestion);
+
+      console.log(newArr);
+      return newArr;
+    });
+  };
+
   return (
-    <form action="">
+    <form onSubmit={addQuestion}>
       {/* Questions */}
       <div className="font-semibold">Question</div>
       <Spacer size="sm" />
       <textarea
         className="w-full outline-none border rounded-md p-3 min-h-38 max-h-38"
         placeholder="Type your question"
+        value={question}
+        onChange={(e) => setQuestion(e.target.value)}
       ></textarea>
       <Spacer size="sm" />
 
@@ -424,7 +476,6 @@ const ObjQuestionForm = () => {
           </div>
         )}
       </div>
-
       <Spacer size="sm" />
 
       {/* Options */}
@@ -473,15 +524,22 @@ const ObjQuestionForm = () => {
                   name={`option-${key + 1}`}
                   type={"text"}
                   placeholder={"Enter an option"}
-                  value={option[key]}
-                  onChange={(e) => {
+                  value={option}
+                  onChange={(e) =>
                     setOptions((prev) => {
                       let newArr = [...prev];
-                      prev[key] = e.target.value;
 
-                      return newArr;
-                    });
-                  }}
+                      if (newArr.length < 1) {
+                        newArr.push(e.target.value);
+                        return newArr;
+                      }
+
+                      newArr[key] = e.target.value;
+                      console.log(newArr);
+
+                      return [...newArr];
+                    })
+                  }
                 />
 
                 {/* Delete a Question */}

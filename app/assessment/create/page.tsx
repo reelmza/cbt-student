@@ -581,10 +581,16 @@ const QuestionForm = ({
 
   const addQuestion = (e: React.SyntheticEvent) => {
     e.preventDefault();
-    let newSections;
-    let formatedQuestion;
+    let formatedQuestion: any;
 
-    // Letter mapping for objective
+    // Check for important state dependencies
+    if (!sections) return;
+    if (!activeSection) return;
+
+    // Initialzie a shortcut for refferencing the target section
+    const targetSection = sections.find((item) => item.type === formType);
+
+    // Letter mapping for objective sections
     const opt: any = { 0: "A", 1: "B", 2: "C", 3: "D" };
 
     // Arrange formdata for objective
@@ -620,7 +626,7 @@ const QuestionForm = ({
         requiresManualMarking: true,
       };
 
-    // Check if update needed
+    // Check if update is the correct action to execute
     let needsUpdate;
     if (sections && activeSection) {
       needsUpdate =
@@ -628,30 +634,52 @@ const QuestionForm = ({
           0) > activeSection[1];
     }
 
-    newSections = [...sections];
-
+    // If question exist, then update it
     if (needsUpdate) {
-      newSections.find((sect) => sect.type == formType).questions[
-        activeSection![1]
-      ] = formatedQuestion;
+      console.log("No active section, logic error.");
 
-      setSections(newSections);
+      setSections((prev) =>
+        prev
+          ? prev.map((sect) => {
+              if (sect.type == formType) {
+                sect.questions[activeSection[1]] = formatedQuestion;
+              }
+
+              return sect;
+            })
+          : prev
+      );
+
       return;
     }
 
-    newSections
-      .find((sect) => sect.type == formType)
-      .questions.push(formatedQuestion);
-    setSections(newSections);
+    // Check if questions are upto 60 before adding
+    if (targetSection && targetSection?.questions.length > 59) {
+      return;
+    }
+    // Else - Question is new so push to end of questions array
+    setSections((prev) =>
+      prev
+        ? prev.map((sect) => {
+            // Spread the previous section to avoid mutation
+            let newSect = { ...sect };
+
+            // Check if iterator is currently on the target section
+            if (newSect.type == formType) {
+              newSect.questions = [...newSect.questions, formatedQuestion];
+            }
+
+            return newSect;
+          })
+        : prev
+    );
 
     // Reset form only when questions are less than 60
-    if (
-      newSections.find((sect) => sect.type == formType).questions.length < 60
-    ) {
+    if (targetSection && targetSection.questions.length < 60) {
       setCorrectAnswer("A");
       setQuestion("");
       setOptions([]);
-      setActiveSection([formType, activeSection![1] + 1]);
+      setActiveSection([formType, activeSection[1] + 1]);
     }
   };
 
@@ -757,7 +785,7 @@ const QuestionForm = ({
         {activeSection &&
           activeSection[0] == "multiple_choice" &&
           options.length > 0 && (
-            <div className="w-10">
+            <div className="w-fit">
               <RadioGroup
                 value={correctAnswer}
                 className="gap-0"
@@ -769,10 +797,7 @@ const QuestionForm = ({
                 {options.map((_, key) => {
                   const opt: any = { 0: "A", 1: "B", 2: "C", 3: "D" };
                   return (
-                    <div
-                      className="flex items-center justify-center h-10 mb-1"
-                      key={key}
-                    >
+                    <div className="flex items-center h-10 mb-1" key={key}>
                       <RadioGroupItem
                         value={opt[`${key}`]}
                         id={`R${key + 1}`}
@@ -794,10 +819,16 @@ const QuestionForm = ({
                 <div className="flex items-center mb-1" key={key}>
                   {/* Labels for Obj & Sub only */}
                   {formType !== "theory" && (
-                    <div className="h-full w-10 flex items-center justify-center text-sm font-semibold">
+                    <div
+                      className={`h-full flex items-center text-sm font-semibold ${
+                        formType === "multiple_choice"
+                          ? "w-14 justify-center"
+                          : "w-20"
+                      }`}
+                    >
                       {formType === "multiple_choice"
                         ? objLabels[key]
-                        : `Slot ` + key + 1}
+                        : `Slot ` + (key + 1)}
                     </div>
                   )}
 
@@ -855,6 +886,7 @@ const QuestionForm = ({
       </div>
       <Spacer size="sm" />
 
+      {/* Submit & Delete Button */}
       <div className="flex gap-2">
         {/* Submit Question */}
         <div className="w-42">

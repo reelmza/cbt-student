@@ -536,9 +536,22 @@ const Main = () => {
                 <SelectValue placeholder="Section Type" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="multiple_choice">Objective</SelectItem>
-                <SelectItem value="subjective">Subjective</SelectItem>
-                <SelectItem value="theory">Theory</SelectItem>
+                {[
+                  { name: "Objective", type: "multiple_choice" },
+                  { name: "Subjective", type: "subjective" },
+                  { name: "Theory", type: "theory" },
+                ].map((sect, key) => {
+                  if (!sections) return;
+                  if (sections.find((sectx) => sectx.type === sect.type)) {
+                    return;
+                  }
+
+                  return (
+                    <SelectItem value={sect.type} key={key}>
+                      {sect.name}
+                    </SelectItem>
+                  );
+                })}
               </SelectContent>
             </Select>
             <Spacer size="sm" />
@@ -628,10 +641,8 @@ const QuestionForm = ({
 
     // Check if update is the correct action to execute
     let needsUpdate;
-    if (sections && activeSection) {
-      needsUpdate =
-        (sections.find((item) => item.type === formType)?.questions?.length ??
-          0) > activeSection[1];
+    if (targetSection && activeSection) {
+      needsUpdate = (targetSection.questions?.length ?? 0) > activeSection[1];
     }
 
     // If question exist, then update it

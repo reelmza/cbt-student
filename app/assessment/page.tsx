@@ -5,6 +5,7 @@ import Spacer from "@/components/spacer";
 import Table from "@/components/table";
 import TableSearchBox from "@/components/table-searchbox";
 import { attachHeaders, localAxios } from "@/lib/axios";
+import { prettyDate } from "@/lib/dateFormater";
 import { assessmentTableData } from "@/utils/dummy-data";
 import { Plus } from "lucide-react";
 import { SessionProvider, useSession } from "next-auth/react";
@@ -13,7 +14,7 @@ import { useEffect, useState } from "react";
 
 const Page = () => {
   const controller = new AbortController();
-  const [loading, setLoading] = useState<string | null>(null);
+  const [loading, setLoading] = useState<string | null>("page");
   const { data: session } = useSession();
   const [pageData, setPageData] = useState(null);
 
@@ -71,6 +72,7 @@ const Page = () => {
           />
         </Link>
       </div>
+
       <Table
         tableHeading={[
           { value: "Course", colSpan: "col-span-3" },
@@ -78,34 +80,57 @@ const Page = () => {
           { value: "Sections", colSpan: "col-span-1" },
           { value: "Questions", colSpan: "col-span-1" },
           { value: "Students", colSpan: "col-span-1" },
-          { value: "Pass (%)", colSpan: "col-span-1" },
+          { value: "Marks", colSpan: "col-span-1" },
           { value: "Status", colSpan: "col-span-1" },
           { value: "Actions", colSpan: "col-span-1" },
         ]}
-        tableData={assessmentTableData.map((item, key) => [
-          { value: item.name, colSpan: "col-span-3" },
-          { value: item.due, colSpan: "col-span-3" },
-          { value: item.sections, colSpan: "col-span-1" },
-          { value: item.questions, colSpan: "col-span-1" },
-          { value: item.students, colSpan: "col-span-1" },
-          { value: item.pass, colSpan: "col-span-1" },
-          {
-            value: item.status,
-            colSpan: "col-span-1",
-            type: "badge",
-            color: `${
-              item.status === "Pending"
-                ? "warning"
-                : item.status === "Ongoing"
-                ? "info"
-                : "success"
-            }`,
-          },
-          { value: key, colSpan: "col-span-1", type: "link" },
-        ])}
+        tableData={
+          pageData
+            ? pageData.map((item, key: number) => [
+                {
+                  value: `${item.title}`,
+                  colSpan: "col-span-3",
+                },
+                {
+                  value: prettyDate(item.dueDate.split("T")[0]),
+                  colSpan: "col-span-3",
+                },
+                { value: item.sections.length, colSpan: "col-span-1" },
+                {
+                  value: item.sections.reduce(
+                    (acc: number, sct: { questions: [] }) => {
+                      if (sct.questions?.length) {
+                        return sct.questions?.length + acc;
+                      }
+                      return 0;
+                    },
+                    0
+                  ),
+                  colSpan: "col-span-1",
+                },
+                { value: item.students.length, colSpan: "col-span-1" },
+                { value: item.totalMarks || "-", colSpan: "col-span-1" },
+                {
+                  value: item.status,
+                  colSpan: "col-span-1",
+                  type: "badge",
+                  color: `${
+                    item.status === "closed"
+                      ? "warning"
+                      : item.status === "ongoing"
+                      ? "info"
+                      : "success"
+                  }`,
+                },
+                { value: key, colSpan: "col-span-1", type: "link" },
+              ])
+            : []
+        }
         showSearch={false}
         showOptions={false}
       />
+
+      <Spacer size="xl" />
     </div>
   );
 };

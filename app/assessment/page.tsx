@@ -4,14 +4,50 @@ import PageNavigator from "@/components/sections/page-navigator";
 import Spacer from "@/components/spacer";
 import Table from "@/components/table";
 import TableSearchBox from "@/components/table-searchbox";
+import { attachHeaders, localAxios } from "@/lib/axios";
 import { assessmentTableData } from "@/utils/dummy-data";
 import { Plus } from "lucide-react";
-import { SessionProvider } from "next-auth/react";
+import { SessionProvider, useSession } from "next-auth/react";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 const Page = () => {
-  const [showCreate, setShowCreate] = useState(false);
+  const controller = new AbortController();
+  const [loading, setLoading] = useState<string | null>(null);
+  const { data: session } = useSession();
+  const [pageData, setPageData] = useState(null);
+
+  useEffect(() => {
+    if (!session) return;
+
+    const getAssessments = async () => {
+      try {
+        attachHeaders(session!.user.token);
+        const res = await localAxios.get("/school/assessments", {
+          signal: controller.signal,
+        });
+
+        if (res.status === 201) {
+          console.log(res.data.data.assessments);
+          setPageData(res.data.data.assessments);
+        }
+
+        setLoading(null);
+      } catch (error: any) {
+        if (error.name !== "CanceledError") {
+          setLoading("pageError");
+          console.log(error);
+        }
+      }
+    };
+
+    !pageData && getAssessments();
+
+    return () => {
+      controller.abort();
+    };
+  }, [session]);
+
   return (
     <div className="w-full h-full p-10 font-sans">
       <PageNavigator

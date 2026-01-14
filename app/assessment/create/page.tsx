@@ -31,63 +31,11 @@ import { attachHeaders, localAxios } from "@/lib/axios";
 import { ArrowRight, Plus, RefreshCcw, Trash2Icon, X } from "lucide-react";
 import { SessionProvider, useSession } from "next-auth/react";
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
-
-// Type declarations
-type SectionType = {
-  title: string;
-  type: string;
-  instruction: string;
-  defaultQuestionScore: number;
-  questions: {
-    question: string;
-    type: string;
-    score: number;
-    options: { label: string; text: string }[];
-    answerSlots: { slotNumber: number; possibleAnswers: string[] }[];
-    expectedAnswer: string;
-    correctAnswer: string;
-  }[];
-}[];
-
-type AssessmentType = {
-  title: string;
-  course: string;
-  session: string;
-  term: string;
-  instruction: string;
-  status: string;
-  totalMarks: number;
-  startDate: string;
-  dueDate: string;
-  sections: SectionType;
-};
-
-type QuestionFormType = {
-  formType: string;
-  sectionParams: {
-    sections: SectionType | null;
-    setSections: Dispatch<SetStateAction<SectionType | null>>;
-  };
-  questionParams: {
-    question: string;
-    setQuestion: Dispatch<SetStateAction<string>>;
-  };
-
-  optionsParams: {
-    options: string[];
-    setOptions: Dispatch<SetStateAction<string[]>>;
-  };
-
-  correctAnswerParams: {
-    correctAnswer: string | null;
-    setCorrectAnswer: Dispatch<SetStateAction<string | null>>;
-  };
-
-  activeSectionParams: {
-    activeSection: [string, number] | null;
-    setActiveSection: Dispatch<SetStateAction<[string, number] | null>>;
-  };
-};
+import {
+  QuestionFormType,
+  AssessmentType,
+  SectionType,
+} from "../assessment.types";
 
 const Main = () => {
   const controller = new AbortController();

@@ -28,7 +28,7 @@ import {
 } from "@/components/ui/select";
 import { Spinner } from "@/components/ui/spinner";
 import { attachHeaders, localAxios } from "@/lib/axios";
-import { Plus, RefreshCcw, Trash2Icon, X } from "lucide-react";
+import { ArrowRight, Plus, RefreshCcw, Trash2Icon, X } from "lucide-react";
 import { SessionProvider, useSession } from "next-auth/react";
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
 
@@ -36,7 +36,8 @@ import { Dispatch, SetStateAction, useEffect, useState } from "react";
 type SectionType = {
   title: string;
   type: string;
-  instructions: string;
+  instruction: string;
+  defaultQuestionScore: number;
   questions: {
     question: string;
     type: string;
@@ -49,11 +50,16 @@ type SectionType = {
 }[];
 
 type AssessmentType = {
+  title: string;
   course: string;
   session: string;
   term: string;
+  instruction: string;
+  status: string;
+  totalMarks: number;
   startDate: string;
   dueDate: string;
+  sections: SectionType;
 };
 
 type QuestionFormType = {
@@ -120,6 +126,28 @@ const Main = () => {
     setCorrectAnswer("A");
   };
 
+  // Submit assessment
+  const submitAss = async () => {
+    setLoading("submitAss");
+    let formData = { ...assDetails };
+    if (!sections) return;
+
+    // @ts-expect-error Remove defaultQuestionScore property that is not in the database schema and causes error upon upload.
+    formData.sections = sections.map((sect) => {
+      const { defaultQuestionScore, ...formatedSect } = sect;
+      return formatedSect;
+    });
+
+    try {
+      const res = await localAxios.post(`/school/create-assessment`, formData);
+      console.log(res);
+      setLoading(null);
+    } catch (error) {
+      console.log(error);
+      setLoading(null);
+    }
+  };
+
   useEffect(() => {
     if (!session) return;
 
@@ -161,7 +189,7 @@ const Main = () => {
             {/* Assessment Details */}
             <div className="w-fit">
               {/* Assesment title */}
-              <div className="text-2xl font-bold text-accent">
+              <div className="text-xl font-bold text-accent">
                 {courses?.find((item) => item._id == assDetails?.course)?.code +
                   " - " +
                   courses?.find((item) => item._id == assDetails?.course)
@@ -177,16 +205,22 @@ const Main = () => {
 
                 <div className="text-sm flex">
                   <div className="font-semibold mr-1">Due Date:</div>
-                  <div>{assDetails?.dueDate}</div>
+                  <div>{assDetails?.dueDate.split("T")[0]}</div>
                 </div>
-                <div></div>
+
+                <div className="text-sm flex">
+                  <div className="font-semibold mr-1">Total Marks:</div>
+                  <div>{assDetails?.totalMarks}</div>
+                </div>
               </div>
             </div>
             <Spacer size="md" />
 
-            <div className="text-sm text-emerald-600 font-semibold">
+            {/* Section Indicator for debug */}
+            <div className="hisdden text-xs text-emerald-600 font-semibsold">
               {activeSection || "No Active Section"}
             </div>
+
             {/* Objective Questions */}
             {activeSection && activeSection[0] === "multiple_choice" && (
               <QuestionForm
@@ -330,6 +364,22 @@ const Main = () => {
               <span>Add a Section</span>
               <Plus size={14} />
             </button>
+
+            {/* Submit Assessment */}
+            {sections && sections?.length > 1 && (
+              <button
+                className="w-full rounded-md h-8 px-5 text-sm border border-emerald-600 mt-10 flex items-center justify-center text-emerald-600 cursor-pointer"
+                type="button"
+                onClick={submitAss}
+              >
+                <span>Submit Assessment</span>
+                {loading !== "submitAss" ? (
+                  <ArrowRight size={12} />
+                ) : (
+                  <Spinner className="size-4" />
+                )}
+              </button>
+            )}
           </div>
         </>
       )}
@@ -357,13 +407,23 @@ const Main = () => {
                     term: { value: string };
                     startDate: { value: string };
                     dueDate: { value: string };
+                    instruction: { value: string };
+                    totalMarks: { value: string };
+                    status: { value: string };
                   };
                   setAssDetails({
+                    title: courses.find(
+                      (item) => item._id == target.courseId.value
+                    )!.code,
                     course: target.courseId.value,
                     session: target.session.value,
                     term: target.term.value,
-                    startDate: target.startDate.value,
-                    dueDate: target.dueDate.value,
+                    startDate: new Date(target.startDate.value).toISOString(),
+                    dueDate: new Date(target.dueDate.value).toISOString(),
+                    instruction: target.instruction.value,
+                    status: target.status.value,
+                    totalMarks: Number(target.totalMarks.value),
+                    sections: [],
                   });
 
                   setShowDetailModal(false);
@@ -420,6 +480,43 @@ const Main = () => {
                 </div>
                 <Spacer size="sm" />
 
+                {/* Instructions */}
+                <div>
+                  <Input
+                    name="instruction"
+                    type="text"
+                    placeholder="Assessment Instruction"
+                    required
+                  />
+                </div>
+                <Spacer size="sm" />
+
+                {/* Total Marks and status */}
+                <div className="flex items-center justify-between gap-2">
+                  {/* Total Marks */}
+                  <Input
+                    name="totalMarks"
+                    type="number"
+                    placeholder="Total Marks"
+                    required
+                  />
+
+                  {/* Status */}
+                  <Select name="status" required>
+                    <SelectTrigger className="w-full min-h-10 shadow-none text-accent-dim border-accent-light">
+                      <SelectValue placeholder="Select a status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectGroup>
+                        <SelectLabel>Select Term</SelectLabel>
+                        <SelectItem value="published">Publish Now</SelectItem>
+                        <SelectItem value="draft">Save Draft</SelectItem>
+                      </SelectGroup>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <Spacer size="sm" />
+
                 {/* Dates */}
                 <div className="flex items-center justify-between gap-2">
                   {/* Start */}
@@ -430,6 +527,7 @@ const Main = () => {
                       name="startDate"
                       className="h-10 border rounded-md border-accent-light text-theme-gray text-sm w-full px-2 outline-none"
                       placeholder="Start Date"
+                      required
                     />
                   </div>
 
@@ -441,6 +539,7 @@ const Main = () => {
                       name="dueDate"
                       className="h-10 border rounded-md border-accent-light text-theme-gray text-sm w-full px-2 outline-none"
                       placeholder="Start Date"
+                      required
                     />
                   </div>
                 </div>
@@ -502,12 +601,14 @@ const Main = () => {
                 sectionType: { value: string };
                 sectionTitle: { value: string };
                 sectionInstructions: { value: string };
+                score: { value: string };
               };
 
               const newSection = {
                 type: target.sectionType.value,
                 title: target.sectionTitle.value,
-                instructions: target.sectionInstructions.value,
+                instruction: target.sectionInstructions.value,
+                defaultQuestionScore: Number(target.score.value),
                 questions: [],
               };
 
@@ -530,30 +631,41 @@ const Main = () => {
             />
             <Spacer size="sm" />
 
-            {/* Section Type */}
-            <Select name="sectionType" required>
-              <SelectTrigger className="w-full min-h-10 shadow-none text-accent-dim border-accent-light">
-                <SelectValue placeholder="Section Type" />
-              </SelectTrigger>
-              <SelectContent>
-                {[
-                  { name: "Objective", type: "multiple_choice" },
-                  { name: "Subjective", type: "subjective" },
-                  { name: "Theory", type: "theory" },
-                ].map((sect, key) => {
-                  if (!sections) return;
-                  if (sections.find((sectx) => sectx.type === sect.type)) {
-                    return;
-                  }
+            <div className="flex items-center gap-2">
+              {/* Section Type */}
+              <Select name="sectionType" required>
+                <SelectTrigger className="w-full min-h-10 shadow-none text-accent-dim border-accent-light">
+                  <SelectValue placeholder="Section Type" />
+                </SelectTrigger>
+                <SelectContent>
+                  {[
+                    { name: "Objective", type: "multiple_choice" },
+                    { name: "Subjective", type: "subjective" },
+                    { name: "Theory", type: "theory" },
+                  ].map((sect, key) => {
+                    if (!sections) return;
+                    if (sections.find((sectx) => sectx.type === sect.type)) {
+                      return;
+                    }
 
-                  return (
-                    <SelectItem value={sect.type} key={key}>
-                      {sect.name}
-                    </SelectItem>
-                  );
-                })}
-              </SelectContent>
-            </Select>
+                    return (
+                      <SelectItem value={sect.type} key={key}>
+                        {sect.name}
+                      </SelectItem>
+                    );
+                  })}
+                </SelectContent>
+              </Select>
+
+              {/* Enter Score */}
+              <Input
+                name="score"
+                type="number"
+                placeholder="Each Question's Score"
+                required
+              />
+            </div>
+
             <Spacer size="sm" />
 
             {/* Section Instructions */}
@@ -561,6 +673,7 @@ const Main = () => {
               name={"sectionInstructions"}
               type={"text"}
               placeholder={"Section Description"}
+              required
             />
             <Spacer size="sm" />
 
@@ -611,7 +724,7 @@ const QuestionForm = ({
       formatedQuestion = {
         question: question,
         type: "multiple_choice",
-        score: 5,
+        score: targetSection?.defaultQuestionScore || 1,
         options: options.map((item, key) => {
           return { label: opt[`${key}`], text: item };
         }),
@@ -623,7 +736,7 @@ const QuestionForm = ({
       formatedQuestion = {
         question: question,
         type: formType,
-        score: 5,
+        score: targetSection?.defaultQuestionScore || 1,
         answerSlots: options.map((item, key) => {
           return { slotNumber: key + 1, possibleAnswers: item.split(",") };
         }),
@@ -634,7 +747,7 @@ const QuestionForm = ({
       formatedQuestion = {
         question: question,
         type: formType,
-        score: 5,
+        score: targetSection?.defaultQuestionScore || 1,
         expectedAnswer: options[0],
         requiresManualMarking: true,
       };

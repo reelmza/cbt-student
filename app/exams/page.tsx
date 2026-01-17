@@ -6,6 +6,7 @@ import Link from "next/link";
 
 const Page = () => {
   const { data: session } = useSession();
+  console.log(session);
   const exams = [
     {
       id: "458u0twrjigsos0tjeqrw0",

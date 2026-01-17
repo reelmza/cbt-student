@@ -11,7 +11,11 @@ type AnswerType = Record<
     type: string;
     question: string;
     selectedOption?: string;
-    subjectiveAnswers?: { slotNumber: number; answer: string }[];
+    subjectiveAnswers?: { slotNumber: number; answer?: string }[];
     theoryAnswer?: string;
   }
 >;
+type PageDataType = {
+  title: string;
+  course: { title: string };
+};

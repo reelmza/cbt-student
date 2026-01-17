@@ -7,7 +7,7 @@ import { Spinner } from "@/components/ui/spinner";
 import { attachHeaders, localAxios } from "@/lib/axios";
 import { ChevronRightIcon, Clock4, User2 } from "lucide-react";
 import { SessionProvider, useSession } from "next-auth/react";
-import { use, useEffect, useMemo, useState } from "react";
+import { act, use, useEffect, useMemo, useState } from "react";
 
 const Page = ({ id }: { id: string }) => {
   const controller = new AbortController();
@@ -18,14 +18,10 @@ const Page = ({ id }: { id: string }) => {
   const [activeQuestion, setActiveQuestion] = useState(0);
   const [questions, setQuestions] = useState<QuestionType | null>(null);
   const [answers, setAnswers] = useState<AnswerType>({});
-  const [pageData, setPageData] = useState<{}[] | null>(null);
+  const [pageData, setPageData] = useState<PageDataType | null>(null);
 
-  const exam = {
-    id: "458u0twrjigsos0tjeqrw0",
-    code: "CMP202",
-    title: "Perimeter Security II",
-    date: "21st April 2026",
-    time: "4:30PM",
+  const parts = (text: string) => {
+    return text.split(/(\[\d+\])/g);
   };
 
   // Next Question
@@ -104,8 +100,10 @@ const Page = ({ id }: { id: string }) => {
               <div className="h-14 bg-red-100s flex items-center border-b justify-between gap-5">
                 {/* Heading */}
                 <div className="bordesr-b  grow">
-                  <div className="text-xl font-semibold">{exam.code}</div>
-                  <div className="text-theme-gray text-sm">{exam.title}</div>
+                  <div className="text-xl font-semibold">{pageData?.title}</div>
+                  <div className="text-theme-gray text-sm">
+                    {pageData?.course?.title}
+                  </div>
                 </div>
 
                 {/* Submit Button */}
@@ -120,62 +118,150 @@ const Page = ({ id }: { id: string }) => {
               <Spacer size="xl" />
 
               {/* Question */}
-              <div className="min-h-24 bg-red-10s0">
-                <div className="flex text-lsg">
-                  {/* Question Number */}
-                  <div className="w-12 h-fit shrink-0 font-semibold underline">
-                    Q{activeQuestion + 1}.
-                  </div>
+              <div className="min-h-24">
+                {/* Objective and Subjective Quesion */}
+                {questions[activeQuestion].type !== "subjective" && (
+                  <div className="flex">
+                    {/* Question Number */}
+                    <div className="w-12 h-fit shrink-0 font-semibold underline">
+                      Q{activeQuestion + 1}.
+                    </div>
 
-                  {/* Question Text */}
-                  <div className="grow">
-                    {questions[activeQuestion].question}
+                    {/* Question Text */}
+                    <div className="grow">
+                      {questions[activeQuestion].question}
+                    </div>
                   </div>
-                </div>
+                )}
+
+                {/* Subjective Question */}
+                {questions[activeQuestion].type == "subjective" && (
+                  <p>
+                    {parts(questions[activeQuestion].question).map(
+                      (part, index) => {
+                        if (part.match(/\[\d+\]/)) {
+                          return (
+                            <input
+                              key={index}
+                              type="text"
+                              value={
+                                answers[`${questions[activeQuestion]._id}`]
+                                  ?.subjectiveAnswers?.[index]?.answer || ""
+                              }
+                              onChange={(e) =>
+                                setAnswers((prev) => {
+                                  const qstRef = questions[activeQuestion];
+                                  const prevEntry = prev[qstRef._id];
+
+                                  const updatedSlots =
+                                    prevEntry?.subjectiveAnswers
+                                      ? [...prevEntry.subjectiveAnswers]
+                                      : [];
+
+                                  updatedSlots[index] = {
+                                    slotNumber: index + 1,
+                                    answer: e.target.value,
+                                  };
+
+                                  return {
+                                    ...prev,
+                                    [qstRef._id]: {
+                                      ...prevEntry,
+                                      question: qstRef._id,
+                                      type: qstRef.type,
+                                      subjectiveAnswers: updatedSlots,
+                                    },
+                                  };
+                                })
+                              }
+                              style={{
+                                width: "80px",
+                                margin: "0 5px",
+                                border: "none",
+                                borderBottom: "1px solid black",
+                                outline: "none",
+                              }}
+                            />
+                          );
+                        }
+
+                        return <span key={index}>{part}</span>;
+                      }
+                    )}
+                  </p>
+                )}
               </div>
               <Spacer size="sm" />
 
-              {/* Options */}
-              <RadioGroup
-                value={
-                  answers[`${questions[activeQuestion]._id}`]?.selectedOption ||
-                  ""
-                }
-                onValueChange={(val) =>
-                  setAnswers((prev) => {
-                    return {
-                      ...prev,
-                      [questions[activeQuestion]._id]: {
-                        question: questions[activeQuestion]._id,
-                        type: questions[activeQuestion].type,
-                        selectedOption: val,
-                      },
-                    };
-                  })
-                }
-              >
-                {questions[activeQuestion].options.map(
-                  (opt: any, key: number) => {
-                    return (
-                      <div className="flex items-center gap-3" key={key}>
-                        <RadioGroupItem
-                          value={opt.label}
-                          id={`r${key + 1}`}
-                          className="cursor-pointer"
-                        />
-
-                        <label
-                          htmlFor={`r${key + 1}`}
-                          className="flex items-center gap-2 select-none cursor-pointer"
-                        >
-                          <span className="font-bold text-sm">{`[${opt.label}]`}</span>
-                          <span>{opt.text}</span>
-                        </label>
-                      </div>
-                    );
+              {/* Objective Options */}
+              {questions[activeQuestion].type == "multiple_choice" && (
+                <RadioGroup
+                  value={
+                    answers[`${questions[activeQuestion]._id}`]
+                      ?.selectedOption || ""
                   }
-                )}
-              </RadioGroup>
+                  onValueChange={(val) =>
+                    setAnswers((prev) => {
+                      return {
+                        ...prev,
+                        [questions[activeQuestion]._id]: {
+                          question: questions[activeQuestion]._id,
+                          type: questions[activeQuestion].type,
+                          selectedOption: val,
+                        },
+                      };
+                    })
+                  }
+                >
+                  {questions[activeQuestion].options.map(
+                    (opt: any, key: number) => {
+                      return (
+                        <div className="flex items-center gap-3" key={key}>
+                          <RadioGroupItem
+                            value={opt.label}
+                            id={`r${key + 1}`}
+                            className="cursor-pointer"
+                          />
+
+                          <label
+                            htmlFor={`r${key + 1}`}
+                            className="flex items-center gap-2 select-none cursor-pointer"
+                          >
+                            <span className="font-bold text-sm">{`[${opt.label}]`}</span>
+                            <span>{opt.text}</span>
+                          </label>
+                        </div>
+                      );
+                    }
+                  )}
+                </RadioGroup>
+              )}
+
+              {/* Theory Options */}
+              {questions[activeQuestion].type == "theory" && (
+                <textarea
+                  className="border w-full min-h-42 max-h-42  px-4 py-4 rounded-md outline-none"
+                  placeholder="Type your answer"
+                  value={
+                    answers[`${questions[activeQuestion]._id}`]?.theoryAnswer ||
+                    ""
+                  }
+                  onChange={(e) =>
+                    setAnswers((prev) => {
+                      const qstRef = questions[activeQuestion];
+                      const prevEntry = prev[qstRef._id];
+                      console.log(e.target.value);
+                      return {
+                        ...prev,
+                        [qstRef._id]: {
+                          ...prevEntry,
+                          theoryAnswer: e.target.value,
+                        },
+                      };
+                    })
+                  }
+                ></textarea>
+              )}
             </div>
 
             {/* Footer Content */}

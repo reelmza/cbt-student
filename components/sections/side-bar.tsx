@@ -72,7 +72,10 @@ const SideBar = () => {
 
       <button
         className="shrink-0 flex items-center gap-2 px-2 rounded-md h-10 w-full hover:bg-theme-gray-light cursor-pointer text-sm"
-        onClick={() => signOut({ redirectTo: "/" })}
+        onClick={() => {
+          localStorage.removeItem("countdown_end_time");
+          signOut({ redirectTo: "/" });
+        }}
       >
         <LogOut size={16} />
         <span>Logout</span>

@@ -9,17 +9,17 @@ export const studentLogin: (
   try {
     // Get user from database
     const targetUser = await fetch(
-      "https://cbt-server-q5fr.onrender.com/api/v1/student/login",
+      "https://cbt-server-q5fr.onrender.com/api/v1/student/complete-login",
       {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          email: "jessemoses70@gmail.com",
+          email: credentials.username,
           regNumber: credentials.username,
           password: credentials.password,
-          loginType: "password",
+          authMethod: "password",
         }),
       }
     );

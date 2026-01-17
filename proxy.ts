@@ -1,6 +1,6 @@
 import { auth } from "./auth";
 
-export default auth((req) => {
+export default auth((req:any) => {
   // If no auth and user is on an auth requiring page
   if (
     !(

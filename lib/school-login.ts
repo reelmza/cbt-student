@@ -1,21 +1,25 @@
 import { User } from "next-auth";
 
-export const schooLogin: (
-  credentials: Partial<Record<"email" | "password" | "loginClient", unknown>>,
+export const studentLogin: (
+  credentials: Partial<
+    Record<"username" | "password" | "loginClient", unknown>
+  >,
   user: any
 ) => Promise<User | null> = async (credentials, user) => {
   try {
     // Get user from database
     const targetUser = await fetch(
-      "https://cbt-server-q5fr.onrender.com/api/v1/school/login",
+      "https://cbt-server-q5fr.onrender.com/api/v1/student/login",
       {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          email: credentials.email,
+          email: "jessemoses70@gmail.com",
+          regNumber: credentials.username,
           password: credentials.password,
+          loginType: "password",
         }),
       }
     );
@@ -27,8 +31,14 @@ export const schooLogin: (
 
     // Parse user response body
     const res = await targetUser.json();
-    user = { ...res.data.school, token: res.data.token };
 
+    user = {
+      ...res.data.student,
+      token: res.data.token,
+      schoolId: res.data.student.school._id,
+    };
+
+    // console.log(user);
     if (!user) {
       return null;
     }

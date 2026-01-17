@@ -1,19 +1,19 @@
 import NextAuth, { DefaultSession } from "next-auth";
 import Credentials from "next-auth/providers/credentials";
-import { schooLogin } from "./lib/school-login";
+import { studentLogin } from "./lib/school-login";
 
 declare module "next-auth" {
-  interface Session {
-    // User to be stored on session
-    user: {
-      id: string;
-      token: string;
-      firstName: string;
-      lastName: string;
-      picture: string;
-      account_type: string;
-    } & DefaultSession["user"];
-  }
+  // interface Session {
+  //   // User to be stored on session
+  //   user: {
+  //     id: string;
+  //     token: string;
+  //     firstName: string;
+  //     lastName: string;
+  //     picture: string;
+  //     account_type: string;
+  //   } & DefaultSession["user"];
+  // }
 
   // User returned from database
   interface User {
@@ -22,6 +22,11 @@ declare module "next-auth" {
     name: string;
     profilePhoto: string;
     userType: string;
+    fullName: string;
+    gender: string;
+    regNumber: string;
+    assessments: {}[];
+    schoolId: string[];
   }
 }
 
@@ -30,7 +35,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     Credentials({
       // Define credentials
       credentials: {
-        email: { type: "email" },
+        username: { type: "text" },
         password: { type: "password" },
         loginClient: { type: "text" },
       },
@@ -38,8 +43,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         let user = null;
 
         // If user attempting login is a school
-        if (credentials.loginClient === "school") {
-          return schooLogin(credentials, user);
+        if (credentials.loginClient === "student") {
+          return studentLogin(credentials, user);
         }
 
         return user;
@@ -54,8 +59,13 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         // Extract data from database user returned from login endpoint
         token.id = user._id;
         token.token = user.token;
-        token.name = user.name;
         token.email = user.email;
+        token.fullName = user.fullName;
+        token.gender = user.gender;
+        token.assessments = user.assessments;
+        token.regNumber = user.regNumber;
+        token.schoolId = user.schoolId;
+
         // token.profilePhoto = user.profilePhoto;
         // token.userType = user.userType;
       }
@@ -75,8 +85,12 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       // Extract data from token to final session
       session.user.id = token.id as string;
       session.user.token = token.token as string;
-      session.user.name = token.name as string;
       session.user.email = token.email as string;
+      session.user.fullName = token.fullName as string;
+      session.user.gender = token.gender as string;
+      session.user.assessments = token.assessments as {}[];
+      session.user.regNumber = token.regNumber as string;
+      session.user.schoolId = token.schoolId as string[];
 
       // session.user.profilePhoto = token.profilePhoto as string;
       // session.user.userType = token.userType as string;

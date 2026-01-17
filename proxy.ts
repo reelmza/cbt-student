@@ -1,6 +1,6 @@
 import { auth } from "./auth";
 
-export default auth((req:any) => {
+export default auth((req: any) => {
   // If no auth and user is on an auth requiring page
   if (
     !(
@@ -24,7 +24,7 @@ export default auth((req:any) => {
       req.nextUrl.pathname.includes("/signup")) &&
     req.auth
   ) {
-    const newUrl = new URL("/dashboard", req.nextUrl.origin);
+    const newUrl = new URL("/exams", req.nextUrl.origin);
     console.log(newUrl);
     return Response.redirect(newUrl);
   }

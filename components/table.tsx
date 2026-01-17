@@ -32,13 +32,14 @@ const Table = ({
       {/* Options Row */}
       <div className="flex items-center justify-between">
         {/* Search Box */}
-        {showSearch ? <TableSearchBox /> : ""}
+        {showSearch ? <TableSearchBox placeholder="Searchn" /> : ""}
 
         {/* Options Buttons */}
         {showOptions ? (
           <div className="w-fit flex items-center gap-2">
             <div className="w-48">
               <Button
+                loading={false}
                 title="Create Assesment"
                 icon={<Plus size={16} strokeWidth={2.5} />}
                 variant="fill"
@@ -47,6 +48,7 @@ const Table = ({
 
             <div className="w-48">
               <Button
+                loading={false}
                 title="Upload Assessment"
                 icon={<CloudUpload size={16} strokeWidth={2.5} />}
                 variant="outline"

@@ -1,4 +1,5 @@
 type AssesmentApiResponse = {
+  _id: string;
   title: string;
   dueDate: string;
   totalMarks: number;

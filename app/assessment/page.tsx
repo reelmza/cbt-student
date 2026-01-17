@@ -123,7 +123,11 @@ const Page = () => {
                       : "success"
                   }`,
                 },
-                { value: key, colSpan: "col-span-1", type: "link" },
+                {
+                  value: `assessment/${item._id}`,
+                  colSpan: "col-span-1",
+                  type: "link",
+                },
               ])
             : []
         }
@@ -146,7 +150,7 @@ const Page = () => {
   );
 };
 
-const Exams = () => {
+const PageWrapper = () => {
   return (
     <SessionProvider>
       <Page />
@@ -154,4 +158,4 @@ const Exams = () => {
   );
 };
 
-export default Exams;
+export default PageWrapper;

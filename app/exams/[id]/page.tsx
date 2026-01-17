@@ -1,5 +1,6 @@
 "use client";
 import Button from "@/components/button";
+import Counter from "@/components/counter";
 import Spacer from "@/components/spacer";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { ChevronLeft, ChevronRightIcon, Clock4, User2 } from "lucide-react";
@@ -10,6 +11,7 @@ const Page = () => {
   const { data: session } = useSession();
   const [loading, setLoading] = useState<string | null>("page");
   const [activeQuestion, setActiveQuestion] = useState(0);
+
   const exam = {
     id: "458u0twrjigsos0tjeqrw0",
     code: "CMP202",
@@ -59,6 +61,32 @@ const Page = () => {
       ],
     },
   ];
+
+  // Next Question
+  const nextQuestion = () => {
+    setActiveQuestion((prev) => {
+      // If active question is not the last
+      if (prev < questions.length - 1) {
+        return prev + 1;
+      }
+
+      // Else do nothing
+      return prev;
+    });
+  };
+
+  // Previous Quesion
+  const prevQuestion = () => {
+    setActiveQuestion((prev) => {
+      // If active question is not the first
+      if (prev > 0) {
+        return prev - 1;
+      }
+
+      // Else do nothing
+      return prev;
+    });
+  };
 
   return (
     <div className="grow grid grid-cols-12 min-h-full px-10 font-sans">
@@ -132,6 +160,7 @@ const Page = () => {
               variant="outline"
               type="button"
               loading={false}
+              onClick={prevQuestion}
             />
           </div>
 
@@ -148,6 +177,7 @@ const Page = () => {
               type="button"
               loading={false}
               icon={<ChevronRightIcon size={16} />}
+              onClick={nextQuestion}
             />
           </div>
         </div>
@@ -162,7 +192,12 @@ const Page = () => {
             <div className="text-xs leading-none text-theme-gray">
               Your Time
             </div>
-            <div className="text-xl font-extrabold leading-none">0:10:55</div>
+            <div className="text-xl font-extrabold leading-none">
+              <Counter
+                durationInSeconds={3600}
+                onComplete={() => alert("Complete")}
+              />
+            </div>
           </div>
         </div>
         <Spacer size="md" />

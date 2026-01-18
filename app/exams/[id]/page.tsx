@@ -50,6 +50,10 @@ const Page = ({ id }: { id: string }) => {
     });
   };
 
+  const submitTest = async () => {
+    console.log(answers);
+  };
+
   useEffect(() => {
     if (!session) return;
 
@@ -91,7 +95,7 @@ const Page = ({ id }: { id: string }) => {
   return (
     <>
       {pageData && questions && (
-        <div className="grow grid grid-cols-12 min-h-full px-10 font-sans">
+        <div className="relative grow grid grid-cols-12 min-h-full px-10 font-sans">
           {/* Main Bar */}
           <div className="col-span-9 flex flex-col justify-between border-r pr-5 pt-10">
             {/* Upper Content */}
@@ -109,6 +113,8 @@ const Page = ({ id }: { id: string }) => {
                 {/* Submit Button */}
                 <div className="w-42">
                   <Button
+                    type="button"
+                    onClick={submitTest}
                     title="Submit Exam"
                     loading={loading == "submitExam"}
                     variant="fill"
@@ -145,11 +151,17 @@ const Page = ({ id }: { id: string }) => {
                               key={index}
                               type="text"
                               value={
-                                answers[`${questions[activeQuestion]._id}`]
-                                  ?.subjectiveAnswers?.[index]?.answer || ""
+                                index < 3
+                                  ? answers[`${questions[activeQuestion]._id}`]
+                                      ?.subjectiveAnswers?.[index - 1]
+                                      ?.answer || ""
+                                  : answers[`${questions[activeQuestion]._id}`]
+                                      ?.subjectiveAnswers?.[index - 2]
+                                      ?.answer || ""
                               }
                               onChange={(e) =>
                                 setAnswers((prev) => {
+                                  console.log(index);
                                   const qstRef = questions[activeQuestion];
                                   const prevEntry = prev[qstRef._id];
 
@@ -158,10 +170,20 @@ const Page = ({ id }: { id: string }) => {
                                       ? [...prevEntry.subjectiveAnswers]
                                       : [];
 
-                                  updatedSlots[index] = {
-                                    slotNumber: index + 1,
-                                    answer: e.target.value,
-                                  };
+                                  // Compensate for ghost index inbwtween caused by spliting
+                                  if (index < 3) {
+                                    updatedSlots[index - 1] = {
+                                      slotNumber: index,
+                                      answer: e.target.value,
+                                    };
+                                  } else {
+                                    updatedSlots[index - 2] = {
+                                      slotNumber: index - 1,
+                                      answer: e.target.value,
+                                    };
+                                  }
+
+                                  console.log(updatedSlots);
 
                                   return {
                                     ...prev,
@@ -250,11 +272,13 @@ const Page = ({ id }: { id: string }) => {
                     setAnswers((prev) => {
                       const qstRef = questions[activeQuestion];
                       const prevEntry = prev[qstRef._id];
-                      console.log(e.target.value);
+
                       return {
                         ...prev,
                         [qstRef._id]: {
                           ...prevEntry,
+                          question: questions[activeQuestion]._id,
+                          type: questions[activeQuestion].type,
                           theoryAnswer: e.target.value,
                         },
                       };
@@ -345,7 +369,29 @@ const Page = ({ id }: { id: string }) => {
             {/* Gender */}
             <div className="pb-2">
               <div className="text-sm text-theme-gray">Gender</div>
-              <div>{session?.user?.gender}</div>
+              <div>{session?.user?.gender == "male" ? "Male" : "Female"}</div>
+            </div>
+          </div>
+
+          {/* Questions Overview */}
+          <div className="absolute top-0 -left-[20vw] w-[20vw] mt-32 p-5">
+            <div className="text-sm text-accent-dim">Answered Questions</div>
+            <Spacer size="sm" />
+            <div className=" bg-reds-100 flex flex-wrap gap-2">
+              {questions.map((qst, key) => (
+                <button
+                  type="button"
+                  key={key}
+                  className={`h-5 w-5  flex items-center justify-center text-xs font-semibold   ${
+                    answers[`${qst._id}`]
+                      ? "bg-accent-dim text-white"
+                      : "border border-accent-light text-accent"
+                  } rounded-sm cursor-pointer`}
+                  onClick={() => setActiveQuestion(key)}
+                >
+                  {key + 1}
+                </button>
+              ))}
             </div>
           </div>
         </div>

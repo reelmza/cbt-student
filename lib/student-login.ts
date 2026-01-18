@@ -18,7 +18,7 @@ export const studentLogin: (
         body: JSON.stringify({
           email: credentials.username,
           regNumber: credentials.username,
-          password: credentials.password,
+          passCode: credentials.password,
           authMethod: "password",
         }),
       }
@@ -31,14 +31,14 @@ export const studentLogin: (
 
     // Parse user response body
     const res = await targetUser.json();
+    console.log({ ...res.data.student.profile, token: res.data.token });
 
     user = {
-      ...res.data.student,
+      ...res.data.student.profile,
       token: res.data.token,
-      schoolId: res.data.student.school._id,
     };
 
-    // console.log(user);
+    console.log(user);
     if (!user) {
       return null;
     }

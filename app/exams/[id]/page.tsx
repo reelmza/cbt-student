@@ -7,10 +7,12 @@ import { Spinner } from "@/components/ui/spinner";
 import { attachHeaders, localAxios } from "@/lib/axios";
 import { ChevronRightIcon, Clock4, User2 } from "lucide-react";
 import { SessionProvider, useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
 import { act, use, useEffect, useMemo, useState } from "react";
 
 const Page = ({ id }: { id: string }) => {
   const controller = new AbortController();
+  const router = useRouter();
   const { data: session } = useSession();
 
   // Component States
@@ -50,8 +52,36 @@ const Page = ({ id }: { id: string }) => {
     });
   };
 
+  // Submit test
   const submitTest = async () => {
-    console.log(answers);
+    const formData = {
+      answers: Object.values(answers),
+    };
+
+    setLoading("submitTest");
+    try {
+      attachHeaders(session!.user!.token);
+      const res = await localAxios.post(
+        `/assessment/submit-test/${id}`,
+        formData,
+        {
+          signal: controller.signal,
+        }
+      );
+
+      console.log(res);
+      if (res.status == 200) {
+        router.push("exams");
+        // setPageData(res.data.data);
+      }
+
+      setLoading(null);
+    } catch (error: any) {
+      if (error.name !== "CanceledError") {
+        setLoading(null);
+        console.log(error);
+      }
+    }
   };
 
   useEffect(() => {
@@ -60,14 +90,19 @@ const Page = ({ id }: { id: string }) => {
     const getAssessment = async () => {
       try {
         attachHeaders(session!.user!.token);
-        const res = await localAxios.get(`/assessment/findone/${id}`, {
+        const startRes = await localAxios.post(`/assessment/start-test/${id}`, {
           signal: controller.signal,
         });
 
-        if (res.status == 200) {
-          setPageData(res.data.data);
+        // const res = await localAxios.get(`/assessment/findone/${id}`, {
+        //   signal: controller.signal,
+        // });
+
+        // If test not started
+        if (startRes.status == 200) {
+          setPageData(startRes.data.data);
           setQuestions(
-            res.data.data.sections.reduce((acc: any, sct: any) => {
+            startRes.data.data.sections.reduce((acc: any, sct: any) => {
               acc.push(...sct.questions);
               return acc;
             }, [])
@@ -116,7 +151,7 @@ const Page = ({ id }: { id: string }) => {
                     type="button"
                     onClick={submitTest}
                     title="Submit Exam"
-                    loading={loading == "submitExam"}
+                    loading={loading == "submitTest"}
                     variant="fill"
                   />
                 </div>
@@ -366,10 +401,10 @@ const Page = ({ id }: { id: string }) => {
             </div>
             <Spacer size="sm" />
 
-            {/* Gender */}
+            {/* Level */}
             <div className="pb-2">
-              <div className="text-sm text-theme-gray">Gender</div>
-              <div>{session?.user?.gender == "male" ? "Male" : "Female"}</div>
+              <div className="text-sm text-theme-gray">Level</div>
+              <div>{session?.user?.level}</div>
             </div>
           </div>
 

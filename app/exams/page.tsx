@@ -11,7 +11,7 @@ import { useEffect, useState } from "react";
 const Page = () => {
   const controller = new AbortController();
   const { data: session } = useSession();
-
+  console.log(session);
   const [pageData, setPageData] = useState<
     | {
         _id: string;

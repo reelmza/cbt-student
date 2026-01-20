@@ -16,6 +16,7 @@ type AnswerType = Record<
   }
 >;
 type PageDataType = {
+  timeLimit: number;
   title: string;
   course: { title: string };
 };

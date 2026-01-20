@@ -21,6 +21,7 @@ const Page = ({ id }: { id: string }) => {
   const [questions, setQuestions] = useState<QuestionType | null>(null);
   const [answers, setAnswers] = useState<AnswerType>({});
   const [pageData, setPageData] = useState<PageDataType | null>(null);
+  const [pageError, setPageError] = useState<string | null>(null);
 
   const parts = (text: string) => {
     return text.split(/(\[\d+\])/g);
@@ -71,8 +72,7 @@ const Page = ({ id }: { id: string }) => {
 
       console.log(res);
       if (res.status == 200) {
-        router.push("exams");
-        // setPageData(res.data.data);
+        router.push("/exams");
       }
 
       setLoading(null);
@@ -94,10 +94,6 @@ const Page = ({ id }: { id: string }) => {
           signal: controller.signal,
         });
 
-        // const res = await localAxios.get(`/assessment/findone/${id}`, {
-        //   signal: controller.signal,
-        // });
-
         // If test not started
         if (startRes.status == 200) {
           setPageData(startRes.data.data);
@@ -114,6 +110,9 @@ const Page = ({ id }: { id: string }) => {
         setLoading(null);
       } catch (error: any) {
         if (error.name !== "CanceledError") {
+          if (error.message) {
+            setPageError(error.response.data.message);
+          }
           setLoading("pageError");
           console.log(error);
         }
@@ -366,7 +365,7 @@ const Page = ({ id }: { id: string }) => {
                 </div>
                 <div className="text-xl font-extrabold leading-none">
                   <Counter
-                    durationInSeconds={3600}
+                    durationInSeconds={Number(pageData.timeLimit * 60)}
                     onComplete={() => alert("Complete")}
                   />
                 </div>
@@ -442,11 +441,11 @@ const Page = ({ id }: { id: string }) => {
         </div>
       )}
 
-      {/* Error */}
+      {/* Unhadled Error Error */}
       {!pageData && loading == "pageError" && (
         <div className="grow min-h-full p-10 font-sans">
           <div>
-            <div>An error occured please refresh the page.</div>
+            <div>{pageError || "An error occured please refresh the page"}</div>
           </div>
         </div>
       )}

@@ -1,28 +1,20 @@
 import Spacer from "../spacer";
 import Image from "next/image";
-import studentsCollage from "@/public/school-logo.png";
+
+import boxImage from "@/public/images/school-logo-auth.png";
 const SideBox = () => {
   return (
-    <div className="col-span-6 bg-accent-light/50 flex flex-col items-center justify-center">
-      <Image
-        src={studentsCollage}
-        width={250}
-        height={0}
-        alt="Sauki CBT"
-        className="aspect-square flex"
-      />
-      <Spacer size="md" />
+    <div className="col-span-6 bg-accent-light flex flex-col items-center justify-center">
+      <Image src={boxImage} width={271} height={271} alt="School logo" />
+      <Spacer size="lg" />
 
       <div className="w-8/10 text-accent-dim text-center">
-        <div className="text-3xl font-bold leading-tight">
-          Built for Schools, <br />
-          Trusted by Educators.
+        <div className="text-3xl font-extrabold leading-tight text-accent-dim">
+          Ebonyi State <br />
+          University, Abakaliki.
         </div>
         <Spacer size="sm" />
-        <p className="text-xs leading-normal">
-          Register confidently with a platform designed specifically for
-          education institutions.
-        </p>
+        <p className="text-lg">Examination Portal</p>
       </div>
     </div>
   );

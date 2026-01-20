@@ -65,7 +65,7 @@ export default function Home() {
         <div className="w-7/10 rounded-lg">
           {/* School Name */}
           <div className="text-sm font-sans font-semibold bg-accent-light text-accent-dim w-fit  rounded-full px-3 mb-5 py-1 leading-none">
-            Mautech, Yola.
+            EBSU, Ebonyi.
           </div>
 
           {/* Form Heading */}

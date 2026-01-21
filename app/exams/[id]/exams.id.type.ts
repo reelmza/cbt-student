@@ -16,7 +16,12 @@ type AnswerType = Record<
   }
 >;
 type PageDataType = {
+  sections: {}[];
+  term: number;
+  instruction: string;
+  session: string;
   timeLimit: number;
   title: string;
   course: { title: string };
+  totalMarks: string;
 };

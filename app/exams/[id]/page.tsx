@@ -5,19 +5,18 @@ import Spacer from "@/components/spacer";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Spinner } from "@/components/ui/spinner";
 import { attachHeaders, localAxios } from "@/lib/axios";
+import shuffleArray from "@/utils/array-shuffler";
 import {
   ArrowRight,
   Check,
   ChevronRightIcon,
   CircleSmall,
   Clock4,
-  Square,
   User2,
 } from "lucide-react";
 import { SessionProvider, useSession } from "next-auth/react";
-import { Space_Grotesk } from "next/font/google";
 import { useRouter } from "next/navigation";
-import { act, use, useEffect, useMemo, useState } from "react";
+import { use, useEffect, useState } from "react";
 
 const Page = ({ id }: { id: string }) => {
   const controller = new AbortController();
@@ -116,12 +115,17 @@ const Page = ({ id }: { id: string }) => {
         // If test not started
         if (startRes.status == 200) {
           setPageData(startRes.data.data);
-          setQuestions(
-            startRes.data.data.sections.reduce((acc: any, sct: any) => {
-              acc.push(...sct.questions);
-              return acc;
-            }, [])
-          );
+          setQuestions(() => {
+            const allQst = startRes.data.data.sections.reduce(
+              (acc: any, sct: any) => {
+                acc.push(...sct.questions);
+                return acc;
+              },
+              []
+            );
+
+            return shuffleArray(allQst);
+          });
         }
 
         setLoading(null);
@@ -215,14 +219,25 @@ const Page = ({ id }: { id: string }) => {
             </div>
             <Spacer size="lg" />
 
-            <div className="w-48">
-              <Button
-                title={"Proceed to exams"}
-                loading={false}
-                variant={"fill"}
-                onClick={() => setIsStarted(true)}
-                icon={<ArrowRight size={14} />}
-              />
+            {/* Buttons */}
+            <div className="flex items-center gap-4">
+              <div className="w-48">
+                <Button
+                  title={"Go back to exams"}
+                  loading={false}
+                  variant={"fillError"}
+                  onClick={() => router.push("/exams")}
+                />
+              </div>
+              <div className="w-48">
+                <Button
+                  title={"Proceed to exam"}
+                  loading={false}
+                  variant={"fill"}
+                  onClick={() => setIsStarted(true)}
+                  icon={<ArrowRight size={14} />}
+                />
+              </div>
             </div>
           </div>
         </div>

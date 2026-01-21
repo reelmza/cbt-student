@@ -1,22 +1,40 @@
 "use client";
 import Button from "@/components/button";
 import Counter from "@/components/counter";
+import Input from "@/components/input";
 import Spacer from "@/components/spacer";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Spinner } from "@/components/ui/spinner";
 import { attachHeaders, localAxios } from "@/lib/axios";
 import shuffleArray from "@/utils/array-shuffler";
 import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from "@radix-ui/react-select";
+import {
   ArrowRight,
   Check,
   ChevronRightIcon,
+  CircleQuestionMark,
   CircleSmall,
   Clock4,
+  Plus,
   User2,
 } from "lucide-react";
 import { SessionProvider, useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { use, useEffect, useState } from "react";
+import { toast } from "sonner";
 
 const Page = ({ id }: { id: string }) => {
   const controller = new AbortController();
@@ -36,6 +54,7 @@ const Page = ({ id }: { id: string }) => {
     totalScore: number;
   } | null>(null);
   const [isStarted, setIsStarted] = useState(false);
+  const [showEndExam, setShowEndExam] = useState(false);
 
   const parts = (text: string) => {
     return text.split(/(\[\d+\])/g);
@@ -45,6 +64,7 @@ const Page = ({ id }: { id: string }) => {
   const nextQuestion = () => {
     if (questions && activeQuestion == questions.length - 1) {
       console.log("End");
+      toast.success("This is the last question", { richColors: true });
     }
 
     setActiveQuestion((prev) => {
@@ -267,7 +287,7 @@ const Page = ({ id }: { id: string }) => {
                     <div className="w-42">
                       <Button
                         type="button"
-                        onClick={submitTest}
+                        onClick={() => setShowEndExam(true)}
                         title="Submit Exam"
                         loading={loading == "submitTest"}
                         variant="fill"
@@ -553,6 +573,50 @@ const Page = ({ id }: { id: string }) => {
                   ))}
                 </div>
               </div>
+
+              {/* Dialog - End Exam */}
+              <Dialog open={showEndExam} onOpenChange={setShowEndExam}>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle className="hidden">End Exam</DialogTitle>
+                    <DialogDescription className="hidden">
+                      you are about to end exams
+                    </DialogDescription>
+                  </DialogHeader>
+
+                  <div className="w-full flex flex-col items-center mt-10">
+                    <CircleQuestionMark size={82} className="text-accent-dim" />
+
+                    {/* Prompt Text */}
+                    <div className="text-3xl text-accent-dim font-semibold">
+                      Are you sure?
+                    </div>
+                    <Spacer size="xl" />
+
+                    {/* Buttons */}
+                    <div className="flex items-center gap-4">
+                      <div className="w-38">
+                        <Button
+                          title={"No, Go back"}
+                          loading={loading === "submitAss"}
+                          variant={"outline"}
+                          onClick={() => setShowEndExam(false)}
+                        />
+                      </div>
+
+                      <div className="w-38">
+                        <Button
+                          title={"Yes, Submit"}
+                          loading={loading == "submitTest"}
+                          variant={"fill"}
+                          icon={<ArrowRight size={14} />}
+                          onClick={submitTest}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </DialogContent>
+              </Dialog>
             </div>
           )}
 

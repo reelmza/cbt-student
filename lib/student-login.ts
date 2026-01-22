@@ -9,7 +9,7 @@ export const studentLogin: (
   try {
     // Get user from database
     const targetUser = await fetch(
-      "https://cbt-server-q5fr.onrender.com/api/v1/student/complete-login",
+      "https://cbt-be-production.up.railway.app/api/v1/student/complete-login",
       {
         method: "POST",
         headers: {

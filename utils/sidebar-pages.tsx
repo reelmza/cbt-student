@@ -1,4 +1,4 @@
-import { NotebookPen } from "lucide-react";
+import { School } from "lucide-react";
 import { JSX } from "react";
 
 type SideBarStructure = {
@@ -17,7 +17,7 @@ export const sideBarPages: SideBarPageType[] = [
   {
     name: "Exams",
     route: "/exams",
-    icon: <NotebookPen size={18} />,
+    icon: <School size={20} strokeWidth={1.5} />,
   },
   // {
   //   name: "Users",

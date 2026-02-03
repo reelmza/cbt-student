@@ -8,6 +8,7 @@ import { SessionProvider, useSession } from "next-auth/react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import Image from "next/image";
+import emptyClipboard from "@/public/images/illustrations/empty_clipboard.svg";
 
 const Page = () => {
   const controller = new AbortController();
@@ -147,9 +148,69 @@ const Page = () => {
 
       {/* No exams due */}
       {pageData && pageData.length < 1 && (
-        <div className="grow min-h-full p-10 font-sans">
-          <div>
-            <div>You have no assesment due at this time.</div>
+        <div className="grow grid grid-cols-12 min-h-full p-10 font-sans">
+          <div className="col-span-9 flex flex-col items-center justify-center">
+            <Image
+              src={emptyClipboard}
+              alt="Empty Exams"
+              height={320}
+              width={320}
+              className="-ml-10"
+            />
+            <Spacer size="xl" />
+
+            <div className="text-accent-dim text-2xl font-semibold">
+              You have no exams due at the moment
+            </div>
+
+            <div className="text-accent-dim font-light">
+              If this not true please conatact the nearest admin
+            </div>
+          </div>
+
+          {/* SideBar */}
+          <div className="col-span-3 flex flex-col pl-5 pt-10 -mr-5 border-l">
+            {/* User details */}
+            {/* Profile Picture */}
+            <div className="h-[250px] w-[250px] flex items-center justify-center self-center bg-theme-gray-light rounded-md overflow-hidden">
+              {!session?.user?.passportPhoto ? (
+                <User2
+                  size={200}
+                  strokeWidth={0.5}
+                  className="text-theme-gray-mid"
+                />
+              ) : (
+                <Image
+                  src={session?.user?.passportPhoto}
+                  alt="Profile photo"
+                  height={250}
+                  width={250}
+                />
+              )}
+            </div>
+            <Spacer size="md" />
+
+            {/* Registration Number */}
+            <div className="border-b pb-2">
+              <div className="text-sm text-theme-gray ">
+                Registration Number
+              </div>
+              <div>{session?.user?.regNumber}</div>
+            </div>
+            <Spacer size="sm" />
+
+            {/* Full Name */}
+            <div className="pb-2 border-b">
+              <div className="text-sm text-theme-gray">Full Name</div>
+              <div>{session?.user?.fullName}</div>
+            </div>
+            <Spacer size="sm" />
+
+            {/* Level */}
+            <div className="pb-2">
+              <div className="text-sm text-theme-gray">Level</div>
+              <div>{session?.user?.level}</div>
+            </div>
           </div>
         </div>
       )}

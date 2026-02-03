@@ -184,7 +184,7 @@ const Page = ({ id }: { id: string }) => {
             can find all relevant information regarding this assessment below.
             Goodluck.
           </div>
-          <Spacer size="xl" />
+          <Spacer size="md" />
 
           {/* Instructions */}
           {pageData?.instruction.split(",").map((item, key) => {
@@ -195,42 +195,39 @@ const Page = ({ id }: { id: string }) => {
               </div>
             );
           })}
-          <Spacer size="xl" />
 
-          <div className="border-t w-6/10 py-5">
+          {/* Exam details */}
+          <div className="w-6/10 pt-5">
             {/* Session */}
-            <div className="flex items-center gap-2 mb-2">
-              <div className="font-semibold">Exam Session:</div>
+            <div className="h-10 flex items-center border-x border-t border-accent-light overflow-hidden px-2 bg-accent-light">
+              <div className="w-42 font-semibold">Exam Session</div>
               <div>{pageData?.session}</div>
             </div>
 
             {/* Semester */}
-            <div className="flex items-center gap-2 mb-2">
-              <div className="font-semibold">Exam Semester:</div>
+            <div className="h-10 flex items-center border border-accent-light overflow-hidden px-2 ">
+              <div className="w-42 font-semibold">Exam Semester</div>
               <div>
                 {pageData?.term == 1 ? "First Semester" : "Second Semester"}
               </div>
             </div>
 
-            {/* Time allocated */}
-            <div className="flex items-center gap-2 mb-2">
-              <div className="font-semibold">Time allocated:</div>
-              <div>{pageData?.timeLimit} minutes</div>
+            {/* Time Allocated */}
+            <div className="h-10 flex items-center border-x border-t border-accent-light overflow-hidden px-2 bg-accent-light">
+              <div className="w-42 font-semibold">Time</div>
+              <div>{pageData?.timeLimit} Minutes</div>
             </div>
 
             {/* Total Marks */}
-            <div className="flex items-center gap-2 mb-2">
-              <div className="font-semibold">Total marks:</div>
+            <div className="h-10 flex items-center border border-accent-light overflow-hidden px-2 ">
+              <div className="w-42 font-semibold">Total Marks</div>
               <div>{pageData?.totalMarks} Marks</div>
             </div>
 
             {/* Sections */}
-            <div className="flex items-center gap-2 mb-2">
-              <div className="font-semibold">Sections:</div>
-              <div>
-                {pageData?.sections?.length} Section{" "}
-                {pageData && pageData?.sections?.length > 1 ? "s" : ""}
-              </div>
+            <div className="h-10 flex items-center border-b border-x border-accent-light overflow-hidden px-2 bg-accent-light">
+              <div className="w-42 font-semibold">Total Sections</div>
+              <div>{pageData?.sections.length} Section(s)</div>
             </div>
             <Spacer size="lg" />
 
@@ -240,7 +237,7 @@ const Page = ({ id }: { id: string }) => {
                 <Button
                   title={"Go back to exams"}
                   loading={false}
-                  variant={"fillError"}
+                  variant={"fillErrorOutline"}
                   onClick={() => router.push("/exams")}
                 />
               </div>

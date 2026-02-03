@@ -3,10 +3,11 @@ import Spacer from "@/components/spacer";
 import { Spinner } from "@/components/ui/spinner";
 import { attachHeaders, localAxios } from "@/lib/axios";
 import { prettyDate } from "@/lib/dateFormater";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, User2 } from "lucide-react";
 import { SessionProvider, useSession } from "next-auth/react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import Image from "next/image";
 
 const Page = () => {
   const controller = new AbortController();
@@ -56,42 +57,90 @@ const Page = () => {
   return (
     <>
       {pageData && pageData.length > 0 && (
-        <div className="grow min-h-full p-10 font-sans">
-          <div className="text-accent font-semibold text-xl">
-            Exams Available
-          </div>
-          <Spacer size="md" />
+        <div className="grow grid grid-cols-12 min-h-full p-10 font-sans">
+          <div className="col-span-9">
+            <div className="text-accent font-semibold text-xl">
+              Exams Available
+            </div>
+            <Spacer size="md" />
 
-          <div className="w-full flex flex-wrap items-center gap-4">
-            {pageData.map((ex, key) => {
-              return (
-                <Link
-                  href={`/exams/${ex._id}`}
-                  key={key}
-                  className="group flex w-3/10 hover:px-1 transition-all duration-300 hover:text-accent"
-                >
-                  <div className="w-full border rounded-md shadow-lg shadow-theme-gray-light/50 p-5">
-                    {/* Exam Title and Code */}
-                    <div className="text-2xl font-semibold">{ex.title}</div>
-                    <div className="text-theme-gray group-hover:text-accent">
-                      {ex.course.title}
-                    </div>
-                    <Spacer size="md" />
+            {/* Exams */}
+            <div className="w-full flex flex-wrap items-center gap-4">
+              {pageData.map((ex, key) => {
+                return (
+                  <Link
+                    href={`/exams/${ex._id}`}
+                    key={key}
+                    className="group flex w-4/10 hover:px-1 transition-all duration-300 hover:text-accent"
+                  >
+                    <div className="w-full border rounded-md shadow-lg shadow-theme-gray-light/50 p-5">
+                      {/* Exam Title and Code */}
+                      <div className="text-2xl font-semibold">{ex.title}</div>
+                      <div className="text-theme-gray group-hover:text-accent">
+                        {ex.course.title}
+                      </div>
+                      <Spacer size="md" />
 
-                    <div className="flex items-center justify-between text-sm text-theme-gray group-hover:text-accent">
-                      {/* Exam Time */}
-                      <div>{prettyDate(ex.dueDate.split("T")[0])}</div>
+                      <div className="flex items-center justify-between text-sm text-theme-gray group-hover:text-accent">
+                        {/* Exam Time */}
+                        <div>{prettyDate(ex.dueDate.split("T")[0])}</div>
 
-                      {/* Start Icon */}
-                      <div className="flex items-center gap-1">
-                        <span>Start</span>
-                        <ArrowRight size={14} />
+                        {/* Start Icon */}
+                        <div className="flex items-center gap-1">
+                          <span>Start</span>
+                          <ArrowRight size={14} />
+                        </div>
                       </div>
                     </div>
-                  </div>
-                </Link>
-              );
-            })}
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* SideBar */}
+          <div className="col-span-3 flex flex-col pl-5 pt-10 -mr-5 border-l">
+            {/* User details */}
+            {/* Profile Picture */}
+            <div className="h-[250px] w-[250px] flex items-center justify-center self-center bg-theme-gray-light rounded-md overflow-hidden">
+              {!session?.user?.passportPhoto ? (
+                <User2
+                  size={200}
+                  strokeWidth={0.5}
+                  className="text-theme-gray-mid"
+                />
+              ) : (
+                <Image
+                  src={session?.user?.passportPhoto}
+                  alt="Profile photo"
+                  height={250}
+                  width={250}
+                />
+              )}
+            </div>
+            <Spacer size="md" />
+
+            {/* Registration Number */}
+            <div className="border-b pb-2">
+              <div className="text-sm text-theme-gray ">
+                Registration Number
+              </div>
+              <div>{session?.user?.regNumber}</div>
+            </div>
+            <Spacer size="sm" />
+
+            {/* Full Name */}
+            <div className="pb-2 border-b">
+              <div className="text-sm text-theme-gray">Full Name</div>
+              <div>{session?.user?.fullName}</div>
+            </div>
+            <Spacer size="sm" />
+
+            {/* Level */}
+            <div className="pb-2">
+              <div className="text-sm text-theme-gray">Level</div>
+              <div>{session?.user?.level}</div>
+            </div>
           </div>
         </div>
       )}

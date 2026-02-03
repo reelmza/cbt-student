@@ -1,7 +1,7 @@
 "use client";
 import Button from "@/components/button";
 import Counter from "@/components/counter";
-import Input from "@/components/input";
+
 import Spacer from "@/components/spacer";
 import {
   Dialog,
@@ -14,13 +14,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Spinner } from "@/components/ui/spinner";
 import { attachHeaders, localAxios } from "@/lib/axios";
 import shuffleArray from "@/utils/array-shuffler";
-import {
-  Select,
-  SelectTrigger,
-  SelectValue,
-  SelectContent,
-  SelectItem,
-} from "@radix-ui/react-select";
+
 import {
   ArrowRight,
   Check,
@@ -28,13 +22,13 @@ import {
   CircleQuestionMark,
   CircleSmall,
   Clock4,
-  Plus,
   User2,
 } from "lucide-react";
 import { SessionProvider, useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { use, useEffect, useState } from "react";
 import { toast } from "sonner";
+import Image from "next/image";
 
 const Page = ({ id }: { id: string }) => {
   const controller = new AbortController();
@@ -56,6 +50,7 @@ const Page = ({ id }: { id: string }) => {
   const [isStarted, setIsStarted] = useState(false);
   const [showEndExam, setShowEndExam] = useState(false);
 
+  // Split Subjective
   const parts = (text: string) => {
     return text.split(/(\[\d+\])/g);
   };
@@ -518,12 +513,21 @@ const Page = ({ id }: { id: string }) => {
 
                 {/* User details */}
                 {/* Profile Picture */}
-                <div className="h-[250px] w-[250px] flex items-center justify-center self-center bg-theme-gray-light rounded-md">
-                  <User2
-                    size={200}
-                    strokeWidth={0.5}
-                    className="text-theme-gray-mid"
-                  />
+                <div className="h-[250px] w-[250px] flex items-center justify-center self-center bg-theme-gray-light rounded-md overflow-hidden">
+                  {!session?.user?.passportPhoto ? (
+                    <User2
+                      size={200}
+                      strokeWidth={0.5}
+                      className="text-theme-gray-mid"
+                    />
+                  ) : (
+                    <Image
+                      src={session?.user?.passportPhoto}
+                      alt="Profile photo"
+                      height={250}
+                      width={250}
+                    />
+                  )}
                 </div>
                 <Spacer size="md" />
 

@@ -27,6 +27,7 @@ declare module "next-auth" {
     regNumber: string;
     assessments: {}[];
     schoolId: string[];
+    passportPhoto: string;
   }
 }
 
@@ -64,8 +65,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         token.level = user.level;
         token.assessments = user.assessments;
         token.regNumber = user.regNumber;
-
-        // token.profilePhoto = user.profilePhoto;
+        token.passportPhoto = user.passportPhoto;
         // token.userType = user.userType;
       }
 
@@ -89,8 +89,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       session.user.level = token.level as number;
       session.user.assessments = token.assessments as {}[];
       session.user.regNumber = token.regNumber as string;
-
-      // session.user.profilePhoto = token.profilePhoto as string;
+      session.user.passportPhoto = token.passportPhoto as string;
       // session.user.userType = token.userType as string;
 
       return session;

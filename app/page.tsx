@@ -89,16 +89,6 @@ export default function Home() {
             />
             <Spacer size="md" />
 
-            <div className="flex items-center text-sm text-accent-dim">
-              Forgot password?
-              <Link
-                href="/reset-password"
-                className="ml-1 inline-block text-accent"
-              >
-                Reset Here.
-              </Link>
-            </div>
-            <Spacer size="md" />
             <Button
               loading={loading == "login"}
               type="submit"

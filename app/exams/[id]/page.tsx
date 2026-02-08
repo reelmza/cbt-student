@@ -460,8 +460,8 @@ const Page = ({ id }: { id: string }) => {
                   {/* Prev Button */}
                   <div className="w-24 shrink-0">
                     <Button
-                      title="Previous"
-                      variant="outline"
+                      title="Previous Question"
+                      variant="fill"
                       type="button"
                       loading={false}
                       onClick={prevQuestion}

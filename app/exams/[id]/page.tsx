@@ -630,15 +630,15 @@ const Page = ({ id }: { id: string }) => {
                 <Spacer size="lg" />
 
                 <div className="text-4xl font-bold text-accent-dim">
-                  Assessment Submited
+                  Exams Submitted!
                 </div>
 
                 <div className="text-black/80 hidden">
                   Please logout or return to your dashboard
                 </div>
-                <Spacer size="md" />
+                {/* <Spacer size="md" /> */}
 
-                <div className="w-3/10 border-y py-2 text-black/80">
+                <div className="hidden w-3/10 border-y py-2 text-black/80">
                   <div className="flex items-end justify-center gap-2 full mb-1">
                     <div>Auto Marked Questions:</div>
                     <div>{assSubmited?.autoMarked}</div>
@@ -649,9 +649,9 @@ const Page = ({ id }: { id: string }) => {
                     <div>{assSubmited?.pending}</div>
                   </div>
                 </div>
-                <Spacer size="xl" />
+                {/* <Spacer size="xl" /> */}
 
-                <div className="flex gap-2 text-accent-dim">
+                <div className="hidden flexs gap-2 text-accent-dim">
                   <div className="text-2xl font-bold">Total Score:</div>
                   <div className="text-2xl">
                     {assSubmited?.totalScore}/{pageData?.totalMarks}

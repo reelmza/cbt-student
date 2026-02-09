@@ -9,8 +9,8 @@ export const studentLogin: (
   try {
     // Get user from database
     const targetUser = await fetch(
-      "https://cbt-be-production.up.railway.app/api/v1/student/complete-login",
-      // "http://localhost:4000/api/v1/student/complete-login",
+      // "https://cbt-be-production.up.railway.app/api/v1/student/complete-login",
+      "http://172.0.0.3:4000/api/v1/student/complete-login",
       {
         method: "POST",
         headers: {
@@ -25,6 +25,7 @@ export const studentLogin: (
       }
     );
 
+    console.log(targetUser);
     // Check if user exist
     if (targetUser.status === 422 || targetUser.status === 400) {
       return user;
@@ -33,6 +34,7 @@ export const studentLogin: (
     // Parse user response body
     const res = await targetUser.json();
     console.log({ ...res.data.student.profile, token: res.data.token });
+    console.log(targetUser);
 
     user = {
       ...res.data.student.profile,

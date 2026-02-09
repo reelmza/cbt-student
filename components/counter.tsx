@@ -57,8 +57,12 @@ export default function CountdownTimer({
   const { hours, minutes, seconds } = formatTime(timeLeft);
 
   return (
-    <>
+    <div
+      className={`${Number(minutes) < 2 ? "text-red-600" : ""} ${
+        Number(minutes) > 2 && Number(minutes) < 5 ? "text-orange-600" : ""
+      } `}
+    >
       {hours}:{minutes}:{seconds}
-    </>
+    </div>
   );
 }

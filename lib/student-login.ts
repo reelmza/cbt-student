@@ -10,6 +10,7 @@ export const studentLogin: (
     // Get user from database
     const targetUser = await fetch(
       "https://cbt-be-production.up.railway.app/api/v1/student/complete-login",
+      // "http://localhost:4000/api/v1/student/complete-login",
       {
         method: "POST",
         headers: {

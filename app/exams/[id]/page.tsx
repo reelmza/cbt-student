@@ -5,6 +5,7 @@ import Counter from "@/components/counter";
 import Spacer from "@/components/spacer";
 import {
   Dialog,
+  DialogClose,
   DialogContent,
   DialogDescription,
   DialogHeader,
@@ -21,6 +22,7 @@ import {
   ChevronRightIcon,
   CircleQuestionMark,
   CircleSmall,
+  Clock2Icon,
   Clock4,
   User2,
 } from "lucide-react";
@@ -49,6 +51,7 @@ const Page = ({ id }: { id: string }) => {
   } | null>(null);
   const [isStarted, setIsStarted] = useState(false);
   const [showEndExam, setShowEndExam] = useState(false);
+  const [showTimeUp, setShowTimeUp] = useState(false);
 
   // Split Subjective
   const parts = (text: string) => {
@@ -105,6 +108,7 @@ const Page = ({ id }: { id: string }) => {
 
       console.log(res);
       if (res.status == 200) {
+        setShowTimeUp(false);
         setAssSubmited(res.data.data);
       }
 
@@ -501,7 +505,10 @@ const Page = ({ id }: { id: string }) => {
                     <div className="text-xl font-extrabold leading-none">
                       <Counter
                         durationInSeconds={Number(pageData.timeLimit * 60)}
-                        onComplete={() => alert("Complete")}
+                        onComplete={() => {
+                          setShowTimeUp(true);
+                          submitTest();
+                        }}
                       />
                     </div>
                   </div>
@@ -616,6 +623,53 @@ const Page = ({ id }: { id: string }) => {
                       </div>
                     </div>
                   </div>
+                </DialogContent>
+              </Dialog>
+
+              {/* Dialog - Auto end exam */}
+              <Dialog open={showTimeUp} onOpenChange={setShowTimeUp}>
+                <DialogContent
+                  className="overflow-hidden"
+                  onPointerDownOutside={(e) => e.preventDefault()}
+                  onEscapeKeyDown={(e) => e.preventDefault()}
+                >
+                  <DialogClose className="hidden"></DialogClose>
+                  <DialogHeader>
+                    <DialogTitle className="hidden">
+                      Your time has elapsed
+                    </DialogTitle>
+                    <DialogDescription className="hidden">
+                      you are about to end exams
+                    </DialogDescription>
+                  </DialogHeader>
+
+                  <div className="w-full flex flex-col items-center mt-10">
+                    <Clock2Icon size={82} className="text-accent-dim" />
+
+                    {/* Prompt Text */}
+                    <div className="text-3xl text-accent-dim font-semibold">
+                      Your time is up!
+                    </div>
+                    <Spacer size="xl" />
+
+                    {/* Buttons */}
+                    <div className="flex items-center gap-4">
+                      <div className="w-38">
+                        <Button
+                          title={
+                            loading === "submitTest"
+                              ? "Submitting Exam"
+                              : "Submit Exam"
+                          }
+                          loading={loading == "submitTest"}
+                          variant={"fill"}
+                          icon={<ArrowRight size={14} />}
+                          onClick={submitTest}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                  <div className="absolute h-20 w-20 bg-white top-0 right-0 z-10"></div>
                 </DialogContent>
               </Dialog>
             </div>

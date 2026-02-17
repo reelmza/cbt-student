@@ -111,7 +111,7 @@ const Page = () => {
           <div className="col-span-3 flex flex-col pl-5 pt-10 -mr-5 border-l">
             {/* User details */}
             {/* Profile Picture */}
-            <div className="h-[250px] w-[250px] flex items-center justify-center self-center bg-theme-gray-light rounded-md overflow-hidden">
+            <div className="h-62.5 w-62.5 flex items-center justify-center self-center bg-theme-gray-light rounded-md overflow-hidden">
               {!session?.user?.passportPhoto ? (
                 <User2
                   size={200}
@@ -180,7 +180,7 @@ const Page = () => {
           <div className="col-span-3 flex flex-col pl-5 pt-10 -mr-5 border-l">
             {/* User details */}
             {/* Profile Picture */}
-            <div className="h-[250px] w-[250px] flex items-center justify-center self-center bg-theme-gray-light rounded-md overflow-hidden">
+            <div className="h-62.5 w-62.5 flex items-center justify-center self-center bg-theme-gray-light rounded-md overflow-hidden">
               {!session?.user?.passportPhoto ? (
                 <User2
                   size={200}

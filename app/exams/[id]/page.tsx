@@ -28,7 +28,7 @@ import {
 } from "lucide-react";
 import { SessionProvider, useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { use, useEffect, useState } from "react";
+import { use, useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 import Image from "next/image";
 
@@ -94,7 +94,7 @@ const Page = ({ id }: { id: string }) => {
     const formData = {
       answers: Object.values(answers),
     };
-
+    console.log(formData);
     setLoading("submitTest");
     try {
       attachHeaders(session!.user!.token);
@@ -119,6 +119,12 @@ const Page = ({ id }: { id: string }) => {
         console.log(error);
       }
     }
+  };
+
+  // Time up handler
+  const handleTimeUp = () => {
+    setShowTimeUp(true);
+    submitTest();
   };
 
   useEffect(() => {
@@ -505,10 +511,7 @@ const Page = ({ id }: { id: string }) => {
                     <div className="text-xl font-extrabold leading-none">
                       <Counter
                         durationInSeconds={Number(pageData.timeLimit * 60)}
-                        onComplete={() => {
-                          setShowTimeUp(true);
-                          submitTest();
-                        }}
+                        onComplete={handleTimeUp}
                       />
                     </div>
                   </div>
@@ -517,7 +520,7 @@ const Page = ({ id }: { id: string }) => {
 
                 {/* User details */}
                 {/* Profile Picture */}
-                <div className="h-[250px] w-[250px] flex items-center justify-center self-center bg-theme-gray-light rounded-md overflow-hidden">
+                <div className="h-62.5 w-62.5 flex items-center justify-center self-center bg-theme-gray-light rounded-md overflow-hidden">
                   {!session?.user?.passportPhoto ? (
                     <User2
                       size={200}

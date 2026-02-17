@@ -28,6 +28,11 @@ export default function CountdownTimer({
   useEffect(() => {
     let endTime = localStorage.getItem(STORAGE_KEY);
 
+    // Avoid timer restart on auto submit
+    if (endTime === "auto_submit") {
+      return;
+    }
+
     // If no existing timer, create one
     if (!endTime) {
       endTime = String(Date.now() + durationInSeconds * 1000);
@@ -46,7 +51,7 @@ export default function CountdownTimer({
 
       if (remainingSeconds === 0) {
         clearInterval(interval);
-        localStorage.removeItem(STORAGE_KEY);
+        localStorage.setItem(STORAGE_KEY, "auto_submit");
         onComplete?.();
       }
     }, 1000);
@@ -57,11 +62,7 @@ export default function CountdownTimer({
   const { hours, minutes, seconds } = formatTime(timeLeft);
 
   return (
-    <div
-      className={`${Number(minutes) < 2 ? "text-red-600" : ""} ${
-        Number(minutes) > 2 && Number(minutes) < 5 ? "text-orange-600" : ""
-      } `}
-    >
+    <div className={`${Number(minutes) < 5 ? "text-red-600" : ""}`}>
       {hours}:{minutes}:{seconds}
     </div>
   );

@@ -9,8 +9,7 @@ export const studentLogin: (
   try {
     // Get user from database
     const targetUser = await fetch(
-      // "https://cbt-be-production.up.railway.app/api/v1/student/complete-login",
-      "http://172.0.0.3:4000/api/v1/student/complete-login",
+      `${process.env.SERVER_BASEURL}/student/complete-login`,
       {
         method: "POST",
         headers: {

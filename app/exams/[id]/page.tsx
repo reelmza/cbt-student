@@ -567,7 +567,7 @@ const Page = ({ id }: { id: string }) => {
                   Answered Questions
                 </div>
                 <Spacer size="sm" />
-                <div className=" bg-reds-100 flex flex-wrap gap-2">
+                <div className=" bg-reds-100 flex flex-wrap gap-2 overflow-y-scroll max-h-[60vh]">
                   {questions.map((qst, key) => (
                     <button
                       type="button"

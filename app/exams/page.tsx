@@ -9,7 +9,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import emptyClipboard from "@/public/images/illustrations/empty_clipboard.svg";
-const STORAGE_KEY = "countdown_end_time";
+// const STORAGE_KEY = "countdown_end_time";
 const Page = () => {
   const controller = new AbortController();
   const { data: session } = useSession();
@@ -30,11 +30,11 @@ const Page = () => {
 
     // Remove key if auto submit
     // Happens on redirect from auto submitted exam
-    const time = localStorage.getItem(STORAGE_KEY);
-    if (time === "auto_submit") {
-      localStorage.removeItem(STORAGE_KEY);
-      console.log(localStorage.getItem(STORAGE_KEY));
-    }
+    // const time = localStorage.getItem(STORAGE_KEY);
+    // if (time === "auto_submit") {
+    //   localStorage.removeItem(STORAGE_KEY);
+    //   console.log(localStorage.getItem(STORAGE_KEY));
+    // }
 
     const getAssessments = async () => {
       try {
@@ -78,7 +78,7 @@ const Page = () => {
               {pageData.map((ex, key) => {
                 return (
                   <Link
-                    href={`/exams/${ex._id}`}
+                    href={`/instructions/${ex._id}`}
                     key={key}
                     className="group flex w-4/10 hover:px-1 transition-all duration-300 hover:text-accent"
                   >

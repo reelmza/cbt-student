@@ -49,9 +49,12 @@ const Page = ({ id }: { id: string }) => {
     pending: number;
     totalScore: number;
   } | null>(null);
-  const [isStarted, setIsStarted] = useState(false);
+
   const [showEndExam, setShowEndExam] = useState(false);
   const [showTimeUp, setShowTimeUp] = useState(false);
+  const [showExamClosed, setShowExamClosed] = useState(false);
+
+  const [timeLeftX, setTimeLeftX] = useState(0);
 
   // Split Subjective
   const parts = (text: string) => {
@@ -117,15 +120,21 @@ const Page = ({ id }: { id: string }) => {
       if (error.name !== "CanceledError") {
         setLoading(null);
         console.log(error);
+        if (error?.message) {
+          console.log(error?.response?.data?.message);
+          if (error?.response?.status) {
+            setShowExamClosed(true);
+          }
+        }
       }
     }
   };
 
   // Time up handler
-  const handleTimeUp = () => {
+  const handleTimeUp = useCallback(() => {
     setShowTimeUp(true);
     submitTest();
-  };
+  }, []);
 
   useEffect(() => {
     if (!session) return;
@@ -133,11 +142,16 @@ const Page = ({ id }: { id: string }) => {
     const getAssessment = async () => {
       try {
         attachHeaders(session!.user!.token);
+
         const startRes = await localAxios.post(`/assessment/start-test/${id}`, {
           signal: controller.signal,
         });
 
-        // If test not started
+        const draftRes = await localAxios.get(`assessment/draft/${id}`, {
+          signal: controller.signal,
+        });
+
+        // Exams request successfull
         if (startRes.status == 200) {
           setPageData(startRes.data.data);
           setQuestions(() => {
@@ -151,6 +165,12 @@ const Page = ({ id }: { id: string }) => {
 
             return shuffleArray(allQst);
           });
+        }
+
+        // Draft srequest successfull
+        if (draftRes.status === 200 || draftRes.status === 201) {
+          if (draftRes.data.data.draft) {
+          }
         }
 
         setLoading(null);
@@ -174,98 +194,7 @@ const Page = ({ id }: { id: string }) => {
 
   return (
     <>
-      {!isStarted && !loading && (
-        <div className="relative grow min-h-full p-10 font-sans">
-          {/* Heading & Submit */}
-          <div className="h-14 w-fit flex items-center justify-between gap-5 border-b">
-            {/* Heading */}
-            <div className="grow">
-              <div className="text-xl font-semibold">{pageData?.title}</div>
-              <div className="text-theme-gray text-sm">
-                {pageData?.course?.title}
-              </div>
-            </div>
-          </div>
-          <Spacer size="sm" />
-
-          {/* Instruction brief */}
-          <div className="w-6/10">
-            Please read all instructions carefully before attempting exams, you
-            can find all relevant information regarding this assessment below.
-            Goodluck.
-          </div>
-          <Spacer size="md" />
-
-          {/* Instructions */}
-          {pageData?.instruction.split(",").map((item, key) => {
-            return (
-              <div key={key} className="ml-4 flex items-center gap-4 mb-2">
-                <CircleSmall size={14} />
-                <div> {item}</div>
-              </div>
-            );
-          })}
-
-          {/* Exam details */}
-          <div className="w-6/10 pt-5">
-            {/* Session */}
-            <div className="h-10 flex items-center border-x border-t border-accent-light overflow-hidden px-2 bg-accent-light">
-              <div className="w-42 font-semibold">Exam Session</div>
-              <div>{pageData?.session}</div>
-            </div>
-
-            {/* Semester */}
-            <div className="h-10 flex items-center border border-accent-light overflow-hidden px-2 ">
-              <div className="w-42 font-semibold">Exam Semester</div>
-              <div>
-                {pageData?.term == 1 ? "First Semester" : "Second Semester"}
-              </div>
-            </div>
-
-            {/* Time Allocated */}
-            <div className="h-10 flex items-center border-x border-t border-accent-light overflow-hidden px-2 bg-accent-light">
-              <div className="w-42 font-semibold">Time</div>
-              <div>{pageData?.timeLimit} Minutes</div>
-            </div>
-
-            {/* Total Marks */}
-            <div className="h-10 flex items-center border border-accent-light overflow-hidden px-2 ">
-              <div className="w-42 font-semibold">Total Marks</div>
-              <div>{pageData?.totalMarks} Marks</div>
-            </div>
-
-            {/* Sections */}
-            <div className="h-10 flex items-center border-b border-x border-accent-light overflow-hidden px-2 bg-accent-light">
-              <div className="w-42 font-semibold">Total Sections</div>
-              <div>{pageData?.sections.length} Section(s)</div>
-            </div>
-            <Spacer size="lg" />
-
-            {/* Buttons */}
-            <div className="flex items-center gap-4">
-              <div className="w-48">
-                <Button
-                  title={"Go back to exams"}
-                  loading={false}
-                  variant={"fillErrorOutline"}
-                  onClick={() => router.push("/exams")}
-                />
-              </div>
-              <div className="w-48">
-                <Button
-                  title={"Proceed to exam"}
-                  loading={false}
-                  variant={"fill"}
-                  onClick={() => setIsStarted(true)}
-                  icon={<ArrowRight size={14} />}
-                />
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {pageData && isStarted && questions && (
+      {pageData && questions && (
         <>
           {!assSubmited && (
             <div className="relative grow grid grid-cols-12 min-h-full px-10 font-sans">
@@ -512,6 +441,7 @@ const Page = ({ id }: { id: string }) => {
                       <Counter
                         durationInSeconds={Number(pageData.timeLimit * 60)}
                         onComplete={handleTimeUp}
+                        timeLeftParams={{ timeLeftX, setTimeLeftX }}
                       />
                     </div>
                   </div>
@@ -668,6 +598,59 @@ const Page = ({ id }: { id: string }) => {
                           variant={"fill"}
                           icon={<ArrowRight size={14} />}
                           onClick={submitTest}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                  <div className="absolute h-20 w-20 bg-white top-0 right-0 z-10"></div>
+                </DialogContent>
+              </Dialog>
+
+              {/* Dialog - Submision on exam */}
+              <Dialog open={showExamClosed} onOpenChange={setShowExamClosed}>
+                <DialogContent
+                  className="overflow-hidden"
+                  onPointerDownOutside={(e) => e.preventDefault()}
+                  onEscapeKeyDown={(e) => e.preventDefault()}
+                >
+                  <DialogClose className="hidden"></DialogClose>
+                  <DialogHeader>
+                    <DialogTitle className="hidden">
+                      This Exam has Ended
+                    </DialogTitle>
+                    <DialogDescription className="hidden">
+                      You can no longer submit, your saved entried will be
+                      recorded
+                    </DialogDescription>
+                  </DialogHeader>
+
+                  <div className="w-full flex flex-col items-center mt-10">
+                    <Clock2Icon size={82} className="text-accent-dim" />
+
+                    {/* Prompt Text */}
+                    <div className="text-3xl text-accent-dim font-semibold">
+                      Exam has ended
+                    </div>
+                    <Spacer size="md" />
+
+                    <div className="text-ss text-theme-gray text-center px-5">
+                      The admin ended exams while you were writting, your
+                      entries will be saved upto the time the exam was ended,
+                      contact your administrator.
+                    </div>
+                    <Spacer size="xl" />
+
+                    {/* Buttons */}
+                    <div className="flex items-center gap-4">
+                      <div className="w-48">
+                        <Button
+                          title={"Go Back to Dashboard"}
+                          loading={loading == "submitTest"}
+                          variant={"fill"}
+                          icon={<ArrowRight size={14} />}
+                          onClick={() => {
+                            router.push("/exams");
+                          }}
                         />
                       </div>
                     </div>

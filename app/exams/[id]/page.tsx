@@ -165,7 +165,7 @@ const Page = ({ id }: { id: string }) => {
           signal: controller.signal,
         });
 
-        // Draft srequest successfull
+        // Draft request successfull
         if (draftRes.status === 200) {
           if (draftRes?.data?.data?.draft) {
             examDurationRef.current = draftRes?.data?.data?.draft?.timeLeft;
@@ -245,7 +245,7 @@ const Page = ({ id }: { id: string }) => {
         }
       } finally {
         if (isMounted.current) {
-          timeoutRef.current = setTimeout(poll, 5_000);
+          timeoutRef.current = setTimeout(poll, 40_000);
         }
       }
     };

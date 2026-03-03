@@ -24,11 +24,12 @@ import {
   CircleSmall,
   Clock2Icon,
   Clock4,
+  CloudCheck,
   User2,
 } from "lucide-react";
 import { SessionProvider, useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { use, useCallback, useEffect, useState } from "react";
+import { use, useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import Image from "next/image";
 
@@ -55,6 +56,14 @@ const Page = ({ id }: { id: string }) => {
   const [showExamClosed, setShowExamClosed] = useState(false);
 
   const [timeLeftX, setTimeLeftX] = useState(0);
+
+  // Poll
+  const latestDataRef = useRef({ answers, timeLeft: timeLeftX });
+
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const abortRef = useRef<AbortController | null>(null);
+  const isMounted = useRef(true);
+  const examDurationRef = useRef<number | null>(null);
 
   // Split Subjective
   const parts = (text: string) => {
@@ -97,6 +106,7 @@ const Page = ({ id }: { id: string }) => {
     const formData = {
       answers: Object.values(answers),
     };
+
     console.log(formData);
     setLoading("submitTest");
     try {
@@ -131,25 +141,49 @@ const Page = ({ id }: { id: string }) => {
   };
 
   // Time up handler
-  const handleTimeUp = useCallback(() => {
+  const handleTimeUp = () => {
     setShowTimeUp(true);
     submitTest();
-  }, []);
+  };
+
+  // Keep ref updated for polling
+  useEffect(() => {
+    latestDataRef.current = { answers, timeLeft: timeLeftX };
+  }, [answers, timeLeftX]);
 
   useEffect(() => {
     if (!session) return;
+    isMounted.current = true;
 
     const getAssessment = async () => {
       try {
         attachHeaders(session!.user!.token);
-
+        const draftRes = await localAxios.get(`assessment/draft/${id}`, {
+          signal: controller.signal,
+        });
         const startRes = await localAxios.post(`/assessment/start-test/${id}`, {
           signal: controller.signal,
         });
 
-        const draftRes = await localAxios.get(`assessment/draft/${id}`, {
-          signal: controller.signal,
-        });
+        // Draft srequest successfull
+        if (draftRes.status === 200) {
+          if (draftRes?.data?.data?.draft) {
+            examDurationRef.current = draftRes?.data?.data?.draft?.timeLeft;
+            const formatted = draftRes?.data?.data?.draft?.data.reduce(
+              (acc: any, item: any) => {
+                acc[item.question] = {
+                  question: item.question,
+                  type: item.type,
+                  selectedOption: item.selectedOption,
+                };
+                return acc;
+              },
+              {}
+            );
+
+            setAnswers(formatted);
+          }
+        }
 
         // Exams request successfull
         if (startRes.status == 200) {
@@ -165,15 +199,9 @@ const Page = ({ id }: { id: string }) => {
 
             return shuffleArray(allQst);
           });
-        }
 
-        // Draft srequest successfull
-        if (draftRes.status === 200 || draftRes.status === 201) {
-          if (draftRes.data.data.draft) {
-          }
+          setLoading(null);
         }
-
-        setLoading(null);
       } catch (error: any) {
         if (error?.name !== "CanceledError") {
           if (error?.message) {
@@ -185,12 +213,53 @@ const Page = ({ id }: { id: string }) => {
       }
     };
 
+    const poll = async () => {
+      if (!isMounted.current) return;
+
+      const formData = {
+        answers: Object.values(latestDataRef.current.answers),
+        timeLeft: latestDataRef.current.timeLeft,
+      };
+
+      setLoading("poll");
+      try {
+        // Cancel previous request if still pending
+        abortRef.current?.abort();
+
+        // Init new controller for new request
+        abortRef.current = new AbortController();
+
+        attachHeaders(session!.user!.token);
+
+        if (Object.values(latestDataRef.current.answers).length < 1) {
+          console.log("No data");
+        } else {
+          await localAxios.post(`assessment/submit-draft/${id}`, formData, {
+            signal: abortRef.current.signal,
+          });
+        }
+        setLoading(null);
+      } catch (err: any) {
+        if (err.name !== "AbortError") {
+          console.error("Polling failed:", err);
+        }
+      } finally {
+        if (isMounted.current) {
+          timeoutRef.current = setTimeout(poll, 5_000);
+        }
+      }
+    };
+
     !pageData && getAssessment();
+    pageData && poll();
 
     return () => {
       controller.abort();
+      isMounted.current = false;
+      timeoutRef.current && clearTimeout(timeoutRef.current);
+      abortRef.current?.abort();
     };
-  }, [session]);
+  }, [session, pageData]);
 
   return (
     <>
@@ -214,15 +283,32 @@ const Page = ({ id }: { id: string }) => {
                       </div>
                     </div>
 
-                    {/* Submit Button */}
-                    <div className="w-42">
-                      <Button
-                        type="button"
-                        onClick={() => setShowEndExam(true)}
-                        title="Submit Exam"
-                        loading={loading == "submitTest"}
-                        variant="fill"
-                      />
+                    <div className="flex items-center gap-2">
+                      {/* Update Status */}
+                      <div className="border h-10 w-38 text-sm flex text-theme-gray items-center justify-center gap-2 rounded-md">
+                        {loading === "poll" ? (
+                          <>
+                            <Spinner className="h-4" />
+                            <span>Saving Progress</span>
+                          </>
+                        ) : (
+                          <>
+                            <CloudCheck size={16} />
+                            <span>Progress Saved</span>
+                          </>
+                        )}
+                      </div>
+
+                      {/* Submit Button */}
+                      <div className="w-42">
+                        <Button
+                          type="button"
+                          onClick={() => setShowEndExam(true)}
+                          title="Submit Exam"
+                          loading={loading == "submitTest"}
+                          variant="fill"
+                        />
+                      </div>
                     </div>
                   </div>
                   <Spacer size="xl" />
@@ -439,7 +525,12 @@ const Page = ({ id }: { id: string }) => {
                     </div>
                     <div className="text-xl font-extrabold leading-none">
                       <Counter
-                        durationInSeconds={Number(pageData.timeLimit * 60)}
+                        durationInSeconds={
+                          examDurationRef.current !== null &&
+                          examDurationRef.current !== 0
+                            ? examDurationRef.current
+                            : Number(pageData.timeLimit * 60)
+                        }
                         onComplete={handleTimeUp}
                         timeLeftParams={{ timeLeftX, setTimeLeftX }}
                       />

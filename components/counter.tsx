@@ -29,7 +29,7 @@ export default function CountdownTimer({
   };
 }) {
   const [timeLeft, setTimeLeft] = useState(0);
-  const { timeLeftX, setTimeLeftX } = timeLeftParams;
+  const { setTimeLeftX } = timeLeftParams;
   const endTimestampRef = useRef<number>(null);
 
   // useEffect(() => {
@@ -90,7 +90,7 @@ export default function CountdownTimer({
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [durationInSeconds]);
+  }, [durationInSeconds, onComplete]);
 
   const { hours, minutes, seconds } = formatTime(timeLeft);
 

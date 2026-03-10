@@ -1,4 +1,4 @@
-name: Build & Push Deployment Image (cbt-server)
+name: Build & Push Deployment Image (cbt-student)
 
 on:
   push:

@@ -168,7 +168,8 @@ const Page = ({ id }: { id: string }) => {
         });
 
         // Draft request successfull
-        if (draftRes.status === 200) {
+        let answeredQuestions: any;
+        if (draftRes.status == 200) {
           if (draftRes?.data?.data?.draft) {
             examDurationRef.current = draftRes?.data?.data?.draft?.timeLeft;
             const formatted = draftRes?.data?.data?.draft?.data.reduce(
@@ -183,6 +184,7 @@ const Page = ({ id }: { id: string }) => {
               {}
             );
 
+            answeredQuestions = formatted;
             setAnswers(formatted);
           }
         }
@@ -198,6 +200,22 @@ const Page = ({ id }: { id: string }) => {
               },
               []
             );
+
+            if (answeredQuestions) {
+              const { answered, unanswered } = allQst.reduce(
+                (acc: any, q: any) => {
+                  if (answeredQuestions[q._id]) {
+                    acc.answered.push(q);
+                  } else {
+                    acc.unanswered.push(q);
+                  }
+                  return acc;
+                },
+                { answered: [], unanswered: [] }
+              );
+
+              return [...answered, ...shuffleArray(unanswered)];
+            }
 
             return shuffleArray(allQst);
           });

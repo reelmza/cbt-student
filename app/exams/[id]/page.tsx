@@ -65,6 +65,10 @@ const Page = ({ id }: { id: string }) => {
   const isMounted = useRef(true);
   const examDurationRef = useRef<number | null>(null);
 
+  // Key press
+  const questionsRef = useRef(questions);
+  const activeQuestionRef = useRef(activeQuestion);
+
   // Split Subjective
   const parts = (text: string) => {
     return text.split(/(\[\d+\])/g);
@@ -147,6 +151,11 @@ const Page = ({ id }: { id: string }) => {
     setShowTimeUp(true);
     submitTest();
   };
+
+  useEffect(() => {
+    questionsRef.current = questions;
+    activeQuestionRef.current = activeQuestion;
+  }, [questions, activeQuestion]);
 
   // Keep ref updated for polling
   useEffect(() => {
@@ -275,14 +284,46 @@ const Page = ({ id }: { id: string }) => {
       }
     };
 
+    // Keyboard downn
+    const handleKeyDown = (event: KeyboardEvent) => {
+      let key = event.key;
+
+      // Handle arrow keys
+      if (key === "ArrowRight") return nextQuestion();
+      if (key === "ArrowLeft") return prevQuestion();
+
+      const qs = questionsRef.current;
+      const index: number = activeQuestionRef.current;
+
+      if (!qs) return;
+      const q = qs[index];
+
+      // Handle option keys
+      if (["A", "B", "C", "D", "a", "b", "c", "d"].includes(key)) {
+        if (!questions) return;
+        setAnswers((prev) => {
+          return {
+            ...prev,
+            [q._id]: {
+              question: q._id,
+              type: q.type,
+              selectedOption: key.toUpperCase(),
+            },
+          };
+        });
+      }
+    };
+
     !pageData && getAssessment();
     pageData && poll();
+    window.addEventListener("keydown", handleKeyDown);
 
     return () => {
       controller.abort();
       isMounted.current = false;
       timeoutRef.current && clearTimeout(timeoutRef.current);
       abortRef.current?.abort();
+      window.removeEventListener("keydown", handleKeyDown);
     };
   }, [session, pageData]);
 

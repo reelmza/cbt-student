@@ -24,8 +24,8 @@ export default function CountdownTimer({
   durationInSeconds: number;
   onComplete?: () => void;
   timeLeftParams: {
-    timeLeftX: number;
-    setTimeLeftX: Dispatch<SetStateAction<number>>;
+    timeLeftX: number | null;
+    setTimeLeftX: Dispatch<SetStateAction<number | null>>;
   };
 }) {
   const [timeLeft, setTimeLeft] = useState(0);

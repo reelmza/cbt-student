@@ -55,7 +55,7 @@ const Page = ({ id }: { id: string }) => {
   const [showTimeUp, setShowTimeUp] = useState(false);
   const [showExamClosed, setShowExamClosed] = useState(false);
 
-  const [timeLeftX, setTimeLeftX] = useState(0);
+  const [timeLeftX, setTimeLeftX] = useState<number | null>(null);
 
   // Poll
   const latestDataRef = useRef({ answers, timeLeft: timeLeftX });
@@ -133,7 +133,9 @@ const Page = ({ id }: { id: string }) => {
         if (error?.message) {
           console.log(error?.response?.data?.message);
           if (error?.response?.status) {
-            setShowExamClosed(true);
+            if (error?.response?.data?.message?.includes("ended")) {
+              setShowExamClosed(true);
+            }
           }
         }
       }
@@ -231,8 +233,13 @@ const Page = ({ id }: { id: string }) => {
 
         attachHeaders(session!.user!.token);
 
-        if (Object.values(latestDataRef.current.answers).length < 1) {
-          console.log("No data");
+        if (
+          Object.values(latestDataRef.current.answers).length < 1 ||
+          latestDataRef.current.timeLeft === null
+        ) {
+          console.log(
+            "Draft Save Cancelled: No data to save, Time not reading yet or time expired."
+          );
         } else {
           await localAxios.post(`assessment/submit-draft/${id}`, formData, {
             signal: abortRef.current.signal,
@@ -245,7 +252,7 @@ const Page = ({ id }: { id: string }) => {
         }
       } finally {
         if (isMounted.current) {
-          timeoutRef.current = setTimeout(poll, 40_000);
+          timeoutRef.current = setTimeout(poll, 10_000);
         }
       }
     };

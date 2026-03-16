@@ -28,14 +28,6 @@ const Page = () => {
   useEffect(() => {
     if (!session) return;
 
-    // Remove key if auto submit
-    // Happens on redirect from auto submitted exam
-    // const time = localStorage.getItem(STORAGE_KEY);
-    // if (time === "auto_submit") {
-    //   localStorage.removeItem(STORAGE_KEY);
-    //   console.log(localStorage.getItem(STORAGE_KEY));
-    // }
-
     const getAssessments = async () => {
       try {
         attachHeaders(session!.user!.token);

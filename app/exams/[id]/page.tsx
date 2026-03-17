@@ -58,6 +58,7 @@ const Page = ({ id }: { id: string }) => {
   const [timeLeftX, setTimeLeftX] = useState<number | null>(null);
 
   // Poll
+  const lastSavedRef = useRef<string | null>(null);
   const latestDataRef = useRef({ answers, timeLeft: timeLeftX });
 
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -268,9 +269,15 @@ const Page = ({ id }: { id: string }) => {
             "Draft Save Cancelled: No data to save, Time not reading yet or time expired."
           );
         } else {
-          await localAxios.post(`assessment/submit-draft/${id}`, formData, {
-            signal: abortRef.current.signal,
-          });
+          const res = await localAxios.post(
+            `assessment/submit-draft/${id}`,
+            formData,
+            {
+              signal: abortRef.current.signal,
+            }
+          );
+
+          lastSavedRef.current = res?.data?.data?.lastSync;
         }
         setLoading(null);
       } catch (err: any) {
@@ -279,7 +286,7 @@ const Page = ({ id }: { id: string }) => {
         }
       } finally {
         if (isMounted.current) {
-          timeoutRef.current = setTimeout(poll, 10_000);
+          timeoutRef.current = setTimeout(poll, 40_000);
         }
       }
     };
@@ -351,18 +358,15 @@ const Page = ({ id }: { id: string }) => {
 
                     <div className="flex items-center gap-2">
                       {/* Update Status */}
-                      <div className="border h-10 w-38 text-sm flex text-theme-gray items-center justify-center gap-2 rounded-md">
-                        {loading === "poll" ? (
-                          <>
-                            <Spinner className="h-4" />
-                            <span>Saving Progress</span>
-                          </>
-                        ) : (
-                          <>
-                            <CloudCheck size={16} />
-                            <span>Progress Saved</span>
-                          </>
-                        )}
+                      <div className="border h-10 w-48 text-sm flex items-center text-theme-gray justify-center gap-2 rounded-md">
+                        <CloudCheck size={20} className="mb-0.5" />
+                        <span>
+                          Saved
+                          {lastSavedRef.current
+                            ? " at : " +
+                              lastSavedRef.current?.split("T")[1].split(".")[0]
+                            : ""}
+                        </span>
                       </div>
 
                       {/* Submit Button */}

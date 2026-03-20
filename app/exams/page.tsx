@@ -9,7 +9,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import emptyClipboard from "@/public/images/illustrations/empty_clipboard.svg";
-// const STORAGE_KEY = "countdown_end_time";
+
 const Page = () => {
   const controller = new AbortController();
   const { data: session } = useSession();
@@ -116,6 +116,7 @@ const Page = () => {
                   alt="Profile photo"
                   height={250}
                   width={250}
+                  unoptimized
                 />
               )}
             </div>
@@ -164,7 +165,7 @@ const Page = () => {
             </div>
 
             <div className="text-accent-dim font-light">
-              If this not true please conatact the nearest admin
+              If this not true please contact the nearest admin
             </div>
           </div>
 

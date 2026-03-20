@@ -153,6 +153,11 @@ const Page = ({ id }: { id: string }) => {
     submitTest();
   };
 
+  // Unfocus radio buttons to avoid auto-select option on arrow key next
+  const handleRadioFocus = () => {
+    (document.activeElement as HTMLElement)?.blur();
+  };
+
   useEffect(() => {
     questionsRef.current = questions;
     activeQuestionRef.current = activeQuestion;
@@ -296,8 +301,12 @@ const Page = ({ id }: { id: string }) => {
       let key = event.key;
 
       // Handle arrow keys
-      if (key === "ArrowRight") return nextQuestion();
-      if (key === "ArrowLeft") return prevQuestion();
+      if (key === "ArrowRight") {
+        return nextQuestion();
+      }
+      if (key === "ArrowLeft") {
+        return prevQuestion();
+      }
 
       const qs = questionsRef.current;
       const index: number = activeQuestionRef.current;
@@ -363,8 +372,12 @@ const Page = ({ id }: { id: string }) => {
                         <span>
                           Saved
                           {lastSavedRef.current
-                            ? " at : " +
-                              lastSavedRef.current?.split("T")[1].split(".")[0]
+                            ? " (" +
+                              lastSavedRef.current
+                                ?.split("T")[1]
+                                .split(".")[0]
+                                .slice(0, -3) +
+                              ")"
                             : ""}
                         </span>
                       </div>
@@ -496,6 +509,7 @@ const Page = ({ id }: { id: string }) => {
                           };
                         })
                       }
+                      onFocus={handleRadioFocus} // prevent auto-select answer on arrow navigation
                     >
                       {questions[activeQuestion].options.map(
                         (opt: any, key: number) => {

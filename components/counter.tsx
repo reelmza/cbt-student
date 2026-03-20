@@ -1,6 +1,7 @@
 "use client";
 
 import { Dispatch, SetStateAction, useEffect, useRef, useState } from "react";
+import { toast } from "sonner";
 
 const STORAGE_KEY = "countdown_end_time";
 
@@ -82,6 +83,18 @@ export default function CountdownTimer({
 
       setTimeLeft(remainingSeconds);
       setTimeLeftX(remainingSeconds);
+
+      if (remainingSeconds === 120) {
+        toast.info("You have Two (2) minute remaining", {
+          position: "top-right",
+        });
+      }
+
+      if (remainingSeconds === 60) {
+        toast.info("You have One (1) minute remaining", {
+          position: "top-right",
+        });
+      }
 
       if (remainingSeconds === 0) {
         clearInterval(interval);

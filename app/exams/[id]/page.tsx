@@ -29,7 +29,7 @@ import {
 } from "lucide-react";
 import { SessionProvider, useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { use, useCallback, useEffect, useRef, useState } from "react";
+import { use, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import Image from "next/image";
 
@@ -669,7 +669,8 @@ const Page = ({ id }: { id: string }) => {
               {/* Questions Overview */}
               <div className="absolute top-0 -left-[20vw] w-[20vw] mt-32 p-5">
                 <div className="text-sm text-accent-dim">
-                  Answered Questions
+                  Answered Questions{" "}
+                  {`(${Object.keys(answers).length}/${questions.length})`}
                 </div>
                 <Spacer size="sm" />
                 <div className=" bg-reds-100 flex flex-wrap gap-2 overflow-y-scroll max-h-[60vh]">
@@ -677,11 +678,20 @@ const Page = ({ id }: { id: string }) => {
                     <button
                       type="button"
                       key={key}
-                      className={`h-5 w-5  flex items-center justify-center text-xs font-semibold   ${
-                        answers[`${qst._id}`]
-                          ? "bg-accent-dim text-white"
-                          : "border border-accent-light text-accent"
-                      } rounded-sm cursor-pointer`}
+                      className={`h-5 w-5  flex items-center justify-center text-xs font-semibold
+                                               
+                          ${
+                            answers[`${qst._id}`] && key !== activeQuestion
+                              ? "bg-accent-dim text-white"
+                              : "border border-dashed border-accent-light text-accent"
+                          } 
+                              
+                           ${
+                             activeQuestion === key
+                               ? "border border-theme-success bg-transparent text-theme-success"
+                               : ""
+                           }
+                            rounded-sm cursor-pointer`}
                       onClick={() => setActiveQuestion(key)}
                     >
                       {key + 1}

@@ -32,6 +32,7 @@ import { useRouter } from "next/navigation";
 import { use, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import Image from "next/image";
+import { SecurityMonitor } from "@/components/security-monitor";
 
 const Page = ({ id }: { id: string }) => {
   const controller = new AbortController();
@@ -346,7 +347,19 @@ const Page = ({ id }: { id: string }) => {
   return (
     <>
       {pageData && questions && (
-        <>
+        <SecurityMonitor
+          maxViolations={5}
+          disableRightClick
+          disableClipboard
+          onViolation={(v) => console.log(v)}
+          blockOn={[
+            "TAB_SWITCH",
+            "KEYBOARD_SHORTCUT",
+            "COPY",
+            "CUT",
+            "FULLSCREEN_EXIT",
+          ]}
+        >
           {!assSubmited && (
             <div className="relative grow grid grid-cols-12 min-h-full px-10 font-sans">
               {/* Main Bar */}
@@ -896,7 +909,7 @@ const Page = ({ id }: { id: string }) => {
               </div>
             </div>
           )}
-        </>
+        </SecurityMonitor>
       )}
 
       {/* Page Loading */}

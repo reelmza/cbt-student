@@ -9,6 +9,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import emptyClipboard from "@/public/images/illustrations/empty_clipboard.svg";
+import { SecurityMonitor } from "@/components/security-monitor";
 
 const Page = () => {
   const controller = new AbortController();

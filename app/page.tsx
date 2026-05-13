@@ -2,10 +2,10 @@
 import Button from "@/components/button";
 import Input from "@/components/input";
 import SideBox from "@/components/sections/side-box";
+import { SecurityMonitor } from "@/components/security-monitor";
 import Spacer from "@/components/spacer";
 import { Key, MoveRight, UserRound } from "lucide-react";
 import { signIn } from "next-auth/react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";

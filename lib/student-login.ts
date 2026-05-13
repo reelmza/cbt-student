@@ -24,7 +24,6 @@ export const studentLogin: (
       }
     );
 
-    console.log(targetUser);
     // Check if user exist
     if (targetUser.status === 422 || targetUser.status === 400) {
       return user;

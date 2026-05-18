@@ -239,10 +239,18 @@ const Page = ({ id }: { id: string }) => {
                 { answered: [], unanswered: [] }
               );
 
-              return [...answered, ...shuffleArray(unanswered)];
+              if (!pageData?.shuffleQuestions) {
+                return [...answered, ...unanswered];
+              } else {
+                return [...answered, ...shuffleArray(unanswered)];
+              }
             }
 
-            return shuffleArray(allQst);
+            if (!pageData?.shuffleQuestions) {
+              return allQst;
+            } else {
+              return shuffleArray(allQst);
+            }
           });
 
           setLoading(null);

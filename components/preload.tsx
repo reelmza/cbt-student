@@ -70,7 +70,7 @@ const Preload = ({
 
   return (
     <div className="grow h-full">
-      {loading === "page" && (
+      {loading === "page" && !pageData && (
         <div style={styles.wrap}>
           <div style={styles.spinner} />
           <span style={styles.text}>Loading…</span>

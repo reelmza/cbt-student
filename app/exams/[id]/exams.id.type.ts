@@ -24,4 +24,5 @@ type PageDataType = {
   title: string;
   course: { title: string };
   totalMarks: string;
+  shuffleQuestions: boolean;
 };

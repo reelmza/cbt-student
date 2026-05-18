@@ -9,7 +9,8 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import emptyClipboard from "@/public/images/illustrations/empty_clipboard.svg";
-import { SecurityMonitor } from "@/components/security-monitor";
+import restMan from "@/public/images/illustrations/rest_man.svg";
+import Preload from "@/components/preload";
 
 const Page = () => {
   const controller = new AbortController();
@@ -61,8 +62,8 @@ const Page = () => {
       {pageData && pageData.length > 0 && (
         <div className="grow grid grid-cols-12 min-h-full p-10 font-sans">
           <div className="col-span-9">
-            <div className="text-accent font-semibold text-xl">
-              Exams Available
+            <div className="text-foreground font-semibold text-2xl font-serif">
+              Scheduled Exams
             </div>
             <Spacer size="md" />
 
@@ -77,7 +78,9 @@ const Page = () => {
                   >
                     <div className="w-full border rounded-md shadow-lg shadow-theme-gray-light/50 p-5">
                       {/* Exam Title and Code */}
-                      <div className="text-2xl font-semibold">{ex.title}</div>
+                      <div className="text-2xl font-semibold font-serif">
+                        {ex.title}
+                      </div>
                       <div className="text-theme-gray group-hover:text-accent">
                         {ex.course.title}
                       </div>
@@ -104,7 +107,7 @@ const Page = () => {
           <div className="col-span-3 flex flex-col pl-5 pt-10 -mr-5 border-l">
             {/* User details */}
             {/* Profile Picture */}
-            <div className="h-62.5 w-62.5 flex items-center justify-center self-center bg-theme-gray-light rounded-md overflow-hidden">
+            <div className="h-62.5 w-62.5 flex items-center justify-center self-center bg-theme-gray-light  overflow-hidden">
               {!session?.user?.passportPhoto ? (
                 <User2
                   size={200}
@@ -153,20 +156,21 @@ const Page = () => {
         <div className="grow grid grid-cols-12 min-h-full p-10 font-sans">
           <div className="col-span-9 flex flex-col items-center justify-center">
             <Image
-              src={emptyClipboard}
+              src={restMan}
               alt="Empty Exams"
-              height={320}
-              width={320}
+              height={280}
               className="-ml-10"
             />
             <Spacer size="xl" />
 
-            <div className="text-accent-dim text-2xl font-semibold">
-              You have no exams due at the moment
+            <div className="text-accesnt-dim text-3xl font-bold font-serif">
+              No Exams Scheduled
             </div>
+            <Spacer size="sm" />
 
-            <div className="text-accent-dim font-light">
-              If this not true please contact the nearest admin
+            <div className="w-2/3 text-center text-theme-gray">
+              You have written all your exams or no exams have been scheduled
+              for you yet, if this is not true, contact the nearest admin.
             </div>
           </div>
 
@@ -217,24 +221,7 @@ const Page = () => {
         </div>
       )}
 
-      {/* Page Loading */}
-      {!pageData && loading == "page" && (
-        <div className="grow min-h-full p-10 font-sans">
-          <div className="flex items-center gap-2 ">
-            <Spinner />
-            <div>Fetching Courses</div>
-          </div>
-        </div>
-      )}
-
-      {/* Error */}
-      {!pageData && loading == "pageError" && (
-        <div className="grow min-h-full p-10 font-sans">
-          <div>
-            <div>An error occured please refresh the page.</div>
-          </div>
-        </div>
-      )}
+      <Preload loading={loading} pageData={pageData ? true : false} />
     </>
   );
 };

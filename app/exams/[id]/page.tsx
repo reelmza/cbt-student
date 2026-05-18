@@ -33,6 +33,7 @@ import { use, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import Image from "next/image";
 import { SecurityMonitor } from "@/components/security-monitor";
+import Preload from "@/components/preload";
 
 const Page = ({ id }: { id: string }) => {
   const controller = new AbortController();
@@ -193,7 +194,15 @@ const Page = ({ id }: { id: string }) => {
                 acc[item.question] = {
                   question: item.question,
                   type: item.type,
-                  selectedOption: item.selectedOption,
+                  ...(item.selectedOption && {
+                    selectedOption: item.selectedOption,
+                  }),
+                  ...(item.theoryAnswer && {
+                    theoryAnswer: item.theoryAnswer,
+                  }),
+                  ...(item.subjectiveAnswers && {
+                    subjectiveAnswers: item.subjectiveAnswers,
+                  }),
                 };
                 return acc;
               },
@@ -245,6 +254,10 @@ const Page = ({ id }: { id: string }) => {
           }
           setLoading("pageError");
           console.log(error);
+        }
+
+        if (error.name === "AxiosError") {
+          setPageError(`An error has occured$${error.response.data.message}`);
         }
       }
     };
@@ -299,6 +312,11 @@ const Page = ({ id }: { id: string }) => {
 
     // Keyboard downn
     const handleKeyDown = (event: KeyboardEvent) => {
+      const tag = (document.activeElement as HTMLElement)?.tagName;
+
+      // Don't intercept keypresses when the user is typing in a field
+      if (tag === "TEXTAREA" || tag === "INPUT") return;
+
       let key = event.key;
 
       // Handle arrow keys
@@ -411,7 +429,7 @@ const Page = ({ id }: { id: string }) => {
 
                   {/* Question */}
                   <div className="min-h-24">
-                    {/* Objective and Subjective Quesion */}
+                    {/* Objective and Subjective Question */}
                     {questions[activeQuestion]?.type !== "subjective" && (
                       <div className="flex">
                         {/* Question Number */}
@@ -458,7 +476,7 @@ const Page = ({ id }: { id: string }) => {
                                           ? [...prevEntry.subjectiveAnswers]
                                           : [];
 
-                                      // Compensate for ghost index inbwtween caused by spliting
+                                      // Compensate for ghost index in between caused by spliting
                                       if (index < 3) {
                                         updatedSlots[index - 1] = {
                                           slotNumber: index,
@@ -485,7 +503,7 @@ const Page = ({ id }: { id: string }) => {
                                     })
                                   }
                                   style={{
-                                    width: "80px",
+                                    width: "180px",
                                     margin: "0 5px",
                                     border: "none",
                                     borderBottom: "1px solid black",
@@ -912,24 +930,11 @@ const Page = ({ id }: { id: string }) => {
         </SecurityMonitor>
       )}
 
-      {/* Page Loading */}
-      {!pageData && loading == "page" && (
-        <div className="grow min-h-full p-10 font-sans">
-          <div className="flex items-center gap-2 ">
-            <Spinner />
-            <div>Getting Questions</div>
-          </div>
-        </div>
-      )}
-
-      {/* Unhadled Error Error */}
-      {!pageData && loading == "pageError" && (
-        <div className="grow min-h-full p-10 font-sans">
-          <div>
-            <div>{pageError || "An error occured please refresh the page"}</div>
-          </div>
-        </div>
-      )}
+      <Preload
+        loading={loading}
+        pageData={pageData ? true : false}
+        errorMessage={pageError}
+      />
     </>
   );
 };

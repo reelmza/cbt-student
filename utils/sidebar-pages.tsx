@@ -1,4 +1,4 @@
-import { School } from "lucide-react";
+import { Building2Icon } from "lucide-react";
 import { JSX } from "react";
 
 type SideBarStructure = {
@@ -15,9 +15,9 @@ type SideBarPageType = {
 };
 export const sideBarPages: SideBarPageType[] = [
   {
-    name: "Exams",
+    name: "Examinations",
     route: "/exams",
-    icon: <School size={20} strokeWidth={1.5} />,
+    icon: <Building2Icon size={20} strokeWidth={1.5} />,
   },
   // {
   //   name: "Users",

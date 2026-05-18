@@ -1,5 +1,6 @@
 "use client";
 import Button from "@/components/button";
+import Preload from "@/components/preload";
 
 import Spacer from "@/components/spacer";
 
@@ -60,12 +61,14 @@ const Page = ({ id }: { id: string }) => {
   return (
     <>
       {!loading && (
-        <div className="relative grow min-h-full p-10 font-sans">
+        <div className="relative grow min-h-full px-10 py-7 font-sans">
           {/* Heading & Submit */}
           <div className="h-14 w-fit flex items-center justify-between gap-5 border-b">
             {/* Heading */}
             <div className="grow">
-              <div className="text-xl font-semibold">{pageData?.title}</div>
+              <div className="text-2xl font-semibold font-serif">
+                {pageData?.title}
+              </div>
               <div className="text-theme-gray text-sm">
                 {pageData?.course?.title}
               </div>
@@ -74,7 +77,7 @@ const Page = ({ id }: { id: string }) => {
           <Spacer size="sm" />
 
           {/* Instruction brief */}
-          <div className="w-6/10">
+          <div className="w-6/10 font-normal">
             Please read all instructions carefully before attempting exams, you
             can find all relevant information regarding this assessment below.
             Goodluck.
@@ -152,24 +155,7 @@ const Page = ({ id }: { id: string }) => {
         </div>
       )}
 
-      {/* Page Loading */}
-      {!pageData && loading == "page" && (
-        <div className="grow min-h-full p-10 font-sans">
-          <div className="flex items-center gap-2 ">
-            <Spinner />
-            <div>Getting Exam Information</div>
-          </div>
-        </div>
-      )}
-
-      {/* Unhadled Error Error */}
-      {!pageData && loading == "pageError" && (
-        <div className="grow min-h-full p-10 font-sans">
-          <div>
-            <div>{pageError || "An error occured please refresh the page"}</div>
-          </div>
-        </div>
-      )}
+      <Preload loading={loading} pageData={pageData ? true : false} />
     </>
   );
 };

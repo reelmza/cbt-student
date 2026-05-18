@@ -81,23 +81,23 @@ export function SecurityMonitor({
 
             <p className="text-xs font-medium text-red-600 dark:text-red-400">
               {violations.length} violation{violations.length !== 1 ? "s" : ""}{" "}
-              recorded this session
+              recorded
             </p>
 
             {handleDismiss && (
               <div className="flex flex-col gap-2 pt-2">
                 <button
                   onClick={handleDismiss}
-                  className="w-full py-2 px-4 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors"
+                  className="w-full py-2 px-4 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors cursor-pointer"
                 >
                   Acknowledge &amp; Continue
                 </button>
-                <button
+                {/* <button
                   onClick={reset}
                   className="w-full py-2 px-4 border border-gray-200 dark:border-neutral-700 text-sm text-gray-500 dark:text-gray-400 rounded-lg hover:bg-gray-50 dark:hover:bg-neutral-800 transition-colors"
                 >
                   Reset session
-                </button>
+                </button> */}
               </div>
             )}
           </div>

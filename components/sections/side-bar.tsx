@@ -22,12 +22,20 @@ const SideBar = () => {
   return (
     <div className="flex flex-col w-2/10 h-full shrink-0 border-r border-neutral-200 bg-background py-10 px-5 font-sans">
       <div className="h-fit">
-        <h1 className="font-bold text-xl text-accent font-sans">EBSU CBT</h1>
+        <h1 className="font-bold text-2xl text-accent font-serif">
+          Oayastech C.B.T
+        </h1>
         <Spacer size="md" />
       </div>
 
       {/* Sidebar Links */}
-      <ul className="grow flex flex-col gap-y-2 w-full">
+      <ul
+        className={`grow flex flex-col gap-y-2 w-full ${
+          path.includes("/exams") && path.length > 10
+            ? "pointer-events-none"
+            : ""
+        }`}
+      >
         {sideBarPages.map((item, key) => (
           <li key={key} className={`w-full h-fit`}>
             {/* Main Link */}
@@ -35,12 +43,12 @@ const SideBar = () => {
               href={item.route}
               className={`h-10 flex items-center w-full gap-2 text-sm px-2 ${
                 path.includes(item.route)
-                  ? "bg-accent-light text-accent font-semibold hover:bg-accent-light/70"
+                  ? "border-l-4 border-accent bg-accent/2 text-accent font-semibold hover:bg-accent-light/70"
                   : "text-theme-gray hover:bg-theme-gray-light"
-              } rounded-md animate-all duration-200 ease-in`}
+              } `}
             >
               {item.icon}
-              <span>{item.name}</span>
+              <span className="font-medium">{item.name}</span>
             </Link>
 
             {/* Link Children */}
@@ -59,7 +67,7 @@ const SideBar = () => {
                     {itemChild?.icon}
                     <span>{itemChild.name}</span>
 
-                    <div className="absolute -left-4 h-[1px] w-2"></div>
+                    <div className="absolute -left-4 h-px w-2"></div>
                   </Link>
                 ))}
               </div>
@@ -71,7 +79,11 @@ const SideBar = () => {
       </ul>
 
       <button
-        className="shrink-0 flex items-center gap-2 px-2 rounded-md h-10 w-full hover:bg-theme-gray-light cursor-pointer text-sm"
+        className={`shrink-0 flex items-center gap-2 px-2 rounded-md h-10 w-full hover:bg-theme-gray-light cursor-pointer text-sm ${
+          path.includes("/exams") && path.length > 10
+            ? "pointer-events-none"
+            : ""
+        }`}
         onClick={() => {
           localStorage.removeItem("countdown_end_time");
           signOut({ redirectTo: "/" });

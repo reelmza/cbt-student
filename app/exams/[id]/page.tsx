@@ -357,9 +357,28 @@ const Page = ({ id }: { id: string }) => {
       }
     };
 
+    // Handle leaving exams by mistake
+    // Handles tab close, refresh, browser back
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      e.preventDefault();
+    };
+
+    // Handles browser back/forward button
+    const handlePopState = () => {
+      const confirmed = window.confirm(
+        "Are you sure you want to leave? Your exam progress may be lost."
+      );
+      if (!confirmed) window.history.pushState(null, "", window.location.href);
+    };
+
+    // Push a history entry so popstate fires on back navigation
+    window.history.pushState(null, "", window.location.href);
+
     !pageData && getAssessment();
     pageData && poll();
     window.addEventListener("keydown", handleKeyDown);
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    window.addEventListener("popstate", handlePopState);
 
     return () => {
       controller.abort();
@@ -367,6 +386,8 @@ const Page = ({ id }: { id: string }) => {
       timeoutRef.current && clearTimeout(timeoutRef.current);
       abortRef.current?.abort();
       window.removeEventListener("keydown", handleKeyDown);
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+      window.removeEventListener("popstate", handlePopState);
     };
   }, [session, pageData]);
 

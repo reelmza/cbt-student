@@ -28,9 +28,8 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${inter.variable} ${noto.variable} antialiased`}>
-        <div className="flex flex-col  lg:flex-row items-center justify-center h-full w-full">
+        <div className="flex flex-col lg:flex-row items-center justify-center h-full w-full">
           <SideBar />
-
           {children}
         </div>
         <Toaster />

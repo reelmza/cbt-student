@@ -60,9 +60,47 @@ const Page = () => {
   return (
     <>
       {pageData && pageData.length > 0 && (
-        <div className="grow grid grid-cols-12 min-h-full p-10 font-sans">
-          <div className="col-span-12 lg:col-span-9 flex flex-col lg:items-centers justify-start">
-            <div className="text-foreground font-semibold text-2xl font-serif">
+        <div className="grow w-full flex flex-col lg:grid grid-cols-12 min-h-full p-4 sm:p-6 lg:p-10 mx-0 font-sans">
+          {/* Mobile profile header — hidden on desktop where sidebar takes over */}
+          <div className="col-span-12 lg:hidden flex items-center gap-4 mb-2 pb-4 border-b h-fit">
+            <div className="size-14 rounded-full bg-theme-gray-light overflow-hidden shrink-0 flex items-center justify-center">
+              {!session?.user?.passportPhoto ? (
+                <User2
+                  size={60}
+                  strokeWidth={0.5}
+                  className="text-theme-gray-mid"
+                />
+              ) : (
+                <Image
+                  src={session?.user?.passportPhoto}
+                  alt="Profile photo"
+                  height={56}
+                  width={56}
+                  className="object-cover w-full h-full"
+                />
+              )}
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="font-semibold truncate">
+                {session?.user?.fullName}
+              </div>
+              <div className="text-sm text-theme-gray">
+                {session?.user?.regNumber} | {session?.user?.level} Level
+              </div>
+            </div>
+            <button
+              className="shrink-0 flex items-center justify-center text-sm bg-theme-gray-light hover:bg-theme-gray-mid  size-10  rounded-lg cursor-pointer"
+              onClick={() => {
+                localStorage.removeItem("countdown_end_time");
+                signOut({ redirectTo: "/" });
+              }}
+            >
+              <LogOut size={14} />
+            </button>
+          </div>
+
+          <div className="col-span-12 lg:col-span-9 flex flex-col lg:itemss-center justify-start h-fit">
+            <div className="text-foreground font-semibold text-2xl font-serif text-left">
               Scheduled Exams
             </div>
             <Spacer size="md" />
@@ -104,7 +142,7 @@ const Page = () => {
           </div>
 
           {/* SideBar */}
-          <div className="col-span-12 lg:col-span-3 flex flex-wrap items-start gap-4 lg:flex-col lg:pl-5 lg:pt-10 lg:-mr-5 lg:border-l h-fit">
+          <div className="col-span-12 lg:col-span-3 hidden lg:flex flex-wrap items-start gap-4 lg:flex-col lg:pl-5 lg:pt-10 lg:-mr-5 lg:border-l h-fit">
             {/* Profile Picture */}
             <div className="h-22 lg:h-62.5 w-22 lg:w-62.5 flex items-center justify-center lg:self-center bg-theme-gray-light rounded-full lg:rounded-md overflow-hidden shrink-0 lg:mb-10">
               {!session?.user?.passportPhoto ? (
@@ -149,17 +187,6 @@ const Page = () => {
                 <div>{session?.user?.level}</div>
               </div>
             </div>
-
-            <button
-              className={`shrink-0 flex lg:hidden items-center gap-2 px-2 rounded-md h-10 w-full hover:bg-theme-gray-light cursor-pointer text-sm bg-theme-gray-light mt-10`}
-              onClick={() => {
-                localStorage.removeItem("countdown_end_time");
-                signOut({ redirectTo: "/" });
-              }}
-            >
-              <LogOut size={16} />
-              <span>Logout</span>
-            </button>
           </div>
         </div>
       )}

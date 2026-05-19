@@ -386,7 +386,7 @@ const Page = ({ id }: { id: string }) => {
           {!assSubmited && (
             <div className="relative grow grid grid-cols-12 min-h-full px-4 sm:px-10 font-sans">
               {/* Main Bar */}
-              <div className="h-screen col-span-12 lg:col-span-9 flex flex-col justify-between lg:border-r lg:pr-5 pt-5 lg:pt-10">
+              <div className="h-full col-span-12 lg:col-span-9 flex flex-col justify-between lg:border-r lg:pr-5 pt-5 lg:pt-10">
                 {/* Upper Content */}
                 <div>
                   {/* Heading & Submit */}

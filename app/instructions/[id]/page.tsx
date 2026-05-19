@@ -61,12 +61,12 @@ const Page = ({ id }: { id: string }) => {
   return (
     <>
       {!loading && (
-        <div className="relative grow min-h-full px-10 py-7 font-sans">
+        <div className="relative grow min-h-full px-4 py-5 sm:px-10 sm:py-7 font-sans">
           {/* Heading & Submit */}
-          <div className="h-14 w-fit flex items-center justify-between gap-5 border-b">
+          <div className="w-fit flex items-start sm:items-center justify-between gap-5 border-b pb-3 sm:pb-0 sm:h-14">
             {/* Heading */}
             <div className="grow">
-              <div className="text-2xl font-semibold font-serif">
+              <div className="text-xl sm:text-2xl font-semibold font-serif leading-snug">
                 {pageData?.title}
               </div>
               <div className="text-theme-gray text-sm">
@@ -77,7 +77,7 @@ const Page = ({ id }: { id: string }) => {
           <Spacer size="sm" />
 
           {/* Instruction brief */}
-          <div className="w-6/10 font-normal">
+          <div className="w-full sm:w-6/10 font-normal text-sm sm:text-base">
             Please read all instructions carefully before attempting exams, you
             can find all relevant information regarding this assessment below.
             Goodluck.
@@ -87,51 +87,70 @@ const Page = ({ id }: { id: string }) => {
           {/* Instructions */}
           {pageData?.instruction.split(",").map((item, key) => {
             return (
-              <div key={key} className="ml-4 flex items-center gap-4 mb-2">
-                <CircleSmall size={14} />
-                <div> {item}</div>
+              <div
+                key={key}
+                className="ml-2 sm:ml-4 flex items-start gap-3 sm:gap-4 mb-2"
+              >
+                <CircleSmall size={14} className="mt-1 shrink-0" />
+                <div className="text-sm sm:text-base">{item}</div>
               </div>
             );
           })}
 
           {/* Exam details */}
-          <div className="w-6/10 pt-5">
+          <div className="w-full sm:w-6/10 pt-5">
             {/* Session */}
-            <div className="h-10 flex items-center border-x border-t border-accent-light overflow-hidden px-2 bg-accent-light">
-              <div className="w-42 font-semibold">Exam Session</div>
-              <div>{pageData?.session}</div>
+            <div className="min-h-10 flex items-center border-x border-t border-accent-light overflow-hidden px-2 py-2 bg-accent-light">
+              <div className="w-36 sm:w-42 shrink-0 font-semibold text-sm sm:text-base">
+                Exam Session
+              </div>
+              <div className="text-sm sm:text-base">{pageData?.session}</div>
             </div>
 
             {/* Semester */}
-            <div className="h-10 flex items-center border border-accent-light overflow-hidden px-2 ">
-              <div className="w-42 font-semibold">Exam Semester</div>
-              <div>
+            <div className="min-h-10 flex items-center border border-accent-light overflow-hidden px-2 py-2">
+              <div className="w-36 sm:w-42 shrink-0 font-semibold text-sm sm:text-base">
+                Exam Semester
+              </div>
+              <div className="text-sm sm:text-base">
                 {pageData?.term == 1 ? "First Semester" : "Second Semester"}
               </div>
             </div>
 
             {/* Time Allocated */}
-            <div className="h-10 flex items-center border-x border-t border-accent-light overflow-hidden px-2 bg-accent-light">
-              <div className="w-42 font-semibold">Time</div>
-              <div>{pageData?.timeLimit} Minutes</div>
+            <div className="min-h-10 flex items-center border-x border-t border-accent-light overflow-hidden px-2 py-2 bg-accent-light">
+              <div className="w-36 sm:w-42 shrink-0 font-semibold text-sm sm:text-base">
+                Time
+              </div>
+              <div className="text-sm sm:text-base">
+                {pageData?.timeLimit} Minutes
+              </div>
             </div>
 
             {/* Total Marks */}
-            <div className="h-10 flex items-center border border-accent-light overflow-hidden px-2 ">
-              <div className="w-42 font-semibold">Total Marks</div>
-              <div>{pageData?.totalMarks} Marks</div>
+            <div className="min-h-10 flex items-center border border-accent-light overflow-hidden px-2 py-2">
+              <div className="w-36 sm:w-42 shrink-0 font-semibold text-sm sm:text-base">
+                Total Marks
+              </div>
+              <div className="text-sm sm:text-base">
+                {pageData?.totalMarks} Marks
+              </div>
             </div>
 
             {/* Sections */}
-            <div className="h-10 flex items-center border-b border-x border-accent-light overflow-hidden px-2 bg-accent-light">
-              <div className="w-42 font-semibold">Total Sections</div>
-              <div>{pageData?.sections.length} Section(s)</div>
+            <div className="min-h-10 flex items-center border-b border-x border-accent-light overflow-hidden px-2 py-2 bg-accent-light">
+              <div className="w-36 sm:w-42 shrink-0 font-semibold text-sm sm:text-base">
+                Total Sections
+              </div>
+              <div className="text-sm sm:text-base">
+                {pageData?.sections.length} Section(s)
+              </div>
             </div>
             <Spacer size="lg" />
 
             {/* Buttons */}
-            <div className="flex items-center gap-4">
-              <div className="w-48">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4">
+              <div className="w-full sm:w-48">
                 <Button
                   title={"Go back to exams"}
                   loading={false}
@@ -139,7 +158,7 @@ const Page = ({ id }: { id: string }) => {
                   onClick={() => router.push("/exams")}
                 />
               </div>
-              <div className="w-48">
+              <div className="w-full sm:w-48">
                 <Button
                   title={"Proceed to exam"}
                   loading={false}

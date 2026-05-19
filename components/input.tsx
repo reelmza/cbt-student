@@ -39,7 +39,7 @@ const Input = ({
         type={type}
         placeholder={placeholder || "Some input"}
         required={required || true}
-        className="grow h-full text-sm outline-none px-3 text-accent-dim"
+        className="grow h-full text-base outline-none px-3 text-accent-dim"
         value={value}
         onChange={onChange}
       />

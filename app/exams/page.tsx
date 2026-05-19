@@ -193,7 +193,45 @@ const Page = () => {
 
       {/* No exams due */}
       {pageData && pageData.length < 1 && (
-        <div className="grow grid grid-cols-12 min-h-full p-10 font-sans">
+        <div className="grow w-full flex flex-col lg:grid grid-cols-12 min-h-full p-5 font-sans">
+          {/* Mobile profile header — hidden on desktop where sidebar takes over */}
+          <div className="col-span-12 lg:hidden flex items-center gap-4 mb-24 pb-4 border-b h-fit">
+            <div className="size-14 rounded-full bg-theme-gray-light overflow-hidden shrink-0 flex items-center justify-center">
+              {!session?.user?.passportPhoto ? (
+                <User2
+                  size={60}
+                  strokeWidth={0.5}
+                  className="text-theme-gray-mid"
+                />
+              ) : (
+                <Image
+                  src={session?.user?.passportPhoto}
+                  alt="Profile photo"
+                  height={56}
+                  width={56}
+                  className="object-cover w-full h-full"
+                />
+              )}
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="font-semibold truncate">
+                {session?.user?.fullName}
+              </div>
+              <div className="text-sm text-theme-gray">
+                {session?.user?.regNumber} | {session?.user?.level} Level
+              </div>
+            </div>
+            <button
+              className="shrink-0 flex items-center justify-center text-sm bg-theme-gray-light hover:bg-theme-gray-mid  size-10  rounded-lg cursor-pointer"
+              onClick={() => {
+                localStorage.removeItem("countdown_end_time");
+                signOut({ redirectTo: "/" });
+              }}
+            >
+              <LogOut size={14} />
+            </button>
+          </div>
+
           <div className="col-span-12 lg:col-span-9 flex flex-col items-center justify-center sm:mb-10">
             <Image
               src={restMan}
@@ -215,7 +253,7 @@ const Page = () => {
           </div>
 
           {/* SideBar */}
-          <div className="col-span-12 lg:col-span-3 flex flex-wrap items-start gap-4 lg:flex-col lg:pl-5 lg:pt-10 lg:-mr-5 lg:border-l h-fit">
+          <div className="col-span-12 lg:col-span-3 hidden lg:flex flex-wrap items-start gap-4 lg:flex-col lg:pl-5 lg:pt-10 lg:-mr-5 lg:border-l h-fit">
             {/* Profile Picture */}
             <div className="h-22 lg:h-62.5 w-22 lg:w-62.5 flex items-center justify-center lg:self-center bg-theme-gray-light rounded-full lg:rounded-md overflow-hidden shrink-0 lg:mb-10">
               {!session?.user?.passportPhoto ? (

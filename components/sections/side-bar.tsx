@@ -20,7 +20,7 @@ const SideBar = () => {
   }
 
   return (
-    <div className="flex flex-col w-2/10 h-full shrink-0 border-r border-neutral-200 bg-background py-10 px-5 font-sans">
+    <div className="hidden lg:flex flex-col w-2/10 h-full shrink-0 border-r border-neutral-200 bg-background py-10 px-5 font-sans">
       <div className="h-fit">
         <h1 className="font-bold text-2xl text-accent font-serif">
           Oayastech C.B.T

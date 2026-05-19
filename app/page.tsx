@@ -61,11 +61,11 @@ export default function Home() {
       <SideBox />
 
       {/* Form Box */}
-      <div className="col-span-6 flex flex-col justify-center items-center">
-        <div className="w-7/10 rounded-lg">
+      <div className="col-span-12 lg:col-span-6 flex flex-col justify-center items-center">
+        <div className="w-full px-5 lg:px-0 lg:w-7/10 rounded-lg">
           {/* School Name */}
           <div className="text-sm font-sans font-semibold bg-accent-light text-accent-dim w-fit  rounded-full px-3 mb-5 py-1 leading-none">
-            EBSU, Ebonyi.
+            OYT Exams
           </div>
 
           {/* Form Heading */}

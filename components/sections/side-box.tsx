@@ -4,7 +4,7 @@ import Image from "next/image";
 import boxImage from "@/public/images/students_collage_x.png";
 const SideBox = () => {
   return (
-    <div className="col-span-6 bg-accent-light flex flex-col items-center justify-center">
+    <div className="hidden lf:flex lg:col-span-6 bg-accent-light flex-col items-center justify-center">
       <Image
         src={boxImage}
         width={320}

@@ -3,8 +3,8 @@ import Spacer from "@/components/spacer";
 import { Spinner } from "@/components/ui/spinner";
 import { attachHeaders, localAxios } from "@/lib/axios";
 import { prettyDate } from "@/lib/dateFormater";
-import { ArrowRight, User2 } from "lucide-react";
-import { SessionProvider, useSession } from "next-auth/react";
+import { ArrowRight, LogOut, User2 } from "lucide-react";
+import { SessionProvider, signOut, useSession } from "next-auth/react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import Image from "next/image";
@@ -61,7 +61,7 @@ const Page = () => {
     <>
       {pageData && pageData.length > 0 && (
         <div className="grow grid grid-cols-12 min-h-full p-10 font-sans">
-          <div className="col-span-9">
+          <div className="col-span-12 lg:col-span-9 flex flex-col lg:items-centers justify-start">
             <div className="text-foreground font-semibold text-2xl font-serif">
               Scheduled Exams
             </div>
@@ -74,19 +74,19 @@ const Page = () => {
                   <Link
                     href={`/instructions/${ex._id}`}
                     key={key}
-                    className="group flex w-4/10 hover:px-1 transition-all duration-300 hover:text-accent"
+                    className="group flex w-full lg:w-4/10 hover:px-1 transition-all duration-300 lg:hover:text-accent"
                   >
-                    <div className="w-full border rounded-md shadow-lg shadow-theme-gray-light/50 p-5">
+                    <div className="w-full border rounded-md shadow-lg shadow-theme-gray-light/50  p-2 lg:p-5">
                       {/* Exam Title and Code */}
-                      <div className="text-2xl font-semibold font-serif">
+                      <div className="text-lg lg:text-2xl font-semibold font-serif">
                         {ex.title}
                       </div>
-                      <div className="text-theme-gray group-hover:text-accent">
+                      <div className="sm:text-sm text-theme-gray group-hover:text-accent">
                         {ex.course.title}
                       </div>
                       <Spacer size="md" />
 
-                      <div className="flex items-center justify-between text-sm text-theme-gray group-hover:text-accent">
+                      <div className="flex items-center justify-between text-xs lg:text-sm text-theme-gray group-hover:text-accent">
                         {/* Exam Time */}
                         <div>{prettyDate(ex.dueDate.split("T")[0])}</div>
 
@@ -104,10 +104,9 @@ const Page = () => {
           </div>
 
           {/* SideBar */}
-          <div className="col-span-3 flex flex-col pl-5 pt-10 -mr-5 border-l">
-            {/* User details */}
+          <div className="col-span-12 lg:col-span-3 flex flex-wrap items-start gap-4 lg:flex-col lg:pl-5 lg:pt-10 lg:-mr-5 lg:border-l h-fit">
             {/* Profile Picture */}
-            <div className="h-62.5 w-62.5 flex items-center justify-center self-center bg-theme-gray-light  overflow-hidden">
+            <div className="h-22 lg:h-62.5 w-22 lg:w-62.5 flex items-center justify-center lg:self-center bg-theme-gray-light rounded-full lg:rounded-md overflow-hidden shrink-0 lg:mb-10">
               {!session?.user?.passportPhoto ? (
                 <User2
                   size={200}
@@ -120,33 +119,47 @@ const Page = () => {
                   alt="Profile photo"
                   height={250}
                   width={250}
-                  unoptimized
                 />
               )}
             </div>
-            <Spacer size="md" />
 
-            {/* Registration Number */}
-            <div className="border-b pb-2">
-              <div className="text-sm text-theme-gray ">
-                Registration Number
+            {/* User details */}
+            <div className="grow lg:w-full flex flex-col lg:gap-y-2">
+              {/* Registration Number */}
+              <div className="lg:border-b lg:pb-2">
+                <div className="text-sm text-theme-gray hidden lg:block">
+                  Registration Number
+                </div>
+                <div>{session?.user?.regNumber}</div>
               </div>
-              <div>{session?.user?.regNumber}</div>
-            </div>
-            <Spacer size="sm" />
 
-            {/* Full Name */}
-            <div className="pb-2 border-b">
-              <div className="text-sm text-theme-gray">Full Name</div>
-              <div>{session?.user?.fullName}</div>
-            </div>
-            <Spacer size="sm" />
+              {/* Full Name */}
+              <div className="lg:pb-2 lg:border-b">
+                <div className="text-sm text-theme-gray hidden lg:block">
+                  Full Name
+                </div>
+                <div>{session?.user?.fullName}</div>
+              </div>
 
-            {/* Level */}
-            <div className="pb-2">
-              <div className="text-sm text-theme-gray">Level</div>
-              <div>{session?.user?.level}</div>
+              {/* Level */}
+              <div className="lg:pb-2">
+                <div className="text-sm text-theme-gray hidden lg:block">
+                  Level
+                </div>
+                <div>{session?.user?.level}</div>
+              </div>
             </div>
+
+            <button
+              className={`shrink-0 flex lg:hidden items-center gap-2 px-2 rounded-md h-10 w-full hover:bg-theme-gray-light cursor-pointer text-sm bg-theme-gray-light mt-10`}
+              onClick={() => {
+                localStorage.removeItem("countdown_end_time");
+                signOut({ redirectTo: "/" });
+              }}
+            >
+              <LogOut size={16} />
+              <span>Logout</span>
+            </button>
           </div>
         </div>
       )}
@@ -154,31 +167,30 @@ const Page = () => {
       {/* No exams due */}
       {pageData && pageData.length < 1 && (
         <div className="grow grid grid-cols-12 min-h-full p-10 font-sans">
-          <div className="col-span-9 flex flex-col items-center justify-center">
+          <div className="col-span-12 lg:col-span-9 flex flex-col items-center justify-center sm:mb-10">
             <Image
               src={restMan}
               alt="Empty Exams"
               height={280}
-              className="-ml-10"
+              className="lg:-ml-10 h-[180px] lg:h-[300px]"
             />
             <Spacer size="xl" />
 
-            <div className="text-accesnt-dim text-3xl font-bold font-serif">
+            <div className="text-center text-lg lg:text-3xl font-bold font-serif">
               No Exams Scheduled
             </div>
             <Spacer size="sm" />
 
-            <div className="w-2/3 text-center text-theme-gray">
+            <div className="w-full lg:w-2/3 text-xs lg:text-sm text-center text-theme-gray">
               You have written all your exams or no exams have been scheduled
-              for you yet, if this is not true, contact the nearest admin.
+              for you yet.
             </div>
           </div>
 
           {/* SideBar */}
-          <div className="col-span-3 flex flex-col pl-5 pt-10 -mr-5 border-l">
-            {/* User details */}
+          <div className="col-span-12 lg:col-span-3 flex flex-wrap items-start gap-4 lg:flex-col lg:pl-5 lg:pt-10 lg:-mr-5 lg:border-l h-fit">
             {/* Profile Picture */}
-            <div className="h-62.5 w-62.5 flex items-center justify-center self-center bg-theme-gray-light rounded-md overflow-hidden">
+            <div className="h-22 lg:h-62.5 w-22 lg:w-62.5 flex items-center justify-center lg:self-center bg-theme-gray-light rounded-full lg:rounded-md overflow-hidden shrink-0 lg:mb-10">
               {!session?.user?.passportPhoto ? (
                 <User2
                   size={200}
@@ -194,29 +206,44 @@ const Page = () => {
                 />
               )}
             </div>
-            <Spacer size="md" />
 
-            {/* Registration Number */}
-            <div className="border-b pb-2">
-              <div className="text-sm text-theme-gray ">
-                Registration Number
+            {/* User details */}
+            <div className="grow lg:w-full flex flex-col lg:gap-y-2">
+              {/* Registration Number */}
+              <div className="lg:border-b lg:pb-2">
+                <div className="text-sm text-theme-gray hidden lg:block">
+                  Registration Number
+                </div>
+                <div>{session?.user?.regNumber}</div>
               </div>
-              <div>{session?.user?.regNumber}</div>
-            </div>
-            <Spacer size="sm" />
 
-            {/* Full Name */}
-            <div className="pb-2 border-b">
-              <div className="text-sm text-theme-gray">Full Name</div>
-              <div>{session?.user?.fullName}</div>
-            </div>
-            <Spacer size="sm" />
+              {/* Full Name */}
+              <div className="lg:pb-2 lg:border-b">
+                <div className="text-sm text-theme-gray hidden lg:block">
+                  Full Name
+                </div>
+                <div>{session?.user?.fullName}</div>
+              </div>
 
-            {/* Level */}
-            <div className="pb-2">
-              <div className="text-sm text-theme-gray">Level</div>
-              <div>{session?.user?.level}</div>
+              {/* Level */}
+              <div className="lg:pb-2">
+                <div className="text-sm text-theme-gray hidden lg:block">
+                  Level
+                </div>
+                <div>{session?.user?.level}</div>
+              </div>
             </div>
+
+            <button
+              className={`shrink-0 flex lg:hidden items-center gap-2 px-2 rounded-md h-10 w-full hover:bg-theme-gray-light cursor-pointer text-sm bg-theme-gray-light mt-10`}
+              onClick={() => {
+                localStorage.removeItem("countdown_end_time");
+                signOut({ redirectTo: "/" });
+              }}
+            >
+              <LogOut size={16} />
+              <span>Logout</span>
+            </button>
           </div>
         </div>
       )}

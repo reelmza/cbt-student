@@ -85,25 +85,19 @@ const Page = ({ id }: { id: string }) => {
     }
 
     setActiveQuestion((prev) => {
-      // If active question is not the last
       if (questions && prev < questions.length - 1) {
         return prev + 1;
       }
-
-      // Else do nothing
       return prev;
     });
   };
 
-  // Previous Quesion
+  // Previous Question
   const prevQuestion = () => {
     setActiveQuestion((prev) => {
-      // If active question is not the first
       if (prev > 0) {
         return prev - 1;
       }
-
-      // Else do nothing
       return prev;
     });
   };
@@ -184,7 +178,6 @@ const Page = ({ id }: { id: string }) => {
           signal: controller.signal,
         });
 
-        // Draft request successfull
         let answeredQuestions: any;
         if (draftRes.status == 200) {
           if (draftRes?.data?.data?.draft) {
@@ -214,7 +207,6 @@ const Page = ({ id }: { id: string }) => {
           }
         }
 
-        // Exams request successfull
         if (startRes.status == 200) {
           setPageData(startRes.data.data);
           setQuestions(() => {
@@ -280,10 +272,7 @@ const Page = ({ id }: { id: string }) => {
 
       setLoading("poll");
       try {
-        // Cancel previous request if still pending
         abortRef.current?.abort();
-
-        // Init new controller for new request
         abortRef.current = new AbortController();
 
         attachHeaders(session!.user!.token);
@@ -318,22 +307,14 @@ const Page = ({ id }: { id: string }) => {
       }
     };
 
-    // Keyboard downn
     const handleKeyDown = (event: KeyboardEvent) => {
       const tag = (document.activeElement as HTMLElement)?.tagName;
-
-      // Don't intercept keypresses when the user is typing in a field
       if (tag === "TEXTAREA" || tag === "INPUT") return;
 
       let key = event.key;
 
-      // Handle arrow keys
-      if (key === "ArrowRight") {
-        return nextQuestion();
-      }
-      if (key === "ArrowLeft") {
-        return prevQuestion();
-      }
+      if (key === "ArrowRight") return nextQuestion();
+      if (key === "ArrowLeft") return prevQuestion();
 
       const qs = questionsRef.current;
       const index: number = activeQuestionRef.current;
@@ -341,7 +322,6 @@ const Page = ({ id }: { id: string }) => {
       if (!qs) return;
       const q = qs[index];
 
-      // Handle option keys
       if (["A", "B", "C", "D", "a", "b", "c", "d"].includes(key)) {
         if (!questions) return;
         setAnswers((prev) => {
@@ -357,13 +337,10 @@ const Page = ({ id }: { id: string }) => {
       }
     };
 
-    // Handle leaving exams by mistake
-    // Handles tab close, refresh, browser back
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
       e.preventDefault();
     };
 
-    // Handles browser back/forward button
     const handlePopState = () => {
       const confirmed = window.confirm(
         "Are you sure you want to leave? Your exam progress may be lost."
@@ -371,7 +348,6 @@ const Page = ({ id }: { id: string }) => {
       if (!confirmed) window.history.pushState(null, "", window.location.href);
     };
 
-    // Push a history entry so popstate fires on back navigation
     window.history.pushState(null, "", window.location.href);
 
     !pageData && getAssessment();
@@ -408,16 +384,16 @@ const Page = ({ id }: { id: string }) => {
           ]}
         >
           {!assSubmited && (
-            <div className="relative grow grid grid-cols-12 min-h-full px-10 font-sans">
+            <div className="relative grow grid grid-cols-12 min-h-full px-4 sm:px-10 font-sans">
               {/* Main Bar */}
-              <div className="col-span-9 flex flex-col justify-between border-r pr-5 pt-10">
+              <div className="h-screen col-span-12 lg:col-span-9 flex flex-col justify-between lg:border-r lg:pr-5 pt-5 lg:pt-10">
                 {/* Upper Content */}
                 <div>
                   {/* Heading & Submit */}
-                  <div className="h-14 bg-red-100s flex items-center border-b justify-between gap-5">
+                  <div className="flex flex-col sm:flex-row sm:h-14 border-b justify-between gap-3 sm:gap-5 pb-3 sm:pb-0">
                     {/* Heading */}
-                    <div className="bordesr-b  grow">
-                      <div className="text-xl font-semibold">
+                    <div className="grow">
+                      <div className="text-lg sm:text-xl font-semibold leading-snug">
                         {pageData?.title}
                       </div>
                       <div className="text-theme-gray text-sm">
@@ -426,8 +402,8 @@ const Page = ({ id }: { id: string }) => {
                     </div>
 
                     <div className="flex items-center gap-2">
-                      {/* Update Status */}
-                      <div className="border h-10 w-48 text-sm flex items-center text-theme-gray justify-center gap-2 rounded-md">
+                      {/* Update Status — hidden on mobile to save space */}
+                      <div className="hidden sm:flex border h-10 w-48 text-sm items-center text-theme-gray justify-center gap-2 rounded-md shrink-0">
                         <CloudCheck size={20} className="mb-0.5" />
                         <span>
                           Saved
@@ -443,7 +419,7 @@ const Page = ({ id }: { id: string }) => {
                       </div>
 
                       {/* Submit Button */}
-                      <div className="w-42">
+                      <div className="w-full sm:w-42">
                         <Button
                           type="button"
                           onClick={() => setShowEndExam(true)}
@@ -454,20 +430,43 @@ const Page = ({ id }: { id: string }) => {
                       </div>
                     </div>
                   </div>
+
+                  {/* Mobile: Timer strip — visible only on mobile, below header */}
+                  <div className="flex lg:hidden items-center gap-2 text-black/80 border-b py-3 mt-1">
+                    <Clock4 size={24} strokeWidth="2.5" />
+                    <div>
+                      <div className="text-xs leading-none text-theme-gray">
+                        Your Time
+                      </div>
+                      <div className="text-lg font-extrabold leading-none">
+                        <Counter
+                          durationInSeconds={
+                            examDurationRef.current !== null &&
+                            examDurationRef.current !== 0
+                              ? examDurationRef.current
+                              : Number(pageData.timeLimit * 60)
+                          }
+                          onComplete={handleTimeUp}
+                          timeLeftParams={{ timeLeftX, setTimeLeftX }}
+                        />
+                      </div>
+                    </div>
+                  </div>
+
                   <Spacer size="xl" />
 
                   {/* Question */}
                   <div className="min-h-24">
-                    {/* Objective and Subjective Question */}
+                    {/* Objective and non-subjective Question */}
                     {questions[activeQuestion]?.type !== "subjective" && (
                       <div className="flex">
                         {/* Question Number */}
-                        <div className="w-12 h-fit shrink-0 font-semibold underline">
+                        <div className="w-10 sm:w-12 h-fit shrink-0 font-semibold underline text-sm sm:text-base">
                           Q{activeQuestion + 1}.
                         </div>
 
                         {/* Question Text */}
-                        <div className="grow">
+                        <div className="grow text-sm sm:text-base">
                           {questions[activeQuestion].question}
                         </div>
                       </div>
@@ -475,7 +474,7 @@ const Page = ({ id }: { id: string }) => {
 
                     {/* Subjective Question */}
                     {questions[activeQuestion]?.type == "subjective" && (
-                      <p>
+                      <p className="text-sm sm:text-base">
                         {parts(questions[activeQuestion].question).map(
                           (part, index) => {
                             if (part.match(/\[\d+\]/)) {
@@ -505,7 +504,6 @@ const Page = ({ id }: { id: string }) => {
                                           ? [...prevEntry.subjectiveAnswers]
                                           : [];
 
-                                      // Compensate for ghost index in between caused by spliting
                                       if (index < 3) {
                                         updatedSlots[index - 1] = {
                                           slotNumber: index,
@@ -532,7 +530,7 @@ const Page = ({ id }: { id: string }) => {
                                     })
                                   }
                                   style={{
-                                    width: "180px",
+                                    width: "140px",
                                     margin: "0 5px",
                                     border: "none",
                                     borderBottom: "1px solid black",
@@ -569,7 +567,7 @@ const Page = ({ id }: { id: string }) => {
                           };
                         })
                       }
-                      onFocus={handleRadioFocus} // prevent auto-select answer on arrow navigation
+                      onFocus={handleRadioFocus}
                     >
                       {questions[activeQuestion].options.map(
                         (opt: any, key: number) => {
@@ -578,12 +576,12 @@ const Page = ({ id }: { id: string }) => {
                               <RadioGroupItem
                                 value={opt.label}
                                 id={`r${key + 1}`}
-                                className="cursor-pointer"
+                                className="cursor-pointer shrink-0"
                               />
 
                               <label
                                 htmlFor={`r${key + 1}`}
-                                className="flex items-center gap-2 select-none cursor-pointer"
+                                className="flex items-center gap-2 select-none cursor-pointer text-sm sm:text-base"
                               >
                                 <span className="font-bold text-sm">{`[${opt.label}]`}</span>
                                 <span>{opt.text}</span>
@@ -598,7 +596,7 @@ const Page = ({ id }: { id: string }) => {
                   {/* Theory Options */}
                   {questions[activeQuestion].type == "theory" && (
                     <textarea
-                      className="border w-full min-h-42 max-h-42  px-4 py-4 rounded-md outline-none"
+                      className="border w-full min-h-36 sm:min-h-42 max-h-42 px-4 py-4 rounded-md outline-none text-sm sm:text-base"
                       placeholder="Type your answer"
                       value={
                         answers[`${questions[activeQuestion]._id}`]
@@ -625,9 +623,9 @@ const Page = ({ id }: { id: string }) => {
                 </div>
 
                 {/* Footer Content */}
-                <div className="mb-10 flex items-center gap-4">
+                <div className="mb-6 sm:mb-10 flex items-center gap-3 sm:gap-4 mt-6">
                   {/* Prev Button */}
-                  <div className="w-24 shrink-0">
+                  <div className="w-20 sm:w-24 shrink-0">
                     <Button
                       title="Previous"
                       variant="fill"
@@ -638,14 +636,12 @@ const Page = ({ id }: { id: string }) => {
                   </div>
 
                   {/* Question Counter */}
-                  <div className="flex items-center justify-center gap-2 grow text-base">
-                    {`Question ${activeQuestion + 1} out of ${
-                      questions.length
-                    } `}
+                  <div className="flex items-center justify-center gap-2 grow text-xs sm:text-base text-center">
+                    {`Q ${activeQuestion + 1} / ${questions.length}`}
                   </div>
 
                   {/* Next Button */}
-                  <div className="w-24 shrink-0">
+                  <div className="w-20 sm:w-24 shrink-0">
                     <Button
                       title="Next"
                       variant="fill"
@@ -658,10 +654,10 @@ const Page = ({ id }: { id: string }) => {
                 </div>
               </div>
 
-              {/* SideBar */}
-              <div className="col-span-3 flex flex-col pl-5 pt-10 -mr-5">
+              {/* SideBar — hidden on mobile, shown on lg+ */}
+              <div className="hidden lg:flex col-span-3 flex-col pl-5 pt-10 -mr-5">
                 {/* Time Counter */}
-                <div className="flex h-14  items-center gap-2 text-black/80 border-b w-full">
+                <div className="flex h-14 items-center gap-2 text-black/80 border-b w-full">
                   <Clock4 size={32} strokeWidth="2.5" />
                   <div>
                     <div className="text-xs leading-none text-theme-gray">
@@ -683,7 +679,6 @@ const Page = ({ id }: { id: string }) => {
                 </div>
                 <Spacer size="md" />
 
-                {/* User details */}
                 {/* Profile Picture */}
                 <div className="h-62.5 w-62.5 flex items-center justify-center self-center bg-theme-gray-light rounded-md overflow-hidden">
                   {!session?.user?.passportPhoto ? (
@@ -705,7 +700,7 @@ const Page = ({ id }: { id: string }) => {
 
                 {/* Registration Number */}
                 <div className="border-b pb-2">
-                  <div className="text-sm text-theme-gray ">
+                  <div className="text-sm text-theme-gray">
                     Registration Number
                   </div>
                   <div>{session?.user?.regNumber}</div>
@@ -726,32 +721,30 @@ const Page = ({ id }: { id: string }) => {
                 </div>
               </div>
 
-              {/* Questions Overview */}
-              <div className="absolute top-0 -left-[20vw] w-[20vw] mt-32 p-5">
+              {/* Questions Overview — hidden on mobile (lives in left gutter on desktop) */}
+              <div className="hidden lg:block absolute top-0 -left-[20vw] w-[20vw] mt-32 p-5">
                 <div className="text-sm text-accent-dim">
                   Answered Questions{" "}
                   {`(${Object.keys(answers).length}/${questions.length})`}
                 </div>
                 <Spacer size="sm" />
-                <div className=" bg-reds-100 flex flex-wrap gap-2 overflow-y-scroll max-h-[60vh]">
+                <div className="flex flex-wrap gap-2 overflow-y-scroll max-h-[60vh]">
                   {questions.map((qst, key) => (
                     <button
                       type="button"
                       key={key}
-                      className={`h-5 w-5  flex items-center justify-center text-xs font-semibold
-                                               
-                          ${
-                            answers[`${qst._id}`] && key !== activeQuestion
-                              ? "bg-accent-dim text-white"
-                              : "border border-dashed border-accent-light text-accent"
-                          } 
-                              
-                           ${
-                             activeQuestion === key
-                               ? "border border-theme-success bg-transparent text-theme-success"
-                               : ""
-                           }
-                            rounded-sm cursor-pointer`}
+                      className={`h-5 w-5 flex items-center justify-center text-xs font-semibold
+                        ${
+                          answers[`${qst._id}`] && key !== activeQuestion
+                            ? "bg-accent-dim text-white"
+                            : "border border-dashed border-accent-light text-accent"
+                        }
+                        ${
+                          activeQuestion === key
+                            ? "border border-theme-success bg-transparent text-theme-success"
+                            : ""
+                        }
+                        rounded-sm cursor-pointer`}
                       onClick={() => setActiveQuestion(key)}
                     >
                       {key + 1}
@@ -773,15 +766,13 @@ const Page = ({ id }: { id: string }) => {
                   <div className="w-full flex flex-col items-center mt-10">
                     <CircleQuestionMark size={82} className="text-accent-dim" />
 
-                    {/* Prompt Text */}
-                    <div className="text-3xl text-accent-dim font-semibold">
+                    <div className="text-2xl sm:text-3xl text-accent-dim font-semibold">
                       Are you sure?
                     </div>
                     <Spacer size="xl" />
 
-                    {/* Buttons */}
                     <div className="flex items-center gap-4">
-                      <div className="w-38">
+                      <div className="w-36 sm:w-38">
                         <Button
                           title={"No, Go back"}
                           loading={loading === "submitAss"}
@@ -790,7 +781,7 @@ const Page = ({ id }: { id: string }) => {
                         />
                       </div>
 
-                      <div className="w-38">
+                      <div className="w-36 sm:w-38">
                         <Button
                           title={"Yes, Submit"}
                           loading={loading == "submitTest"}
@@ -824,15 +815,13 @@ const Page = ({ id }: { id: string }) => {
                   <div className="w-full flex flex-col items-center mt-10">
                     <Clock2Icon size={82} className="text-accent-dim" />
 
-                    {/* Prompt Text */}
-                    <div className="text-3xl text-accent-dim font-semibold">
+                    <div className="text-2xl sm:text-3xl text-accent-dim font-semibold">
                       Your time is up!
                     </div>
                     <Spacer size="xl" />
 
-                    {/* Buttons */}
                     <div className="flex items-center gap-4">
-                      <div className="w-38">
+                      <div className="w-36 sm:w-38">
                         <Button
                           title={
                             loading === "submitTest"
@@ -851,7 +840,7 @@ const Page = ({ id }: { id: string }) => {
                 </DialogContent>
               </Dialog>
 
-              {/* Dialog - Submision on exam */}
+              {/* Dialog - Submission on exam closed */}
               <Dialog open={showExamClosed} onOpenChange={setShowExamClosed}>
                 <DialogContent
                   className="overflow-hidden"
@@ -864,7 +853,7 @@ const Page = ({ id }: { id: string }) => {
                       This Exam has Ended
                     </DialogTitle>
                     <DialogDescription className="hidden">
-                      You can no longer submit, your saved entried will be
+                      You can no longer submit, your saved entries will be
                       recorded
                     </DialogDescription>
                   </DialogHeader>
@@ -872,22 +861,20 @@ const Page = ({ id }: { id: string }) => {
                   <div className="w-full flex flex-col items-center mt-10">
                     <Clock2Icon size={82} className="text-accent-dim" />
 
-                    {/* Prompt Text */}
-                    <div className="text-3xl text-accent-dim font-semibold">
+                    <div className="text-2xl sm:text-3xl text-accent-dim font-semibold">
                       Exam has ended
                     </div>
                     <Spacer size="md" />
 
-                    <div className="text-ss text-theme-gray text-center px-5">
-                      The admin ended exams while you were writting, your
-                      entries will be saved upto the time the exam was ended,
-                      contact your administrator.
+                    <div className="text-sm text-theme-gray text-center px-5">
+                      The admin ended exams while you were writing, your entries
+                      will be saved up to the time the exam was ended. Contact
+                      your administrator.
                     </div>
                     <Spacer size="xl" />
 
-                    {/* Buttons */}
                     <div className="flex items-center gap-4">
-                      <div className="w-48">
+                      <div className="w-full sm:w-48">
                         <Button
                           title={"Go Back to Dashboard"}
                           loading={loading == "submitTest"}
@@ -907,21 +894,24 @@ const Page = ({ id }: { id: string }) => {
           )}
 
           {assSubmited && (
-            <div className="relative grow grid grid-cols-12 min-h-full px-10 font-sans">
-              <div className="col-span-12 h-full flex flex-col items-center justify-center -mt-5">
-                <div className="bg-accent-light rounded-full p-10">
-                  <Check size={98} strokeWidth={2.5} className="text-accent" />
+            <div className="relative grow grid grid-cols-12 min-h-full px-4 sm:px-10 font-sans">
+              <div className="col-span-12 h-full flex flex-col items-center justify-center -mt-5 px-4">
+                <div className="bg-accent-light rounded-full p-8 sm:p-10">
+                  <Check
+                    size={72}
+                    strokeWidth={2.5}
+                    className="text-accent sm:w-[98px] sm:h-[98px]"
+                  />
                 </div>
                 <Spacer size="lg" />
 
-                <div className="text-4xl font-bold text-accent-dim">
+                <div className="text-2xl sm:text-4xl font-bold text-accent-dim text-center">
                   Exams Submitted!
                 </div>
 
                 <div className="text-black/80 hidden">
                   Please logout or return to your dashboard
                 </div>
-                {/* <Spacer size="md" /> */}
 
                 <div className="hidden w-3/10 border-y py-2 text-black/80">
                   <div className="flex items-end justify-center gap-2 full mb-1">
@@ -934,7 +924,6 @@ const Page = ({ id }: { id: string }) => {
                     <div>{assSubmited?.pending}</div>
                   </div>
                 </div>
-                {/* <Spacer size="xl" /> */}
 
                 <div className="hidden flexs gap-2 text-accent-dim">
                   <div className="text-2xl font-bold">Total Score:</div>
@@ -944,7 +933,7 @@ const Page = ({ id }: { id: string }) => {
                 </div>
                 <Spacer size="xl" />
 
-                <div className="w-72">
+                <div className="w-full sm:w-72">
                   <Button
                     title={"Return to my Dashboard"}
                     loading={false}

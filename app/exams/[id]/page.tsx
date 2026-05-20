@@ -117,7 +117,7 @@ const Page = ({ id }: { id: string }) => {
         formData,
         {
           signal: controller.signal,
-        }
+        },
       );
 
       console.log(res);
@@ -199,7 +199,7 @@ const Page = ({ id }: { id: string }) => {
                 };
                 return acc;
               },
-              {}
+              {},
             );
 
             answeredQuestions = formatted;
@@ -215,7 +215,7 @@ const Page = ({ id }: { id: string }) => {
                 acc.push(...sct.questions);
                 return acc;
               },
-              []
+              [],
             );
 
             if (answeredQuestions) {
@@ -228,7 +228,7 @@ const Page = ({ id }: { id: string }) => {
                   }
                   return acc;
                 },
-                { answered: [], unanswered: [] }
+                { answered: [], unanswered: [] },
               );
 
               if (!pageData?.shuffleQuestions) {
@@ -282,7 +282,7 @@ const Page = ({ id }: { id: string }) => {
           latestDataRef.current.timeLeft === null
         ) {
           console.log(
-            "Draft Save Cancelled: No data to save, Time not reading yet or time expired."
+            "Draft Save Cancelled: No data to save, Time not reading yet or time expired.",
           );
         } else {
           const res = await localAxios.post(
@@ -290,7 +290,7 @@ const Page = ({ id }: { id: string }) => {
             formData,
             {
               signal: abortRef.current.signal,
-            }
+            },
           );
 
           lastSavedRef.current = res?.data?.data?.lastSync;
@@ -343,7 +343,7 @@ const Page = ({ id }: { id: string }) => {
 
     const handlePopState = () => {
       const confirmed = window.confirm(
-        "Are you sure you want to leave? Your exam progress may be lost."
+        "Are you sure you want to leave? Your exam progress may be lost.",
       );
       if (!confirmed) window.history.pushState(null, "", window.location.href);
     };
@@ -390,9 +390,9 @@ const Page = ({ id }: { id: string }) => {
                 {/* Upper Content */}
                 <div>
                   {/* Heading & Submit */}
-                  <div className="flex flex-col sm:flex-row sm:h-14 border-b justify-between gap-3 sm:gap-5 pb-3 sm:pb-0">
+                  <div className="flex  sm:flex-row sm:h-14 border-b justify-between gap-3 sm:gap-5 pb-3 sm:pb-0">
                     {/* Heading */}
-                    <div className="grow">
+                    <div className="grow ">
                       <div className="text-lg sm:text-xl font-semibold leading-snug">
                         {pageData?.title}
                       </div>
@@ -401,7 +401,7 @@ const Page = ({ id }: { id: string }) => {
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 w-32 lg:w-fit">
                       {/* Update Status — hidden on mobile to save space */}
                       <div className="hidden sm:flex border h-10 w-48 text-sm items-center text-theme-gray justify-center gap-2 rounded-md shrink-0">
                         <CloudCheck size={20} className="mb-0.5" />
@@ -541,7 +541,7 @@ const Page = ({ id }: { id: string }) => {
                             }
 
                             return <span key={index}>{part}</span>;
-                          }
+                          },
                         )}
                       </p>
                     )}
@@ -588,7 +588,7 @@ const Page = ({ id }: { id: string }) => {
                               </label>
                             </div>
                           );
-                        }
+                        },
                       )}
                     </RadioGroup>
                   )}

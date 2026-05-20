@@ -1,3 +1,6 @@
+import { LogOut } from "lucide-react";
+import { signOut } from "next-auth/react";
+
 const Preload = ({
   loading,
   pageData,
@@ -115,9 +118,24 @@ const Preload = ({
             <p style={stylesX.subtitle}>{errorMessage?.split("$")[1]}</p>
           </div>
 
-          <button style={stylesX.btn} onClick={() => window.location.reload()}>
-            Try again
-          </button>
+          {errorMessage?.includes("session") ? (
+            <button
+              style={stylesX.btn}
+              onClick={() => window.location.reload()}
+            >
+              Try again
+            </button>
+          ) : (
+            <button
+              className="shrink-0 flex items-center justify-center text-sm bg-theme-gray-light hover:bg-theme-gray-mid  px-5 h-10 rounded-lg cursor-pointer gap-4"
+              onClick={() => {
+                localStorage.removeItem("countdown_end_time");
+                signOut({ redirectTo: "/" });
+              }}
+            >
+              <span className="font-semibold">Logout</span> <LogOut size={16} />
+            </button>
+          )}
         </div>
       )}
     </div>

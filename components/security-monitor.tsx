@@ -33,7 +33,7 @@ export function SecurityMonitor({
   const stableBlockOn = useMemo(
     () => blockOn ?? ["TAB_SWITCH", "KEYBOARD_SHORTCUT"],
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [JSON.stringify(blockOn)]
+    [JSON.stringify(blockOn)],
   ) as ViolationType[];
 
   // Stable onViolation reference — wrap in useCallback at the call site,
@@ -41,7 +41,7 @@ export function SecurityMonitor({
   const stableOnViolation = useCallback(
     (v: Violation) => onViolation?.(v),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    []
+    [],
   );
 
   const { violations, isBlocked, activeViolation, unblock, reset } =
@@ -58,10 +58,10 @@ export function SecurityMonitor({
   // - null       → no button (hard block)
   // - function   → caller controls what happens
   const handleDismiss =
-    onDismiss === undefined ? unblock : onDismiss ?? undefined;
+    onDismiss === undefined ? unblock : (onDismiss ?? undefined);
 
   return (
-    <div className="relative h-full w-full">
+    <div className="relative min-h-full w-full">
       {children}
 
       {isBlocked && (

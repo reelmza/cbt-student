@@ -8,7 +8,7 @@ import { SessionProvider, signOut, useSession } from "next-auth/react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import Image from "next/image";
-import emptyClipboard from "@/public/images/illustrations/empty_clipboard.svg";
+
 import restMan from "@/public/images/illustrations/rest_man.svg";
 import Preload from "@/components/preload";
 
@@ -26,6 +26,7 @@ const Page = () => {
     | null
   >(null);
   const [loading, setLoading] = useState<string | null>("page");
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   useEffect(() => {
     if (!session) return;
@@ -47,6 +48,13 @@ const Page = () => {
           setLoading("pageError");
           console.log(error);
         }
+
+        if (error?.status === 401) {
+          setLoading("pageError");
+          setErrorMessage(
+            "You Session Has Expired$Please login again to continue.",
+          );
+        }
       }
     };
 
@@ -62,8 +70,8 @@ const Page = () => {
       {pageData && pageData.length > 0 && (
         <div className="grow w-full flex flex-col lg:grid grid-cols-12 min-h-full p-4 sm:p-6 lg:p-10 mx-0 font-sans">
           {/* Mobile profile header — hidden on desktop where sidebar takes over */}
-          <div className="col-span-12 lg:hidden flex items-center gap-4 mb-2 pb-4 border-b h-fit">
-            <div className="size-14 rounded-full bg-theme-gray-light overflow-hidden shrink-0 flex items-center justify-center">
+          <div className="col-span-12 lg:hidden flex items-center gap-4 mb-5 pb-4 border-b h-fit">
+            <div className="size-12 rounded-full bg-theme-gray-light overflow-hidden shrink-0 flex items-center justify-center">
               {!session?.user?.passportPhoto ? (
                 <User2
                   size={60}
@@ -241,12 +249,12 @@ const Page = () => {
             />
             <Spacer size="xl" />
 
-            <div className="text-center text-lg lg:text-3xl font-bold font-serif">
+            <div className="text-center text-xl lg:text-3xl font-bold font-serif">
               No Exams Scheduled
             </div>
             <Spacer size="sm" />
 
-            <div className="w-full lg:w-2/3 text-xs lg:text-sm text-center text-theme-gray">
+            <div className="w-full lg:w-2/3 text-sm lg:text-sm text-center text-theme-gray">
               You have written all your exams or no exams have been scheduled
               for you yet.
             </div>
@@ -313,7 +321,11 @@ const Page = () => {
         </div>
       )}
 
-      <Preload loading={loading} pageData={pageData ? true : false} />
+      <Preload
+        loading={loading}
+        pageData={pageData ? true : false}
+        errorMessage={errorMessage}
+      />
     </>
   );
 };

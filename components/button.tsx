@@ -23,27 +23,27 @@ const Button = ({
   variant,
   onClick,
 }: ButtonType) => {
+  const base =
+    "flex items-center justify-center h-12 lg:h-10 w-full font-semibold rounded-lg leading-none gap-2 cursor-pointer select-none transition duration-150 ease-out text-sm active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2";
+
   const buttonVariants = {
-    fill: `flex items-center justify-center h-10 w-full font-medium rounded-md leading-0 gap-2 cursor-pointer animate-all duration-200 ease-in text-sm bg-accent hover:bg-accent/80 text-accent-light shadow shadow-accent-light/20 ${
-      loading ? "opacity-75 pointer-events-none" : ""
+    fill: `${base} bg-accent text-white hover:bg-accent-dim focus-visible:ring-accent/50${
+      loading ? " opacity-60 pointer-events-none" : ""
     }`,
-
-    fillError: `flex items-center justify-center h-10 w-full font-medium rounded-md leading-0 gap-2 cursor-pointer animate-all duration-200 ease-in text-sm bg-theme-error hover:bg-theme-error/80 text-white shadow shadow-theme-error-light/20 ${
-      loading ? "opacity-75 pointer-events-none" : ""
+    fillError: `${base} bg-theme-error text-white hover:opacity-90 focus-visible:ring-theme-error/50${
+      loading ? " opacity-60 pointer-events-none" : ""
     }`,
-
-    fillErrorOutline: `flex items-center justify-center h-10 w-full font-medium rounded-md leading-0 gap-2 cursor-pointer animate-all duration-200 ease-in text-sm border-theme-error/50 border text-theme-error ${
-      loading ? "opacity-75 pointer-events-none" : ""
+    fillErrorOutline: `${base} border border-theme-error/50 text-theme-error bg-transparent hover:bg-theme-error/8 focus-visible:ring-theme-error/40${
+      loading ? " opacity-60 pointer-events-none" : ""
     }`,
-
-    fillErrorGhost: `flex items-center justify-center h-10 w-full font-medium rounded-md leading-0 gap-2 cursor-pointer animate-all duration-200 ease-in text-sm  text-theme-error  ${
-      loading ? "opacity-75 pointer-events-none" : ""
+    fillErrorGhost: `${base} text-theme-error bg-transparent hover:bg-theme-error/8 focus-visible:ring-theme-error/40${
+      loading ? " opacity-60 pointer-events-none" : ""
     }`,
-
-    outline: `flex items-center justify-center h-10 w-full font-medium rounded-md leading-0 gap-2 cursor-pointer animate-all duration-200 ease-in text-sm bg-transparent hover:bg-theme-gray-light/80 text-theme-gray border border-theme-gray-light shadow-sm shadow-theme-gray-light/20 ${
-      loading ? "opacity-75 pointer-events-none" : ""
+    outline: `${base} bg-transparent text-accent-dim border border-accent/25 hover:bg-accent-light focus-visible:ring-accent/30${
+      loading ? " opacity-60 pointer-events-none" : ""
     }`,
   };
+
   return (
     <button
       type={type || "submit"}

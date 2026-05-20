@@ -65,7 +65,7 @@ export function SecurityMonitor({
       {children}
 
       {isBlocked && (
-        <div className="fixed inset-0 z-9999 flex items-center justify-center bg-black/75 backdrop-blur-sm font-sans">
+        <div className="hidden fixed inset-0 z-9999 flesx items-center justify-center bg-black/75 backdrop-blur-sm font-sans">
           <div className="bg-white dark:bg-neutral-900 rounded-2xl shadow-2xl p-8 max-w-sm w-full mx-4 text-center space-y-3">
             <div className="w-20 h-20 bg-red-50 dark:bg-red-800 rounded-full flex items-center justify-center mx-auto text-3xl">
               <X size={40} className="text-red-600" />

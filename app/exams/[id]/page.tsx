@@ -456,17 +456,17 @@ const Page = ({ id }: { id: string }) => {
                   <Spacer size="xl" />
 
                   {/* Question */}
-                  <div className="min-h-24">
+                  <div className="min-h-24 ">
                     {/* Objective and non-subjective Question */}
                     {questions[activeQuestion]?.type !== "subjective" && (
                       <div className="flex">
                         {/* Question Number */}
-                        <div className="w-10 sm:w-12 h-fit shrink-0 font-semibold underline text-sm sm:text-base">
+                        <div className="w-10 sm:w-12 h-fit shrink-0 font-semibold underline text-lg">
                           Q{activeQuestion + 1}.
                         </div>
 
                         {/* Question Text */}
-                        <div className="grow text-sm sm:text-base">
+                        <div className="grow text-lg">
                           {questions[activeQuestion].question}
                         </div>
                       </div>
@@ -474,7 +474,7 @@ const Page = ({ id }: { id: string }) => {
 
                     {/* Subjective Question */}
                     {questions[activeQuestion]?.type == "subjective" && (
-                      <p className="text-sm sm:text-base">
+                      <p className="text-base leading-2">
                         {parts(questions[activeQuestion].question).map(
                           (part, index) => {
                             if (part.match(/\[\d+\]/)) {
@@ -529,6 +529,7 @@ const Page = ({ id }: { id: string }) => {
                                       };
                                     })
                                   }
+                                  className="h-10"
                                   style={{
                                     width: "140px",
                                     margin: "0 5px",
@@ -540,7 +541,11 @@ const Page = ({ id }: { id: string }) => {
                               );
                             }
 
-                            return <span key={index}>{part}</span>;
+                            return (
+                              <span key={index} className="leading-relaxed">
+                                {part}
+                              </span>
+                            );
                           },
                         )}
                       </p>
@@ -572,7 +577,10 @@ const Page = ({ id }: { id: string }) => {
                       {questions[activeQuestion].options.map(
                         (opt: any, key: number) => {
                           return (
-                            <div className="flex items-center gap-3" key={key}>
+                            <div
+                              className="flex items-center gap-4 mb-2"
+                              key={key}
+                            >
                               <RadioGroupItem
                                 value={opt.label}
                                 id={`r${key + 1}`}
@@ -581,9 +589,9 @@ const Page = ({ id }: { id: string }) => {
 
                               <label
                                 htmlFor={`r${key + 1}`}
-                                className="flex items-center gap-2 select-none cursor-pointer text-sm sm:text-base"
+                                className="flex items-center gap-2 select-none cursor-pointer text-base"
                               >
-                                <span className="font-bold text-sm">{`[${opt.label}]`}</span>
+                                <span className="font-bold text-base">{`[${opt.label}]`}</span>
                                 <span>{opt.text}</span>
                               </label>
                             </div>
@@ -596,7 +604,7 @@ const Page = ({ id }: { id: string }) => {
                   {/* Theory Options */}
                   {questions[activeQuestion].type == "theory" && (
                     <textarea
-                      className="border w-full min-h-36 sm:min-h-42 max-h-42 px-4 py-4 rounded-md outline-none text-sm sm:text-base"
+                      className="border w-full min-h-36 sm:min-h-42 max-h-42 px-4 py-4 rounded-md outline-none text-base"
                       placeholder="Type your answer"
                       value={
                         answers[`${questions[activeQuestion]._id}`]

@@ -457,7 +457,7 @@ const Page = ({ id }: { id: string }) => {
 
                   {/* Question */}
                   <div className="min-h-24 ">
-                    {/* Objective and non-subjective Question */}
+                    {/* theory and non-subjective Question */}
                     {questions[activeQuestion]?.type !== "subjective" && (
                       <div className="flex">
                         {/* Question Number */}
@@ -550,6 +550,8 @@ const Page = ({ id }: { id: string }) => {
                         )}
                       </p>
                     )}
+
+                    
                   </div>
                   <Spacer size="sm" />
 

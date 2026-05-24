@@ -4,7 +4,7 @@ export const studentLogin: (
   credentials: Partial<
     Record<"username" | "password" | "loginClient", unknown>
   >,
-  user: any
+  user: any,
 ) => Promise<User | null> = async (credentials, user) => {
   try {
     // Get user from database
@@ -21,7 +21,7 @@ export const studentLogin: (
           passCode: credentials.password,
           authMethod: "password",
         }),
-      }
+      },
     );
 
     // Check if user exist

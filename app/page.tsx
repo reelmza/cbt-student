@@ -75,7 +75,7 @@ export default function Home() {
           <div className="w-full max-w-sm lg:max-w-none lg:w-3/5">
             {/* Badge — desktop only */}
             <div className="hidden lg:block text-xs font-semibold bg-accent-light text-accent-dim w-fit rounded-full px-3.5 mb-6 py-1.5 leading-none">
-              OYT Exams
+              Welcome
             </div>
 
             {/* Heading */}

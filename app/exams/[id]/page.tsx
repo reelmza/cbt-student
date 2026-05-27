@@ -15,6 +15,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Spinner } from "@/components/ui/spinner";
 import { attachHeaders, localAxios } from "@/lib/axios";
 import shuffleArray from "@/utils/array-shuffler";
+import { useExamSocket } from "@/hooks/useExamSocket";
 
 import {
   ArrowRight,
@@ -25,11 +26,12 @@ import {
   Clock2Icon,
   Clock4,
   CloudCheck,
+  Lock,
   User2,
 } from "lucide-react";
 import { SessionProvider, useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { use, useEffect, useRef, useState } from "react";
+import { use, useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import Image from "next/image";
 import { SecurityMonitor } from "@/components/security-monitor";
@@ -56,6 +58,10 @@ const Page = ({ id }: { id: string }) => {
   const [showEndExam, setShowEndExam] = useState(false);
   const [showTimeUp, setShowTimeUp] = useState(false);
   const [showExamClosed, setShowExamClosed] = useState(false);
+  const [examLocked, setExamLocked] = useState<{
+    reason: string;
+    violationCount: number;
+  } | null>(null);
 
   const [timeLeftX, setTimeLeftX] = useState<number | null>(null);
 
@@ -71,6 +77,10 @@ const Page = ({ id }: { id: string }) => {
   // Key press
   const questionsRef = useRef(questions);
   const activeQuestionRef = useRef(activeQuestion);
+
+  // submitTest ref — allows the socket force-submit handler to call the latest
+  // version of submitTest without a stale closure
+  const submitTestRef = useRef<(() => Promise<void>) | null>(null);
 
   // Split Subjective
   const parts = (text: string) => {
@@ -143,11 +153,40 @@ const Page = ({ id }: { id: string }) => {
     }
   };
 
+  // Keep submitTestRef pointing at the latest submitTest closure
+  submitTestRef.current = submitTest;
+
   // Time up handler
   const handleTimeUp = () => {
     setShowTimeUp(true);
     submitTest();
   };
+
+  // Socket event handlers
+  const handleExamLocked = useCallback(
+    (data: { reason: string; violationCount: number }) => {
+      setExamLocked(data);
+    },
+    [],
+  );
+
+  const handleExamUnlocked = useCallback(() => {
+    setExamLocked(null);
+  }, []);
+
+  const handleForceSubmit = useCallback(() => {
+    submitTestRef.current?.();
+  }, []);
+
+  useExamSocket({
+    enabled: !!pageData && !!session,
+    assessmentId: id,
+    studentId: session?.user?.id ?? "",
+    name: session?.user?.fullName ?? "",
+    onLocked: handleExamLocked,
+    onUnlocked: handleExamUnlocked,
+    onForceSubmit: handleForceSubmit,
+  });
 
   // Unfocus radio buttons to avoid auto-select option on arrow key next
   const handleRadioFocus = () => {
@@ -952,6 +991,26 @@ const Page = ({ id }: { id: string }) => {
                     onClick={() => router.push("/exams")}
                   />
                 </div>
+              </div>
+            </div>
+          )}
+          {/* Exam locked overlay — shown when admin locks this student */}
+          {examLocked && (
+            <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/80 backdrop-blur-sm font-sans">
+              <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-sm w-full mx-4 text-center space-y-3">
+                <div className="w-20 h-20 bg-red-50 rounded-full flex items-center justify-center mx-auto">
+                  <Lock size={40} className="text-red-600" />
+                </div>
+                <h2 className="text-lg font-bold text-gray-900">
+                  Exam Locked
+                </h2>
+                <p className="text-sm text-gray-500">
+                  {examLocked.reason ||
+                    "Your exam has been locked by the administrator."}
+                </p>
+                <p className="text-xs font-medium text-red-600">
+                  Violations recorded: {examLocked.violationCount}
+                </p>
               </div>
             </div>
           )}

@@ -33,43 +33,6 @@ export default function CountdownTimer({
   const { setTimeLeftX } = timeLeftParams;
   const endTimestampRef = useRef<number>(null);
 
-  // useEffect(() => {
-  //   // let endTime = localStorage.getItem(STORAGE_KEY);
-
-  //   // Avoid timer restart on auto submit
-  //   // if (endTime === "auto_submit") {
-  //   //   return;
-  //   // }
-
-  //   // If no existing timer, create one
-  //   // if (!endTime) {
-  //   let endTime = String(Date.now() + durationInSeconds * 1000);
-  //   // localStorage.setItem(STORAGE_KEY, endTime);
-  //   // }
-
-  //   const endTimestamp = Number(endTime);
-
-  //   const interval = setInterval(() => {
-  //     const remainingSeconds = Math.max(
-  //       0,
-  //       Math.floor((endTimestamp - Date.now()) / 1000)
-  //     );
-
-  //     setTimeLeft(remainingSeconds);
-  //     // setTimeLeftX(remainingSeconds);
-
-  //     console.log(remainingSeconds);
-
-  //     if (remainingSeconds === 0) {
-  //       clearInterval(interval);
-  //       // localStorage.setItem(STORAGE_KEY, "auto_submit");
-  //       onComplete?.();
-  //     }
-  //   }, 1000);
-
-  //   return () => clearInterval(interval);
-  // }, [durationInSeconds, onComplete]);
-
   useEffect(() => {
     if (!endTimestampRef.current) {
       endTimestampRef.current = Date.now() + durationInSeconds * 1000;

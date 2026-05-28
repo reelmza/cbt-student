@@ -12,30 +12,27 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Spinner } from "@/components/ui/spinner";
 import { attachHeaders, localAxios } from "@/lib/axios";
 import shuffleArray from "@/utils/array-shuffler";
-import { useExamSocket } from "@/hooks/useExamSocket";
 
 import {
   ArrowRight,
   Check,
   ChevronRightIcon,
   CircleQuestionMark,
-  CircleSmall,
   Clock2Icon,
   Clock4,
   CloudCheck,
-  Lock,
   User2,
 } from "lucide-react";
 import { SessionProvider, useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { use, useCallback, useEffect, useRef, useState } from "react";
+import { use, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import Image from "next/image";
 import { SecurityMonitor } from "@/components/security-monitor";
 import Preload from "@/components/preload";
+import { io, Socket } from "socket.io-client";
 
 const Page = ({ id }: { id: string }) => {
   const controller = new AbortController();
@@ -58,10 +55,6 @@ const Page = ({ id }: { id: string }) => {
   const [showEndExam, setShowEndExam] = useState(false);
   const [showTimeUp, setShowTimeUp] = useState(false);
   const [showExamClosed, setShowExamClosed] = useState(false);
-  const [examLocked, setExamLocked] = useState<{
-    reason: string;
-    violationCount: number;
-  } | null>(null);
 
   const [timeLeftX, setTimeLeftX] = useState<number | null>(null);
 
@@ -74,13 +67,13 @@ const Page = ({ id }: { id: string }) => {
   const isMounted = useRef(true);
   const examDurationRef = useRef<number | null>(null);
 
+  // Web sockets
+  const socketRef = useRef<Socket | null>(null);
+  const [violationCount, setViolationCount] = useState(0);
+  const violationCountRef = useRef(0);
   // Key press
   const questionsRef = useRef(questions);
   const activeQuestionRef = useRef(activeQuestion);
-
-  // submitTest ref — allows the socket force-submit handler to call the latest
-  // version of submitTest without a stale closure
-  const submitTestRef = useRef<(() => Promise<void>) | null>(null);
 
   // Split Subjective
   const parts = (text: string) => {
@@ -153,40 +146,11 @@ const Page = ({ id }: { id: string }) => {
     }
   };
 
-  // Keep submitTestRef pointing at the latest submitTest closure
-  submitTestRef.current = submitTest;
-
   // Time up handler
   const handleTimeUp = () => {
     setShowTimeUp(true);
     submitTest();
   };
-
-  // Socket event handlers
-  const handleExamLocked = useCallback(
-    (data: { reason: string; violationCount: number }) => {
-      setExamLocked(data);
-    },
-    [],
-  );
-
-  const handleExamUnlocked = useCallback(() => {
-    setExamLocked(null);
-  }, []);
-
-  const handleForceSubmit = useCallback(() => {
-    submitTestRef.current?.();
-  }, []);
-
-  useExamSocket({
-    enabled: !!pageData && !!session,
-    assessmentId: id,
-    studentId: session?.user?.id ?? "",
-    name: session?.user?.fullName ?? "",
-    onLocked: handleExamLocked,
-    onUnlocked: handleExamUnlocked,
-    onForceSubmit: handleForceSubmit,
-  });
 
   // Unfocus radio buttons to avoid auto-select option on arrow key next
   const handleRadioFocus = () => {
@@ -331,7 +295,13 @@ const Page = ({ id }: { id: string }) => {
               signal: abortRef.current.signal,
             },
           );
-
+          socketRef.current &&
+            socketRef.current.emit("progress-update", {
+              assessmentId: id,
+              studentId: session.user?.id,
+              answered: Object.values(latestDataRef.current.answers).length,
+              total: questionsRef.current?.length,
+            });
           lastSavedRef.current = res?.data?.data?.lastSync;
         }
         setLoading(null);
@@ -341,7 +311,7 @@ const Page = ({ id }: { id: string }) => {
         }
       } finally {
         if (isMounted.current) {
-          timeoutRef.current = setTimeout(poll, 40_000);
+          timeoutRef.current = setTimeout(poll, 10_000);
         }
       }
     };
@@ -406,21 +376,77 @@ const Page = ({ id }: { id: string }) => {
     };
   }, [session, pageData]);
 
+  useEffect(() => {
+    if (!session?.user?.id) return;
+
+    const socket = io("https://womenlegacyacademy.com", {
+      path: "/socket.io",
+      transports: ["websocket"],
+      query: {
+        token: `Bearer ${session.user.token}`,
+      },
+    });
+
+    socketRef.current = socket;
+
+    socket.on("connect", () => {
+      console.log("Connected to socket");
+      socket.emit("join-assessment", {
+        assessmentId: id,
+        studentId: session?.user?.id,
+        name: session?.user?.fullName ?? "",
+      });
+    });
+
+    socket.on("connect_error", (err) => {
+      console.error("[ExamSocket] connection error:", err.message);
+    });
+
+    socket.io.on("reconnect", () => {
+      socket.emit("join-assessment", {
+        assessmentId: id,
+        studentId: session?.user?.id,
+        name: session?.user?.fullName ?? "",
+      });
+    });
+
+    return () => {
+      socket.disconnect();
+      socketRef.current = null;
+    };
+  }, [session?.user?.id, id]);
   return (
     <>
       {pageData && questions && (
         <SecurityMonitor
           maxViolations={5}
-          disableRightClick
-          disableClipboard
-          onViolation={(v) => console.log(v)}
-          blockOn={[
-            "TAB_SWITCH",
-            "KEYBOARD_SHORTCUT",
-            "COPY",
-            "CUT",
-            "FULLSCREEN_EXIT",
-          ]}
+          disableRightClick={pageData.allowBrowserRestriction}
+          disableClipboard={pageData.allowBrowserRestriction}
+          onViolation={(v) => {
+            violationCountRef.current += 1;
+            const next = violationCountRef.current;
+            setViolationCount(next);
+            if (next >= 4) {
+              socketRef.current?.emit("suspicious-activity", {
+                assessmentId: id,
+                studentId: session?.user?.id,
+                type: v.type,
+                violationsCount: next,
+              });
+            }
+          }}
+          onDismiss={violationCount >= 4 ? null : undefined}
+          blockOn={
+            pageData.allowBrowserRestriction
+              ? [
+                  "TAB_SWITCH",
+                  "KEYBOARD_SHORTCUT",
+                  "COPY",
+                  "CUT",
+                  "FULLSCREEN_EXIT",
+                ]
+              : []
+          }
         >
           {!assSubmited && (
             <div className="relative grow grid grid-cols-12 min-h-full px-4 sm:px-10 font-sans">
@@ -589,8 +615,6 @@ const Page = ({ id }: { id: string }) => {
                         )}
                       </p>
                     )}
-
-                    
                   </div>
                   <Spacer size="sm" />
 
@@ -991,26 +1015,6 @@ const Page = ({ id }: { id: string }) => {
                     onClick={() => router.push("/exams")}
                   />
                 </div>
-              </div>
-            </div>
-          )}
-          {/* Exam locked overlay — shown when admin locks this student */}
-          {examLocked && (
-            <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/80 backdrop-blur-sm font-sans">
-              <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-sm w-full mx-4 text-center space-y-3">
-                <div className="w-20 h-20 bg-red-50 rounded-full flex items-center justify-center mx-auto">
-                  <Lock size={40} className="text-red-600" />
-                </div>
-                <h2 className="text-lg font-bold text-gray-900">
-                  Exam Locked
-                </h2>
-                <p className="text-sm text-gray-500">
-                  {examLocked.reason ||
-                    "Your exam has been locked by the administrator."}
-                </p>
-                <p className="text-xs font-medium text-red-600">
-                  Violations recorded: {examLocked.violationCount}
-                </p>
               </div>
             </div>
           )}

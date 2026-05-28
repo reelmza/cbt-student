@@ -91,18 +91,9 @@ export function useSecurityMonitor({
     onViolation?.(violation);
   }, []); // intentionally empty — optsRef handles freshness
 
-  // Tab visibility
+  // Tab switch / window blur — blur is a superset of visibilitychange
   useEffect(() => {
-    const handler = () => {
-      if (document.visibilityState === "hidden") report("TAB_SWITCH");
-    };
-    document.addEventListener("visibilitychange", handler);
-    return () => document.removeEventListener("visibilitychange", handler);
-  }, [report]);
-
-  // Window blur
-  useEffect(() => {
-    const handler = () => report("WINDOW_BLUR");
+    const handler = () => report("TAB_SWITCH");
     window.addEventListener("blur", handler);
     return () => window.removeEventListener("blur", handler);
   }, [report]);

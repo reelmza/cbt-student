@@ -25,4 +25,5 @@ type PageDataType = {
   course: { title: string };
   totalMarks: string;
   shuffleQuestions: boolean;
+  allowBrowserRestriction: boolean;
 };

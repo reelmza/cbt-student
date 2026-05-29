@@ -52,25 +52,30 @@ const Page = ({ id }: { id: string }) => {
     totalScore: number;
   } | null>(null);
 
+  // Modal States
   const [showEndExam, setShowEndExam] = useState(false);
   const [showTimeUp, setShowTimeUp] = useState(false);
   const [showExamClosed, setShowExamClosed] = useState(false);
 
-  const [timeLeftX, setTimeLeftX] = useState<number | null>(null);
+  // Timer state
+  const [globalTimeLeft, setGlobalTimeLeft] = useState<number | null>(null);
+  const [pauseTime, setPauseTime] = useState(false);
 
   // Poll
   const lastSavedRef = useRef<string | null>(null);
-  const latestDataRef = useRef({ answers, timeLeft: timeLeftX });
+  const latestDataRef = useRef({ answers, timeLeft: globalTimeLeft });
 
-  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const abortRef = useRef<AbortController | null>(null);
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const isMounted = useRef(true);
   const examDurationRef = useRef<number | null>(null);
+  const pauseTimeRef = useRef(false);
 
   // Web sockets
   const socketRef = useRef<Socket | null>(null);
   const [violationCount, setViolationCount] = useState(0);
   const violationCountRef = useRef(0);
+
   // Key press
   const questionsRef = useRef(questions);
   const activeQuestionRef = useRef(activeQuestion);
@@ -157,6 +162,7 @@ const Page = ({ id }: { id: string }) => {
     (document.activeElement as HTMLElement)?.blur();
   };
 
+  // Update questions ref anytime it changes
   useEffect(() => {
     questionsRef.current = questions;
     activeQuestionRef.current = activeQuestion;
@@ -164,9 +170,15 @@ const Page = ({ id }: { id: string }) => {
 
   // Keep ref updated for polling
   useEffect(() => {
-    latestDataRef.current = { answers, timeLeft: timeLeftX };
-  }, [answers, timeLeftX]);
+    latestDataRef.current = { answers, timeLeft: globalTimeLeft };
+  }, [answers, globalTimeLeft]);
 
+  // Time Control
+  useEffect(() => {
+    pauseTimeRef.current = pauseTime;
+  }, [pauseTime]);
+
+  // Page data fetching
   useEffect(() => {
     if (!session) return;
     isMounted.current = true;
@@ -287,7 +299,7 @@ const Page = ({ id }: { id: string }) => {
           console.log(
             "Draft Save Cancelled: No data to save, Time not reading yet or time expired.",
           );
-        } else {
+        } else if (!pauseTimeRef.current) {
           const res = await localAxios.post(
             `assessment/submit-draft/${id}`,
             formData,
@@ -376,6 +388,7 @@ const Page = ({ id }: { id: string }) => {
     };
   }, [session, pageData]);
 
+  // Web Sockets
   useEffect(() => {
     if (!session?.user?.id) return;
 
@@ -415,6 +428,7 @@ const Page = ({ id }: { id: string }) => {
       socketRef.current = null;
     };
   }, [session?.user?.id, id]);
+
   return (
     <>
       {pageData && questions && (
@@ -427,6 +441,7 @@ const Page = ({ id }: { id: string }) => {
             const next = violationCountRef.current;
             setViolationCount(next);
             if (next >= 4) {
+              setPauseTime(true);
               socketRef.current?.emit("suspicious-activity", {
                 assessmentId: id,
                 studentId: session?.user?.id,
@@ -466,6 +481,7 @@ const Page = ({ id }: { id: string }) => {
                       </div>
                     </div>
 
+                    {/* Submit & Save Button */}
                     <div className="flex items-center gap-2 w-32 lg:w-fit">
                       {/* Update Status — hidden on mobile to save space */}
                       <div className="hidden sm:flex border h-10 w-48 text-sm items-center text-theme-gray justify-center gap-2 rounded-md shrink-0">
@@ -509,10 +525,11 @@ const Page = ({ id }: { id: string }) => {
                             examDurationRef.current !== null &&
                             examDurationRef.current !== 0
                               ? examDurationRef.current
-                              : Number(pageData.timeLimit * 60)
+                              : Number(pageData.timeLimit * 60) // get durationn from pageData & convert sec.
                           }
                           onComplete={handleTimeUp}
-                          timeLeftParams={{ timeLeftX, setTimeLeftX }}
+                          timeLeftParams={{ globalTimeLeft, setGlobalTimeLeft }}
+                          timePaused={pauseTime}
                         />
                       </div>
                     </div>
@@ -745,7 +762,8 @@ const Page = ({ id }: { id: string }) => {
                             : Number(pageData.timeLimit * 60)
                         }
                         onComplete={handleTimeUp}
-                        timeLeftParams={{ timeLeftX, setTimeLeftX }}
+                        timeLeftParams={{ globalTimeLeft, setGlobalTimeLeft }}
+                        timePaused={pauseTime}
                       />
                     </div>
                   </div>

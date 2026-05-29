@@ -3,8 +3,6 @@
 import { Dispatch, SetStateAction, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 
-const STORAGE_KEY = "countdown_end_time";
-
 function formatTime(totalSeconds: number) {
   const hours = Math.floor(totalSeconds / 3600);
   const minutes = Math.floor((totalSeconds % 3600) / 60);
@@ -21,32 +19,49 @@ export default function CountdownTimer({
   durationInSeconds,
   onComplete,
   timeLeftParams,
+  timePaused,
 }: {
   durationInSeconds: number;
   onComplete?: () => void;
   timeLeftParams: {
-    timeLeftX: number | null;
-    setTimeLeftX: Dispatch<SetStateAction<number | null>>;
+    globalTimeLeft: number | null;
+    setGlobalTimeLeft: Dispatch<SetStateAction<number | null>>;
   };
+  timePaused: boolean;
 }) {
-  const [timeLeft, setTimeLeft] = useState(0);
-  const { setTimeLeftX } = timeLeftParams;
+  const [localTimeLeft, setLocalTimeLeft] = useState(0);
+  const { setGlobalTimeLeft } = timeLeftParams;
   const endTimestampRef = useRef<number>(null);
+  const intervalRef = useRef<NodeJS.Timeout>(null);
+  const pausedAtRef = useRef<number | null>(null);
 
   useEffect(() => {
+    if (timePaused) {
+      pausedAtRef.current = Date.now();
+      intervalRef.current && clearInterval(intervalRef.current);
+      return;
+    }
+
+    // Shift the end timestamp forward by however long we were paused
+    if (endTimestampRef.current && pausedAtRef.current) {
+      endTimestampRef.current += Date.now() - pausedAtRef.current;
+      pausedAtRef.current = null;
+    }
+
     if (!endTimestampRef.current) {
       endTimestampRef.current = Date.now() + durationInSeconds * 1000;
     }
 
-    const interval = setInterval(() => {
+    intervalRef.current = setInterval(() => {
       const remainingSeconds = Math.max(
         0,
-        Math.floor((endTimestampRef.current! - Date.now()) / 1000)
+        Math.floor((endTimestampRef.current! - Date.now()) / 1000),
       );
 
-      setTimeLeft(remainingSeconds);
-      setTimeLeftX(remainingSeconds);
+      setLocalTimeLeft(remainingSeconds); // For the internal UI
+      setGlobalTimeLeft(remainingSeconds); // For other upper components that might need it
 
+      // Timer toasts messages
       if (remainingSeconds === 120) {
         toast.info("You have Two (2) minute remaining", {
           position: "top-right",
@@ -60,15 +75,19 @@ export default function CountdownTimer({
       }
 
       if (remainingSeconds === 0) {
-        clearInterval(interval);
+        intervalRef.current && clearInterval(intervalRef.current);
         onComplete?.();
       }
     }, 1000);
 
-    return () => clearInterval(interval);
-  }, [durationInSeconds, onComplete]);
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
+    };
+  }, [durationInSeconds, onComplete, timePaused]);
 
-  const { hours, minutes, seconds } = formatTime(timeLeft);
+  const { hours, minutes, seconds } = formatTime(localTimeLeft);
 
   return (
     <div className={`${Number(minutes) < 5 ? "text-red-600" : ""}`}>

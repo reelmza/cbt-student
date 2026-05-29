@@ -991,7 +991,7 @@ const Page = ({ id }: { id: string }) => {
                   <Check
                     size={72}
                     strokeWidth={2.5}
-                    className="text-accent sm:w-[98px] sm:h-[98px]"
+                    className="text-accent sm:w-24.5 sm:h-24.5"
                   />
                 </div>
                 <Spacer size="lg" />

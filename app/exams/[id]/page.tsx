@@ -446,7 +446,7 @@ const Page = ({ id }: { id: string }) => {
                 assessmentId: id,
                 studentId: session?.user?.id,
                 type: v.type,
-                violationsCount: next,
+                violation: next,
               });
             }
           }}

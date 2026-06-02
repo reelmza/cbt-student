@@ -18,6 +18,10 @@ interface SecurityMonitorProps {
    * Omit entirely to use the default unblock behaviour.
    */
   onDismiss?: (() => void) | null;
+  /** Rendered inside the blocked overlay when the block is permanent (onDismiss === null). */
+  pardonSlot?: React.ReactNode;
+  /** Seed isBlocked as true on mount (e.g. server-loaded violations). */
+  initialBlocked?: boolean;
 }
 
 export function SecurityMonitor({
@@ -28,6 +32,8 @@ export function SecurityMonitor({
   disableRightClick = true,
   disableClipboard = false,
   onDismiss,
+  pardonSlot,
+  initialBlocked = false,
 }: SecurityMonitorProps) {
   // Memoize blockOn so it never creates a new array reference between renders
   const stableBlockOn = useMemo(
@@ -51,6 +57,7 @@ export function SecurityMonitor({
       onViolation: stableOnViolation,
       disableRightClick,
       disableClipboard,
+      initialBlocked,
     });
 
   // Resolve dismiss handler:
@@ -92,13 +99,11 @@ export function SecurityMonitor({
                 >
                   Acknowledge &amp; Continue
                 </button>
-                {/* <button
-                  onClick={reset}
-                  className="w-full py-2 px-4 border border-gray-200 dark:border-neutral-700 text-sm text-gray-500 dark:text-gray-400 rounded-lg hover:bg-gray-50 dark:hover:bg-neutral-800 transition-colors"
-                >
-                  Reset session
-                </button> */}
               </div>
+            )}
+
+            {!handleDismiss && pardonSlot && (
+              <div className="pt-2">{pardonSlot}</div>
             )}
           </div>
         </div>

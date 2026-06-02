@@ -76,6 +76,10 @@ const Page = ({ id }: { id: string }) => {
   const [violationCount, setViolationCount] = useState(0);
   const violationCountRef = useRef(0);
 
+  // Pardon
+  const [pardonCode, setPardonCode] = useState("");
+  const [serverBlocked, setServerBlocked] = useState(false);
+
   // Key press
   const questionsRef = useRef(questions);
   const activeQuestionRef = useRef(activeQuestion);
@@ -151,6 +155,21 @@ const Page = ({ id }: { id: string }) => {
     }
   };
 
+  // Submit pardon code
+  const submitPardonCode = async () => {
+    setLoading("pardon");
+    try {
+      attachHeaders(session!.user!.token);
+      await localAxios.post("/assessment/unlock", { pardonCode, assessmentId: id });
+    } catch (error: any) {
+      toast.error(error?.response?.data?.message || "Invalid pardon code", {
+        richColors: true,
+      });
+    } finally {
+      setLoading(null);
+    }
+  };
+
   // Time up handler
   const handleTimeUp = () => {
     setShowTimeUp(true);
@@ -220,6 +239,22 @@ const Page = ({ id }: { id: string }) => {
             answeredQuestions = formatted;
             setAnswers(formatted);
           }
+        }
+
+        const violationsRes = await localAxios.get(
+          `/assessment/violations/${id}?studentId=${session!.user!.id}`,
+          { signal: controller.signal },
+        );
+        const serverCount: number = Array.isArray(violationsRes.data.data)
+          ? violationsRes.data.data.length
+          : (violationsRes.data.data?.count ?? 0);
+        if (serverCount > 0) {
+          violationCountRef.current = serverCount;
+          setViolationCount(serverCount);
+        }
+        if (serverCount > 1) {
+          setServerBlocked(true);
+          setPauseTime(true);
         }
 
         if (startRes.status == 200) {
@@ -415,6 +450,14 @@ const Page = ({ id }: { id: string }) => {
       console.error("[ExamSocket] connection error:", err.message);
     });
 
+    socket.on("unlock", () => {
+      violationCountRef.current = 0;
+      setViolationCount(0);
+      setPauseTime(false);
+      setPardonCode("");
+      setServerBlocked(false);
+    });
+
     socket.io.on("reconnect", () => {
       socket.emit("join-assessment", {
         assessmentId: id,
@@ -440,7 +483,7 @@ const Page = ({ id }: { id: string }) => {
             violationCountRef.current += 1;
             const next = violationCountRef.current;
             setViolationCount(next);
-            if (next >= 4) {
+            if (next === 4) {
               setPauseTime(true);
               socketRef.current?.emit("suspicious-activity", {
                 assessmentId: id,
@@ -450,7 +493,35 @@ const Page = ({ id }: { id: string }) => {
               });
             }
           }}
-          onDismiss={violationCount >= 4 ? null : undefined}
+          initialBlocked={serverBlocked}
+          onDismiss={violationCount >= 4 || serverBlocked ? null : undefined}
+          pardonSlot={
+            violationCount >= 4 || serverBlocked ? (
+              <div className="flex flex-col gap-2">
+                <p className="text-xs text-gray-500 text-center">
+                  Enter the pardon code from your administrator to continue.
+                </p>
+                <input
+                  type="text"
+                  className="border w-full px-3 py-2 rounded-lg outline-none text-sm"
+                  placeholder="Enter pardon code"
+                  value={pardonCode}
+                  onChange={(e) => setPardonCode(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && pardonCode.trim())
+                      submitPardonCode();
+                  }}
+                />
+                <button
+                  onClick={submitPardonCode}
+                  disabled={!pardonCode.trim() || loading === "pardon"}
+                  className="w-full py-2 px-4 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white text-sm font-medium rounded-lg transition-colors cursor-pointer"
+                >
+                  {loading === "pardon" ? "Unlocking..." : "Unlock Exam"}
+                </button>
+              </div>
+            ) : undefined
+          }
           blockOn={
             pageData.allowBrowserRestriction
               ? [

@@ -28,6 +28,7 @@ interface Options {
   onViolation?: (v: Violation) => void;
   disableRightClick?: boolean;
   disableClipboard?: boolean;
+  initialBlocked?: boolean;
 }
 
 export function useSecurityMonitor({
@@ -36,9 +37,10 @@ export function useSecurityMonitor({
   onViolation,
   disableRightClick = true,
   disableClipboard = false,
+  initialBlocked = false,
 }: Options = {}) {
   const [violations, setViolations] = useState<Violation[]>([]);
-  const [isBlocked, setIsBlocked] = useState(false);
+  const [isBlocked, setIsBlocked] = useState(initialBlocked);
   const [activeViolation, setActiveViolation] = useState<Violation | null>(
     null
   );

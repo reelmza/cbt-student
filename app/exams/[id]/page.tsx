@@ -12,6 +12,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Checkbox } from "@/components/ui/checkbox";
 import { attachHeaders, localAxios } from "@/lib/axios";
 import shuffleArray from "@/utils/array-shuffler";
 
@@ -160,7 +161,10 @@ const Page = ({ id }: { id: string }) => {
     setLoading("pardon");
     try {
       attachHeaders(session!.user!.token);
-      await localAxios.post("/assessment/unlock", { pardonCode, assessmentId: id });
+      await localAxios.post("/assessment/unlock", {
+        pardonCode,
+        assessmentId: id,
+      });
     } catch (error: any) {
       toast.error(error?.response?.data?.message || "Invalid pardon code", {
         richColors: true,
@@ -241,20 +245,22 @@ const Page = ({ id }: { id: string }) => {
           }
         }
 
-        const violationsRes = await localAxios.get(
-          `/assessment/violations/${id}?studentId=${session!.user!.id}`,
-          { signal: controller.signal },
-        );
-        const serverCount: number = Array.isArray(violationsRes.data.data)
-          ? violationsRes.data.data.length
-          : (violationsRes.data.data?.count ?? 0);
-        if (serverCount > 0) {
-          violationCountRef.current = serverCount;
-          setViolationCount(serverCount);
-        }
-        if (serverCount > 1) {
-          setServerBlocked(true);
-          setPauseTime(true);
+        if (startRes.data.data.allowBrowserRestriction) {
+          const violationsRes = await localAxios.get(
+            `/assessment/violations/${id}?studentId=${session!.user!.id}`,
+            { signal: controller.signal },
+          );
+          const serverCount: number = Array.isArray(violationsRes.data.data)
+            ? violationsRes.data.data.length
+            : (violationsRes.data.data?.count ?? 0);
+          if (serverCount > 0) {
+            violationCountRef.current = serverCount;
+            setViolationCount(serverCount);
+          }
+          if (serverCount > 1) {
+            setServerBlocked(true);
+            setPauseTime(true);
+          }
         }
 
         if (startRes.status == 200) {
@@ -380,13 +386,34 @@ const Page = ({ id }: { id: string }) => {
 
       if (["A", "B", "C", "D", "a", "b", "c", "d"].includes(key)) {
         if (!questions) return;
+        const upperKey = key.toUpperCase();
         setAnswers((prev) => {
+          if (q.type === "multiple_select") {
+            const prevEntry = prev[q._id];
+            const prevSelected = prevEntry?.selectedOptions ?? [];
+            const nextSelected = prevSelected.includes(upperKey)
+              ? prevSelected.filter((l) => l !== upperKey)
+              : [...prevSelected, upperKey];
+            if (nextSelected.length === 0) {
+              const { [q._id]: _, ...rest } = prev;
+              return rest;
+            }
+            return {
+              ...prev,
+              [q._id]: {
+                ...prevEntry,
+                question: q._id,
+                type: q.type,
+                selectedOptions: nextSelected,
+              },
+            };
+          }
           return {
             ...prev,
             [q._id]: {
               question: q._id,
               type: q.type,
-              selectedOption: key.toUpperCase(),
+              selectedOption: upperKey,
             },
           };
         });
@@ -476,10 +503,11 @@ const Page = ({ id }: { id: string }) => {
     <>
       {pageData && questions && (
         <SecurityMonitor
-          maxViolations={5}
+          maxViolations={pageData.allowBrowserRestriction ? 5 : undefined}
           disableRightClick={pageData.allowBrowserRestriction}
           disableClipboard={pageData.allowBrowserRestriction}
           onViolation={(v) => {
+            if (!pageData.allowBrowserRestriction) return;
             violationCountRef.current += 1;
             const next = violationCountRef.current;
             setViolationCount(next);
@@ -752,6 +780,65 @@ const Page = ({ id }: { id: string }) => {
                         },
                       )}
                     </RadioGroup>
+                  )}
+
+                  {/* Multiple Select Options */}
+                  {questions[activeQuestion]?.type == "multiple_select" && (
+                    <div className="flex flex-col">
+                      {questions[activeQuestion].options.map(
+                        (opt: any, key: number) => {
+                          const selected =
+                            answers[`${questions[activeQuestion]._id}`]
+                              ?.selectedOptions ?? [];
+                          const isChecked = selected.includes(opt.label);
+                          return (
+                            <div
+                              className="flex items-center gap-4 mb-2"
+                              key={key}
+                            >
+                              <Checkbox
+                                id={`ms${key + 1}`}
+                                checked={isChecked}
+                                className="cursor-pointer shrink-0"
+                                onCheckedChange={(checked) => {
+                                  setAnswers((prev) => {
+                                    const qstRef = questions[activeQuestion];
+                                    const prevEntry = prev[qstRef._id];
+                                    const prevSelected =
+                                      prevEntry?.selectedOptions ?? [];
+                                    const nextSelected = checked
+                                      ? [...prevSelected, opt.label]
+                                      : prevSelected.filter(
+                                          (l) => l !== opt.label,
+                                        );
+                                    if (nextSelected.length === 0) {
+                                      const { [qstRef._id]: _, ...rest } = prev;
+                                      return rest;
+                                    }
+                                    return {
+                                      ...prev,
+                                      [qstRef._id]: {
+                                        ...prevEntry,
+                                        question: qstRef._id,
+                                        type: qstRef.type,
+                                        selectedOptions: nextSelected,
+                                      },
+                                    };
+                                  });
+                                }}
+                              />
+                              <label
+                                htmlFor={`ms${key + 1}`}
+                                className="flex items-center gap-2 select-none cursor-pointer text-base"
+                              >
+                                <span className="font-bold text-base">{`[${opt.label}]`}</span>
+                                <span>{opt.text}</span>
+                              </label>
+                            </div>
+                          );
+                        },
+                      )}
+                    </div>
                   )}
 
                   {/* Theory Options */}

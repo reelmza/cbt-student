@@ -24,6 +24,7 @@ import {
   Clock2Icon,
   Clock4,
   CloudCheck,
+  Timer,
   User2,
 } from "lucide-react";
 import { SessionProvider, useSession } from "next-auth/react";
@@ -575,16 +576,16 @@ const Page = ({ id }: { id: string }) => {
           }
         >
           {!assSubmited && (
-            <div className="relative grow grid grid-cols-12 min-h-full px-4 sm:px-10 font-sans">
+            <div className="relative grow grid grid-cols-12 min-h-full px-4s sm:px-5 font-sans">
               {/* Main Bar */}
-              <div className="h-full col-span-12 lg:col-span-9 flex flex-col justify-between lg:border-r lg:pr-5 pt-5 lg:pt-10">
+              <div className="h-full col-span-12 lg:col-span-9 flex flex-col justify-between lg:border-r lg:pr-5 pt-5">
                 {/* Upper Content */}
                 <div>
                   {/* Heading & Submit */}
                   <div className="flex  sm:flex-row sm:h-14 border-b justify-between gap-3 sm:gap-5 pb-3 sm:pb-0">
                     {/* Heading */}
                     <div className="grow ">
-                      <div className="text-lg sm:text-xl font-semibold leading-snug">
+                      <div className="text-lg sm:text-xl font-semibold leading-snug font-serif">
                         {pageData?.title}
                       </div>
                       <div className="text-theme-gray text-sm">
@@ -595,10 +596,10 @@ const Page = ({ id }: { id: string }) => {
                     {/* Submit & Save Button */}
                     <div className="flex items-center gap-2 w-32 lg:w-fit">
                       {/* Update Status — hidden on mobile to save space */}
-                      <div className="hidden sm:flex border h-10 w-48 text-sm items-center text-theme-gray justify-center gap-2 rounded-md shrink-0">
+                      <div className="hidden sm:flex border-l h-10 w-48 text-sm items-center text-theme-gray justify-center gap-2 shrink-0">
                         <CloudCheck size={20} className="mb-0.5" />
                         <span>
-                          Saved
+                          Last Saved
                           {lastSavedRef.current
                             ? " (" +
                               lastSavedRef.current
@@ -616,7 +617,7 @@ const Page = ({ id }: { id: string }) => {
                           type="button"
                           onClick={() => setShowEndExam(true)}
                           title="Submit Exam"
-                          loading={loading == "submitTest"}
+                          loading={false}
                           variant="fill"
                         />
                       </div>
@@ -915,27 +916,22 @@ const Page = ({ id }: { id: string }) => {
               </div>
 
               {/* SideBar — hidden on mobile, shown on lg+ */}
-              <div className="hidden lg:flex col-span-3 flex-col pl-5 pt-10 -mr-5">
+              <div className="hidden lg:flex col-span-3 flex-col pl-5 pt-5 -mr-5">
                 {/* Time Counter */}
                 <div className="flex h-14 items-center gap-2 text-black/80 border-b w-full">
-                  <Clock4 size={32} strokeWidth="2.5" />
-                  <div>
-                    <div className="text-xs leading-none text-theme-gray">
-                      Your Time
-                    </div>
-                    <div className="text-xl font-extrabold leading-none">
-                      <Counter
-                        durationInSeconds={
-                          examDurationRef.current !== null &&
-                          examDurationRef.current !== 0
-                            ? examDurationRef.current
-                            : Number(pageData.timeLimit * 60)
-                        }
-                        onComplete={handleTimeUp}
-                        timeLeftParams={{ globalTimeLeft, setGlobalTimeLeft }}
-                        timePaused={pauseTime}
-                      />
-                    </div>
+                  <Timer size={38} />
+                  <div className="text-2xl font-extrabold leading-none mt-1">
+                    <Counter
+                      durationInSeconds={
+                        examDurationRef.current !== null &&
+                        examDurationRef.current !== 0
+                          ? examDurationRef.current
+                          : Number(pageData.timeLimit * 60)
+                      }
+                      onComplete={handleTimeUp}
+                      timeLeftParams={{ globalTimeLeft, setGlobalTimeLeft }}
+                      timePaused={pauseTime}
+                    />
                   </div>
                 </div>
                 <Spacer size="md" />

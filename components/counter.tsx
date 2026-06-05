@@ -34,6 +34,8 @@ export default function CountdownTimer({
   const endTimestampRef = useRef<number>(null);
   const intervalRef = useRef<NodeJS.Timeout>(null);
   const pausedAtRef = useRef<number | null>(null);
+  const onCompleteRef = useRef(onComplete);
+  onCompleteRef.current = onComplete;
 
   useEffect(() => {
     if (timePaused) {
@@ -76,7 +78,7 @@ export default function CountdownTimer({
 
       if (remainingSeconds === 0) {
         intervalRef.current && clearInterval(intervalRef.current);
-        onComplete?.();
+        onCompleteRef.current?.();
       }
     }, 1000);
 
@@ -85,12 +87,14 @@ export default function CountdownTimer({
         clearInterval(intervalRef.current);
       }
     };
-  }, [durationInSeconds, onComplete, timePaused]);
+  }, [durationInSeconds, timePaused]);
 
   const { hours, minutes, seconds } = formatTime(localTimeLeft);
 
   return (
-    <div className={`${Number(minutes) < 5 ? "text-red-600" : ""}`}>
+    <div
+      className={`${localTimeLeft && Number(minutes) < 5 ? "text-theme-warning" : ""}`}
+    >
       {hours}:{minutes}:{seconds}
     </div>
   );

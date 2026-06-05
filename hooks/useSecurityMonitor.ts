@@ -42,7 +42,7 @@ export function useSecurityMonitor({
   const [violations, setViolations] = useState<Violation[]>([]);
   const [isBlocked, setIsBlocked] = useState(initialBlocked);
   const [activeViolation, setActiveViolation] = useState<Violation | null>(
-    null
+    null,
   );
 
   // Keep latest opts in a ref so report() never needs them as deps
@@ -78,9 +78,10 @@ export function useSecurityMonitor({
 
     setViolations((prev) => {
       const next = [...prev, violation];
-      if (maxViolations && next.length >= maxViolations) {
+      if (maxViolations && next.length > maxViolations) {
         setIsBlocked(true);
         setActiveViolation(violation);
+        return prev; // return old array to avoid count increase update if maxViolations is hit as ui is blocked and no more violations should be added
       }
       return next;
     });
@@ -118,6 +119,7 @@ export function useSecurityMonitor({
       { ctrl: true, shift: true, key: "I" },
       { ctrl: true, shift: true, key: "J" },
       { ctrl: true, shift: true, key: "C" },
+      { ctrl: true, shift: true, key: "V" },
       { ctrl: true, key: "U" },
       { ctrl: true, key: "W" },
     ];
@@ -125,7 +127,7 @@ export function useSecurityMonitor({
     const handler = (e: KeyboardEvent) => {
       const hit = BLOCKED_COMBOS.some(
         (c) =>
-          (!c.ctrl || e.ctrlKey) && (!c.shift || e.shiftKey) && e.key === c.key
+          (!c.ctrl || e.ctrlKey) && (!c.shift || e.shiftKey) && e.key === c.key,
       );
       if (hit) {
         e.preventDefault();

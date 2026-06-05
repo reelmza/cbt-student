@@ -280,7 +280,7 @@ const Page = ({ id }: { id: string }) => {
             violationCountRef.current = serverCount;
             setViolationCount(serverCount);
           }
-          if (serverCount > 1) {
+          if (serverCount >= 1) {
             setServerBlocked(true);
             setPauseTime(true);
           }
@@ -531,14 +531,17 @@ const Page = ({ id }: { id: string }) => {
       {pageData && questions && (
         <SecurityMonitor
           key={serverBlocked ? "blocked" : "free"}
-          maxViolations={pageData.allowBrowserRestriction ? 5 : undefined}
+          maxViolations={pageData.allowBrowserRestriction ? 4 : undefined}
           disableRightClick={pageData.allowBrowserRestriction}
           disableClipboard={pageData.allowBrowserRestriction}
           onViolation={(v) => {
             if (!pageData.allowBrowserRestriction) return;
+            if (violationCountRef.current > 4) return;
+
             violationCountRef.current += 1;
             const next = violationCountRef.current;
             setViolationCount(next);
+
             if (next === 4) {
               setPauseTime(true);
               socketRef.current?.emit("suspicious-activity", {
@@ -585,6 +588,7 @@ const Page = ({ id }: { id: string }) => {
                   "KEYBOARD_SHORTCUT",
                   "COPY",
                   "CUT",
+                  "PASTE",
                   "FULLSCREEN_EXIT",
                 ]
               : []

@@ -1,7 +1,6 @@
 "use client";
 
 import { Dispatch, SetStateAction, useEffect, useRef, useState } from "react";
-import { toast } from "sonner";
 
 function formatTime(totalSeconds: number) {
   const hours = Math.floor(totalSeconds / 3600);
@@ -62,19 +61,6 @@ export default function CountdownTimer({
 
       setLocalTimeLeft(remainingSeconds); // For the internal UI
       setGlobalTimeLeft(remainingSeconds); // For other upper components that might need it
-
-      // Timer toasts messages
-      if (remainingSeconds === 120) {
-        toast.info("You have Two (2) minute remaining", {
-          position: "top-right",
-        });
-      }
-
-      if (remainingSeconds === 60) {
-        toast.info("You have One (1) minute remaining", {
-          position: "top-right",
-        });
-      }
 
       if (remainingSeconds === 0) {
         intervalRef.current && clearInterval(intervalRef.current);

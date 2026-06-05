@@ -202,6 +202,21 @@ const Page = ({ id }: { id: string }) => {
   // Keep ref updated for polling
   useEffect(() => {
     latestDataRef.current = { answers, timeLeft: globalTimeLeft };
+
+    // Timer toasts messages
+    if (globalTimeLeft === 300) {
+      toast.warning("You have 5 minute remaining", {
+        position: "bottom-right",
+        richColors: true,
+      });
+    }
+
+    if (globalTimeLeft === 60) {
+      toast.warning("You have 1 minute remaining", {
+        position: "bottom-right",
+        richColors: true,
+      });
+    }
   }, [answers, globalTimeLeft]);
 
   // Time Control
@@ -617,6 +632,7 @@ const Page = ({ id }: { id: string }) => {
                           type="button"
                           onClick={() => setShowEndExam(true)}
                           title="Submit Exam"
+                          icon={<Check size={16} />}
                           loading={false}
                           variant="fill"
                         />
@@ -954,7 +970,10 @@ const Page = ({ id }: { id: string }) => {
               <div className="hidden lg:flex col-span-3 flex-col pl-5 pt-5 -mr-5">
                 {/* Time Counter */}
                 <div className="flex h-14 items-center gap-2 text-black/80 border-b w-full">
-                  <Timer size={38} />
+                  <Timer
+                    size={38}
+                    className={`${globalTimeLeft && globalTimeLeft < 300 ? "text-theme-warning" : ""}`}
+                  />
                   <div className="text-2xl font-extrabold leading-none mt-1">
                     <Counter
                       durationInSeconds={

@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter, Noto_Serif } from "next/font/google";
+import { Inter, Merriweather } from "next/font/google";
 import "./globals.css";
 import SideBar from "@/components/sections/side-bar";
 import { Toaster } from "@/components/ui/sonner";
@@ -9,9 +9,10 @@ const inter = Inter({
   subsets: ["latin"],
 });
 
-const noto = Noto_Serif({
-  variable: "--font-noto",
+const merriweather = Merriweather({
+  variable: "--font-merriweather",
   subsets: ["latin"],
+  weight: ["300", "400", "700", "900"],
 });
 
 export const metadata: Metadata = {
@@ -27,12 +28,14 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${inter.variable} ${noto.variable} antialiased`}>
+      <body
+        className={`${inter.variable} ${merriweather.variable} antialiased`}
+      >
         <div className="flex flex-col lg:flex-row items-center justify-center h-full w-full">
           <SideBar />
           {children}
         </div>
-        <Toaster />
+        <Toaster theme="dark" />
       </body>
     </html>
   );

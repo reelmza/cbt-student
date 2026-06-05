@@ -647,20 +647,20 @@ const Page = ({ id }: { id: string }) => {
                     </div>
                   </div>
 
-                  <Spacer size="xl" />
+                  <Spacer size="md" />
 
                   {/* Question */}
-                  <div className="min-h-24 ">
-                    {/* theory and non-subjective Question */}
+                  <div className="min-h-15">
+                    {/* Non-subjective Question */}
                     {questions[activeQuestion]?.type !== "subjective" && (
-                      <div className="flex">
+                      <div className="flex text-base">
                         {/* Question Number */}
-                        <div className="w-10 sm:w-12 h-fit shrink-0 font-semibold underline text-lg">
+                        <div className="w-10 sm:w-12 h-fit shrink-0 font-semibold underline">
                           Q{activeQuestion + 1}.
                         </div>
 
                         {/* Question Text */}
-                        <div className="grow text-lg">
+                        <div className="grow">
                           {questions[activeQuestion].question}
                         </div>
                       </div>
@@ -668,81 +668,89 @@ const Page = ({ id }: { id: string }) => {
 
                     {/* Subjective Question */}
                     {questions[activeQuestion]?.type == "subjective" && (
-                      <p className="text-base leading-2">
-                        {parts(questions[activeQuestion].question).map(
-                          (part, index) => {
-                            if (part.match(/\[\d+\]/)) {
+                      <div className="flex">
+                        {/* Question Number */}
+                        <div className="w-10 sm:w-12 h-fit shrink-0 font-semibold underline">
+                          Q{activeQuestion + 1}.
+                        </div>
+
+                        <p className="text-base leading-2">
+                          {parts(questions[activeQuestion].question).map(
+                            (part, index) => {
+                              if (part.match(/\[\d+\]/)) {
+                                return (
+                                  <input
+                                    key={index}
+                                    type="text"
+                                    value={
+                                      index < 3
+                                        ? answers[
+                                            `${questions[activeQuestion]._id}`
+                                          ]?.subjectiveAnswers?.[index - 1]
+                                            ?.answer || ""
+                                        : answers[
+                                            `${questions[activeQuestion]._id}`
+                                          ]?.subjectiveAnswers?.[index - 2]
+                                            ?.answer || ""
+                                    }
+                                    onChange={(e) =>
+                                      setAnswers((prev) => {
+                                        console.log(index);
+                                        const qstRef =
+                                          questions[activeQuestion];
+                                        const prevEntry = prev[qstRef._id];
+
+                                        const updatedSlots =
+                                          prevEntry?.subjectiveAnswers
+                                            ? [...prevEntry.subjectiveAnswers]
+                                            : [];
+
+                                        if (index < 3) {
+                                          updatedSlots[index - 1] = {
+                                            slotNumber: index,
+                                            answer: e.target.value,
+                                          };
+                                        } else {
+                                          updatedSlots[index - 2] = {
+                                            slotNumber: index - 1,
+                                            answer: e.target.value,
+                                          };
+                                        }
+
+                                        console.log(updatedSlots);
+
+                                        return {
+                                          ...prev,
+                                          [qstRef._id]: {
+                                            ...prevEntry,
+                                            question: qstRef._id,
+                                            type: qstRef.type,
+                                            subjectiveAnswers: updatedSlots,
+                                          },
+                                        };
+                                      })
+                                    }
+                                    className="h-5"
+                                    style={{
+                                      width: "140px",
+                                      margin: "0 5px",
+                                      border: "none",
+                                      borderBottom: "1px solid black",
+                                      outline: "none",
+                                    }}
+                                  />
+                                );
+                              }
+
                               return (
-                                <input
-                                  key={index}
-                                  type="text"
-                                  value={
-                                    index < 3
-                                      ? answers[
-                                          `${questions[activeQuestion]._id}`
-                                        ]?.subjectiveAnswers?.[index - 1]
-                                          ?.answer || ""
-                                      : answers[
-                                          `${questions[activeQuestion]._id}`
-                                        ]?.subjectiveAnswers?.[index - 2]
-                                          ?.answer || ""
-                                  }
-                                  onChange={(e) =>
-                                    setAnswers((prev) => {
-                                      console.log(index);
-                                      const qstRef = questions[activeQuestion];
-                                      const prevEntry = prev[qstRef._id];
-
-                                      const updatedSlots =
-                                        prevEntry?.subjectiveAnswers
-                                          ? [...prevEntry.subjectiveAnswers]
-                                          : [];
-
-                                      if (index < 3) {
-                                        updatedSlots[index - 1] = {
-                                          slotNumber: index,
-                                          answer: e.target.value,
-                                        };
-                                      } else {
-                                        updatedSlots[index - 2] = {
-                                          slotNumber: index - 1,
-                                          answer: e.target.value,
-                                        };
-                                      }
-
-                                      console.log(updatedSlots);
-
-                                      return {
-                                        ...prev,
-                                        [qstRef._id]: {
-                                          ...prevEntry,
-                                          question: qstRef._id,
-                                          type: qstRef.type,
-                                          subjectiveAnswers: updatedSlots,
-                                        },
-                                      };
-                                    })
-                                  }
-                                  className="h-10"
-                                  style={{
-                                    width: "140px",
-                                    margin: "0 5px",
-                                    border: "none",
-                                    borderBottom: "1px solid black",
-                                    outline: "none",
-                                  }}
-                                />
+                                <span key={index} className="leading-relaxed">
+                                  {part}
+                                </span>
                               );
-                            }
-
-                            return (
-                              <span key={index} className="leading-relaxed">
-                                {part}
-                              </span>
-                            );
-                          },
-                        )}
-                      </p>
+                            },
+                          )}
+                        </p>
+                      </div>
                     )}
                   </div>
                   <Spacer size="sm" />
@@ -1151,7 +1159,7 @@ const Page = ({ id }: { id: string }) => {
           )}
 
           {assSubmited && (
-            <div className="relative h-full grow grid grid-cols-12 min-h-full px-4 sm:px-10 font-sans bg-red-100">
+            <div className="relative h-full grow grid grid-cols-12 min-h-full px-4 sm:px-10 font-sans">
               <div className="col-span-12 h-full flex flex-col items-center justify-center -mt-5 px-4">
                 <div className="bg-accent-light rounded-full p-8 sm:p-10">
                   <Check

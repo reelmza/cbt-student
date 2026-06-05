@@ -1155,7 +1155,7 @@ const Page = ({ id }: { id: string }) => {
           )}
 
           {assSubmited && (
-            <div className="relative grow grid grid-cols-12 min-h-full px-4 sm:px-10 font-sans">
+            <div className="relative h-full grow grid grid-cols-12 min-h-full px-4 sm:px-10 font-sans bg-red-100">
               <div className="col-span-12 h-full flex flex-col items-center justify-center -mt-5 px-4">
                 <div className="bg-accent-light rounded-full p-8 sm:p-10">
                   <Check

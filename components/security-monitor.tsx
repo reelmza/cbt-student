@@ -68,7 +68,7 @@ export function SecurityMonitor({
     onDismiss === undefined ? unblock : (onDismiss ?? undefined);
 
   return (
-    <div className="relative min-h-full w-full">
+    <div className="relative min-h-full h-full w-full">
       {children}
 
       {isBlocked && (

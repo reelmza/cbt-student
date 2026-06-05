@@ -161,10 +161,17 @@ const Page = ({ id }: { id: string }) => {
     setLoading("pardon");
     try {
       attachHeaders(session!.user!.token);
-      await localAxios.post("/assessment/unlock", {
+      const res = await localAxios.post("/assessment/unlock", {
         pardonCode,
         assessmentId: id,
       });
+      if (res.data.status === "success") {
+        violationCountRef.current = 0;
+        setViolationCount(0);
+        setServerBlocked(false);
+        setPauseTime(false);
+        setPardonCode("");
+      }
     } catch (error: any) {
       toast.error(error?.response?.data?.message || "Invalid pardon code", {
         richColors: true,
@@ -251,7 +258,7 @@ const Page = ({ id }: { id: string }) => {
             { signal: controller.signal },
           );
           const serverCount: number = Array.isArray(violationsRes.data.data)
-            ? violationsRes.data.data.length
+            ? violationsRes.data.data.filter((v: any) => !v.isPardoned).length
             : (violationsRes.data.data?.count ?? 0);
           if (serverCount > 0) {
             violationCountRef.current = serverCount;
@@ -318,8 +325,10 @@ const Page = ({ id }: { id: string }) => {
       }
     };
 
+    let cancelled = false;
+
     const poll = async () => {
-      if (!isMounted.current) return;
+      if (!isMounted.current || cancelled) return;
 
       const formData = {
         answers: Object.values(latestDataRef.current.answers),
@@ -363,7 +372,7 @@ const Page = ({ id }: { id: string }) => {
           console.error("Polling failed:", err);
         }
       } finally {
-        if (isMounted.current) {
+        if (isMounted.current && !cancelled) {
           timeoutRef.current = setTimeout(poll, 10_000);
         }
       }
@@ -440,10 +449,12 @@ const Page = ({ id }: { id: string }) => {
     window.addEventListener("popstate", handlePopState);
 
     return () => {
+      cancelled = true;
       controller.abort();
       isMounted.current = false;
       timeoutRef.current && clearTimeout(timeoutRef.current);
       abortRef.current?.abort();
+
       window.removeEventListener("keydown", handleKeyDown);
       window.removeEventListener("beforeunload", handleBeforeUnload);
       window.removeEventListener("popstate", handlePopState);
@@ -503,6 +514,7 @@ const Page = ({ id }: { id: string }) => {
     <>
       {pageData && questions && (
         <SecurityMonitor
+          key={serverBlocked ? "blocked" : "free"}
           maxViolations={pageData.allowBrowserRestriction ? 5 : undefined}
           disableRightClick={pageData.allowBrowserRestriction}
           disableClipboard={pageData.allowBrowserRestriction}

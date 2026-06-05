@@ -1,9 +1,13 @@
 "use client";
 
-import { useMemo, useCallback } from "react";
+import { useMemo, useCallback, forwardRef, useImperativeHandle } from "react";
 import { useSecurityMonitor } from "@/hooks/useSecurityMonitor";
 import type { ViolationType, Violation } from "@/hooks/useSecurityMonitor";
 import { Info, X } from "lucide-react";
+
+export interface SecurityMonitorHandle {
+  reset: () => void;
+}
 
 interface SecurityMonitorProps {
   children: React.ReactNode;
@@ -24,7 +28,7 @@ interface SecurityMonitorProps {
   initialBlocked?: boolean;
 }
 
-export function SecurityMonitor({
+export const SecurityMonitor = forwardRef<SecurityMonitorHandle, SecurityMonitorProps>(function SecurityMonitor({
   children,
   blockOn,
   maxViolations,
@@ -34,7 +38,7 @@ export function SecurityMonitor({
   onDismiss,
   pardonSlot,
   initialBlocked = false,
-}: SecurityMonitorProps) {
+}, ref) {
   // Memoize blockOn so it never creates a new array reference between renders
   const stableBlockOn = useMemo(
     () => blockOn ?? ["TAB_SWITCH", "KEYBOARD_SHORTCUT"],
@@ -59,6 +63,8 @@ export function SecurityMonitor({
       disableClipboard,
       initialBlocked,
     });
+
+  useImperativeHandle(ref, () => ({ reset }), [reset]);
 
   // Resolve dismiss handler:
   // - undefined  → use internal unblock (default)
@@ -110,4 +116,4 @@ export function SecurityMonitor({
       )}
     </div>
   );
-}
+});

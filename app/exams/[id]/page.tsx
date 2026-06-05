@@ -33,6 +33,7 @@ import { use, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import Image from "next/image";
 import { SecurityMonitor } from "@/components/security-monitor";
+import type { SecurityMonitorHandle } from "@/components/security-monitor";
 import Preload from "@/components/preload";
 import { io, Socket } from "socket.io-client";
 
@@ -81,6 +82,7 @@ const Page = ({ id }: { id: string }) => {
   // Pardon
   const [pardonCode, setPardonCode] = useState("");
   const [serverBlocked, setServerBlocked] = useState(false);
+  const securityMonitorRef = useRef<SecurityMonitorHandle>(null);
 
   // Key press
   const questionsRef = useRef(questions);
@@ -172,6 +174,7 @@ const Page = ({ id }: { id: string }) => {
         setServerBlocked(false);
         setPauseTime(false);
         setPardonCode("");
+        securityMonitorRef.current?.reset();
       }
     } catch (error: any) {
       toast.error(error?.response?.data?.message || "Invalid pardon code", {
@@ -530,6 +533,7 @@ const Page = ({ id }: { id: string }) => {
     <>
       {pageData && questions && (
         <SecurityMonitor
+          ref={securityMonitorRef}
           key={serverBlocked ? "blocked" : "free"}
           maxViolations={pageData.allowBrowserRestriction ? 4 : undefined}
           disableRightClick={pageData.allowBrowserRestriction}

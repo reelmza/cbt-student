@@ -4,6 +4,7 @@ type QuestionType = {
   question: string;
   options: { label: string; text: string; _id: string }[];
   correctAnswers?: string[];
+  images?: string[];
 }[];
 
 type AnswerType = Record<

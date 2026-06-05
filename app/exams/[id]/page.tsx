@@ -580,7 +580,7 @@ const Page = ({ id }: { id: string }) => {
               {/* Main Bar */}
               <div className="h-full col-span-12 lg:col-span-9 flex flex-col justify-between lg:border-r lg:pr-5 pt-5">
                 {/* Upper Content */}
-                <div>
+                <div className="">
                   {/* Heading & Submit */}
                   <div className="flex  sm:flex-row sm:h-14 border-b justify-between gap-3 sm:gap-5 pb-3 sm:pb-0">
                     {/* Heading */}
@@ -649,246 +649,273 @@ const Page = ({ id }: { id: string }) => {
 
                   <Spacer size="md" />
 
-                  {/* Question */}
-                  <div className="min-h-15">
-                    {/* Non-subjective Question */}
-                    {questions[activeQuestion]?.type !== "subjective" && (
-                      <div className="flex text-base">
-                        {/* Question Number */}
-                        <div className="w-10 sm:w-12 h-fit shrink-0 font-semibold underline">
-                          Q{activeQuestion + 1}.
-                        </div>
+                  {/* Question Content & Image */}
+                  <div className="flex items-start gap-2">
+                    {/* Questions */}
+                    <div className="grow h-fit">
+                      {/* Question */}
+                      <div className="min-h-15">
+                        {/* Non-subjective Question */}
+                        {questions[activeQuestion]?.type !== "subjective" && (
+                          <div className="flex text-base">
+                            {/* Question Number */}
+                            <div className="w-10 sm:w-12 h-fit shrink-0 font-semibold underline">
+                              Q{activeQuestion + 1}.
+                            </div>
 
-                        {/* Question Text */}
-                        <div className="grow">
-                          {questions[activeQuestion].question}
-                        </div>
+                            {/* Question Text */}
+                            <div className="grow">
+                              {questions[activeQuestion].question}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Subjective Question */}
+                        {questions[activeQuestion]?.type == "subjective" && (
+                          <div className="flex">
+                            {/* Question Number */}
+                            <div className="w-10 sm:w-12 h-fit shrink-0 font-semibold underline">
+                              Q{activeQuestion + 1}.
+                            </div>
+
+                            <p className="text-base leading-2">
+                              {parts(questions[activeQuestion].question).map(
+                                (part, index) => {
+                                  if (part.match(/\[\d+\]/)) {
+                                    return (
+                                      <input
+                                        key={index}
+                                        type="text"
+                                        value={
+                                          index < 3
+                                            ? answers[
+                                                `${questions[activeQuestion]._id}`
+                                              ]?.subjectiveAnswers?.[index - 1]
+                                                ?.answer || ""
+                                            : answers[
+                                                `${questions[activeQuestion]._id}`
+                                              ]?.subjectiveAnswers?.[index - 2]
+                                                ?.answer || ""
+                                        }
+                                        onChange={(e) =>
+                                          setAnswers((prev) => {
+                                            console.log(index);
+                                            const qstRef =
+                                              questions[activeQuestion];
+                                            const prevEntry = prev[qstRef._id];
+
+                                            const updatedSlots =
+                                              prevEntry?.subjectiveAnswers
+                                                ? [
+                                                    ...prevEntry.subjectiveAnswers,
+                                                  ]
+                                                : [];
+
+                                            if (index < 3) {
+                                              updatedSlots[index - 1] = {
+                                                slotNumber: index,
+                                                answer: e.target.value,
+                                              };
+                                            } else {
+                                              updatedSlots[index - 2] = {
+                                                slotNumber: index - 1,
+                                                answer: e.target.value,
+                                              };
+                                            }
+
+                                            console.log(updatedSlots);
+
+                                            return {
+                                              ...prev,
+                                              [qstRef._id]: {
+                                                ...prevEntry,
+                                                question: qstRef._id,
+                                                type: qstRef.type,
+                                                subjectiveAnswers: updatedSlots,
+                                              },
+                                            };
+                                          })
+                                        }
+                                        className="h-5"
+                                        style={{
+                                          width: "140px",
+                                          margin: "0 5px",
+                                          border: "none",
+                                          borderBottom: "1px solid black",
+                                          outline: "none",
+                                        }}
+                                      />
+                                    );
+                                  }
+
+                                  return (
+                                    <span
+                                      key={index}
+                                      className="leading-relaxed"
+                                    >
+                                      {part}
+                                    </span>
+                                  );
+                                },
+                              )}
+                            </p>
+                          </div>
+                        )}
                       </div>
-                    )}
+                      <Spacer size="sm" />
 
-                    {/* Subjective Question */}
-                    {questions[activeQuestion]?.type == "subjective" && (
-                      <div className="flex">
-                        {/* Question Number */}
-                        <div className="w-10 sm:w-12 h-fit shrink-0 font-semibold underline">
-                          Q{activeQuestion + 1}.
-                        </div>
+                      {/* Objective Options */}
+                      {questions[activeQuestion]?.type == "multiple_choice" && (
+                        <RadioGroup
+                          value={
+                            answers[`${questions[activeQuestion]._id}`]
+                              ?.selectedOption || ""
+                          }
+                          onValueChange={(val) =>
+                            setAnswers((prev) => {
+                              return {
+                                ...prev,
+                                [questions[activeQuestion]._id]: {
+                                  question: questions[activeQuestion]._id,
+                                  type: questions[activeQuestion].type,
+                                  selectedOption: val,
+                                },
+                              };
+                            })
+                          }
+                          onFocus={handleRadioFocus}
+                        >
+                          {questions[activeQuestion].options.map(
+                            (opt: any, key: number) => {
+                              return (
+                                <div
+                                  className="flex items-center gap-4 mb-2"
+                                  key={key}
+                                >
+                                  <RadioGroupItem
+                                    value={opt.label}
+                                    id={`r${key + 1}`}
+                                    className="cursor-pointer shrink-0"
+                                  />
 
-                        <p className="text-base leading-2">
-                          {parts(questions[activeQuestion].question).map(
-                            (part, index) => {
-                              if (part.match(/\[\d+\]/)) {
-                                return (
-                                  <input
-                                    key={index}
-                                    type="text"
-                                    value={
-                                      index < 3
-                                        ? answers[
-                                            `${questions[activeQuestion]._id}`
-                                          ]?.subjectiveAnswers?.[index - 1]
-                                            ?.answer || ""
-                                        : answers[
-                                            `${questions[activeQuestion]._id}`
-                                          ]?.subjectiveAnswers?.[index - 2]
-                                            ?.answer || ""
-                                    }
-                                    onChange={(e) =>
+                                  <label
+                                    htmlFor={`r${key + 1}`}
+                                    className="flex items-center gap-2 select-none cursor-pointer text-base"
+                                  >
+                                    <span className="font-bold text-base">{`[${opt.label}]`}</span>
+                                    <span>{opt.text}</span>
+                                  </label>
+                                </div>
+                              );
+                            },
+                          )}
+                        </RadioGroup>
+                      )}
+
+                      {/* Multiple Select Options */}
+                      {questions[activeQuestion]?.type == "multiple_select" && (
+                        <div className="flex flex-col">
+                          {questions[activeQuestion].options.map(
+                            (opt: any, key: number) => {
+                              const selected =
+                                answers[`${questions[activeQuestion]._id}`]
+                                  ?.selectedOptions ?? [];
+                              const isChecked = selected.includes(opt.label);
+                              return (
+                                <div
+                                  className="flex items-center gap-4 mb-2"
+                                  key={key}
+                                >
+                                  <Checkbox
+                                    id={`ms${key + 1}`}
+                                    checked={isChecked}
+                                    className="cursor-pointer shrink-0"
+                                    onCheckedChange={(checked) => {
                                       setAnswers((prev) => {
-                                        console.log(index);
                                         const qstRef =
                                           questions[activeQuestion];
                                         const prevEntry = prev[qstRef._id];
-
-                                        const updatedSlots =
-                                          prevEntry?.subjectiveAnswers
-                                            ? [...prevEntry.subjectiveAnswers]
-                                            : [];
-
-                                        if (index < 3) {
-                                          updatedSlots[index - 1] = {
-                                            slotNumber: index,
-                                            answer: e.target.value,
-                                          };
-                                        } else {
-                                          updatedSlots[index - 2] = {
-                                            slotNumber: index - 1,
-                                            answer: e.target.value,
-                                          };
+                                        const prevSelected =
+                                          prevEntry?.selectedOptions ?? [];
+                                        const nextSelected = checked
+                                          ? [...prevSelected, opt.label]
+                                          : prevSelected.filter(
+                                              (l) => l !== opt.label,
+                                            );
+                                        if (nextSelected.length === 0) {
+                                          const { [qstRef._id]: _, ...rest } =
+                                            prev;
+                                          return rest;
                                         }
-
-                                        console.log(updatedSlots);
-
                                         return {
                                           ...prev,
                                           [qstRef._id]: {
                                             ...prevEntry,
                                             question: qstRef._id,
                                             type: qstRef.type,
-                                            subjectiveAnswers: updatedSlots,
+                                            selectedOptions: nextSelected,
                                           },
                                         };
-                                      })
-                                    }
-                                    className="h-5"
-                                    style={{
-                                      width: "140px",
-                                      margin: "0 5px",
-                                      border: "none",
-                                      borderBottom: "1px solid black",
-                                      outline: "none",
+                                      });
                                     }}
                                   />
-                                );
-                              }
-
-                              return (
-                                <span key={index} className="leading-relaxed">
-                                  {part}
-                                </span>
+                                  <label
+                                    htmlFor={`ms${key + 1}`}
+                                    className="flex items-center gap-2 select-none cursor-pointer text-base"
+                                  >
+                                    <span className="font-bold text-base">{`[${opt.label}]`}</span>
+                                    <span>{opt.text}</span>
+                                  </label>
+                                </div>
                               );
                             },
                           )}
-                        </p>
-                      </div>
-                    )}
-                  </div>
-                  <Spacer size="sm" />
-
-                  {/* Objective Options */}
-                  {questions[activeQuestion]?.type == "multiple_choice" && (
-                    <RadioGroup
-                      value={
-                        answers[`${questions[activeQuestion]._id}`]
-                          ?.selectedOption || ""
-                      }
-                      onValueChange={(val) =>
-                        setAnswers((prev) => {
-                          return {
-                            ...prev,
-                            [questions[activeQuestion]._id]: {
-                              question: questions[activeQuestion]._id,
-                              type: questions[activeQuestion].type,
-                              selectedOption: val,
-                            },
-                          };
-                        })
-                      }
-                      onFocus={handleRadioFocus}
-                    >
-                      {questions[activeQuestion].options.map(
-                        (opt: any, key: number) => {
-                          return (
-                            <div
-                              className="flex items-center gap-4 mb-2"
-                              key={key}
-                            >
-                              <RadioGroupItem
-                                value={opt.label}
-                                id={`r${key + 1}`}
-                                className="cursor-pointer shrink-0"
-                              />
-
-                              <label
-                                htmlFor={`r${key + 1}`}
-                                className="flex items-center gap-2 select-none cursor-pointer text-base"
-                              >
-                                <span className="font-bold text-base">{`[${opt.label}]`}</span>
-                                <span>{opt.text}</span>
-                              </label>
-                            </div>
-                          );
-                        },
+                        </div>
                       )}
-                    </RadioGroup>
-                  )}
 
-                  {/* Multiple Select Options */}
-                  {questions[activeQuestion]?.type == "multiple_select" && (
-                    <div className="flex flex-col">
-                      {questions[activeQuestion].options.map(
-                        (opt: any, key: number) => {
-                          const selected =
+                      {/* Theory Options */}
+                      {questions[activeQuestion].type == "theory" && (
+                        <textarea
+                          className="border w-full min-h-36 sm:min-h-42 max-h-42 px-4 py-4 rounded-md outline-none text-base"
+                          placeholder="Type your answer"
+                          value={
                             answers[`${questions[activeQuestion]._id}`]
-                              ?.selectedOptions ?? [];
-                          const isChecked = selected.includes(opt.label);
-                          return (
-                            <div
-                              className="flex items-center gap-4 mb-2"
-                              key={key}
-                            >
-                              <Checkbox
-                                id={`ms${key + 1}`}
-                                checked={isChecked}
-                                className="cursor-pointer shrink-0"
-                                onCheckedChange={(checked) => {
-                                  setAnswers((prev) => {
-                                    const qstRef = questions[activeQuestion];
-                                    const prevEntry = prev[qstRef._id];
-                                    const prevSelected =
-                                      prevEntry?.selectedOptions ?? [];
-                                    const nextSelected = checked
-                                      ? [...prevSelected, opt.label]
-                                      : prevSelected.filter(
-                                          (l) => l !== opt.label,
-                                        );
-                                    if (nextSelected.length === 0) {
-                                      const { [qstRef._id]: _, ...rest } = prev;
-                                      return rest;
-                                    }
-                                    return {
-                                      ...prev,
-                                      [qstRef._id]: {
-                                        ...prevEntry,
-                                        question: qstRef._id,
-                                        type: qstRef.type,
-                                        selectedOptions: nextSelected,
-                                      },
-                                    };
-                                  });
-                                }}
-                              />
-                              <label
-                                htmlFor={`ms${key + 1}`}
-                                className="flex items-center gap-2 select-none cursor-pointer text-base"
-                              >
-                                <span className="font-bold text-base">{`[${opt.label}]`}</span>
-                                <span>{opt.text}</span>
-                              </label>
-                            </div>
-                          );
-                        },
+                              ?.theoryAnswer || ""
+                          }
+                          onChange={(e) =>
+                            setAnswers((prev) => {
+                              const qstRef = questions[activeQuestion];
+                              const prevEntry = prev[qstRef._id];
+
+                              return {
+                                ...prev,
+                                [qstRef._id]: {
+                                  ...prevEntry,
+                                  question: questions[activeQuestion]._id,
+                                  type: questions[activeQuestion].type,
+                                  theoryAnswer: e.target.value,
+                                },
+                              };
+                            })
+                          }
+                        ></textarea>
                       )}
                     </div>
-                  )}
 
-                  {/* Theory Options */}
-                  {questions[activeQuestion].type == "theory" && (
-                    <textarea
-                      className="border w-full min-h-36 sm:min-h-42 max-h-42 px-4 py-4 rounded-md outline-none text-base"
-                      placeholder="Type your answer"
-                      value={
-                        answers[`${questions[activeQuestion]._id}`]
-                          ?.theoryAnswer || ""
-                      }
-                      onChange={(e) =>
-                        setAnswers((prev) => {
-                          const qstRef = questions[activeQuestion];
-                          const prevEntry = prev[qstRef._id];
-
-                          return {
-                            ...prev,
-                            [qstRef._id]: {
-                              ...prevEntry,
-                              question: questions[activeQuestion]._id,
-                              type: questions[activeQuestion].type,
-                              theoryAnswer: e.target.value,
-                            },
-                          };
-                        })
-                      }
-                    ></textarea>
-                  )}
+                    {/* Question Image */}
+                    {questions[activeQuestion]?.images &&
+                      questions[activeQuestion]?.images.length > 0 && (
+                        <div className="flex w-[40%] shrink-0">
+                          <Image
+                            src={questions[activeQuestion].images[0]}
+                            alt="Question Image"
+                            className="w-full object-contain"
+                            width={100}
+                            height={100}
+                          />
+                        </div>
+                      )}
+                  </div>
                 </div>
 
                 {/* Footer Content */}

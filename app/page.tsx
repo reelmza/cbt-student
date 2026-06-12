@@ -6,12 +6,26 @@ import Spacer from "@/components/spacer";
 import { Key, MoveRight, UserRound } from "lucide-react";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import Image from "next/image";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
+import getEnv from "@/lib/getEnv";
+import { getSchool } from "@/utils/schools";
 
 export default function Home() {
   const router = useRouter();
   const [loading, setLoading] = useState<string | null>(null);
+  const [schoolName, setSchoolName] = useState<string | null>(null);
+
+  useEffect(() => {
+    const getVars = async () => {
+      const vars = await getEnv();
+      if (vars) setSchoolName(vars.schoolName);
+    };
+    getVars();
+  }, []);
+
+  const school = getSchool(schoolName);
 
   const login = async (e: React.SyntheticEvent) => {
     e.preventDefault();
@@ -61,12 +75,19 @@ export default function Home() {
       <div className="col-span-12 lg:col-span-6 flex flex-col h-full">
         {/* Mobile branded header */}
         <div className="lg:hidden bg-accent-dim flex flex-col items-center justify-center py-12 shrink-0 gap-3">
-          <div className="text-xs font-semibold bg-white/15 text-white/90 w-fit rounded-full px-3.5 py-1.5 leading-none tracking-wide">
-            Welcome
+          <div className="bg-white rounded-2xl p-2.5">
+            <Image
+              src={school.image}
+              width={48}
+              height={48}
+              alt={`${school.shortName} logo`}
+              priority
+              unoptimized
+              className="h-12 w-12 object-contain"
+            />
           </div>
           <div className="text-2xl font-extrabold text-white font-serif text-center leading-tight px-8">
-            OayasTech <br />
-            Exam Portal
+            {school.name}
           </div>
         </div>
 

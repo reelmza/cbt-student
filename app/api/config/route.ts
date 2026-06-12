@@ -6,6 +6,7 @@ export async function GET() {
   return NextResponse.json(
     {
       baseUrl: process.env.SERVER_BASEURL || "http://127.0.0.1/api/v1",
+      schoolName: process.env.SCHOOL_NAME || null,
     },
     {
       headers: {

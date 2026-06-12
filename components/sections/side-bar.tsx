@@ -1,13 +1,26 @@
 "use client";
 import { sideBarPages } from "@/utils/sidebar-pages";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import Spacer from "../spacer";
 import { LogOut } from "lucide-react";
 import { signOut } from "next-auth/react";
+import { useEffect, useState } from "react";
+import getEnv from "@/lib/getEnv";
+import { getSchool } from "@/utils/schools";
 
 const SideBar = () => {
   const path = usePathname();
+  const [schoolName, setSchoolName] = useState<string | null>(null);
+
+  useEffect(() => {
+    const getVars = async () => {
+      const vars = await getEnv();
+      if (vars) setSchoolName(vars.schoolName);
+    };
+    getVars();
+  }, []);
 
   // Hide sidebar on pre-auth pages
   if (
@@ -19,12 +32,30 @@ const SideBar = () => {
     return;
   }
 
+  const school = getSchool(schoolName);
+
   return (
     <div className="hidden lg:flex flex-col w-2/10 h-full shrink-0 border-r border-neutral-200 bg-background py-5 px-5 font-sans">
       <div className="h-fit">
-        <h1 className="font-bold text-2xl text-accent font-serif">
-          Oayastech C.B.T
-        </h1>
+        <div className="flex items-center gap-2">
+          <Image
+            src={school.image}
+            alt="School logo"
+            width={48}
+            unoptimized
+            className="shrink-0"
+            loading="eager"
+          />
+
+          <div className="grow border-l pl-2">
+            <div className="leading-none font-bold font-serif text-accent-dim">
+              {school.shortName}
+            </div>
+            <div className="text-xs text-theme-gray leading-tight">
+              {school.fullName}
+            </div>
+          </div>
+        </div>
         <Spacer size="md" />
       </div>
 

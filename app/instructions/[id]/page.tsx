@@ -5,7 +5,7 @@ import Preload from "@/components/preload";
 import Spacer from "@/components/spacer";
 
 import { Spinner } from "@/components/ui/spinner";
-import { attachHeaders, localAxios } from "@/lib/axios";
+import { getAxios } from "@/lib/axios";
 
 import { ArrowRight, CircleSmall } from "lucide-react";
 import { SessionProvider, useSession } from "next-auth/react";
@@ -28,9 +28,9 @@ const Page = ({ id }: { id: string }) => {
 
     const getAssessment = async () => {
       try {
-        attachHeaders(session!.user!.token);
+        const api = await getAxios();
 
-        const res = await localAxios.get(`/assessment/findone/${id}`, {
+        const res = await api.get(`/assessment/findone/${id}`, {
           signal: controller.signal,
         });
 

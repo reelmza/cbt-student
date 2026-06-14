@@ -1,7 +1,7 @@
 "use client";
 import Spacer from "@/components/spacer";
 import { Spinner } from "@/components/ui/spinner";
-import { attachHeaders, localAxios } from "@/lib/axios";
+import { getAxios } from "@/lib/axios";
 import { prettyDate } from "@/lib/dateFormater";
 import { ArrowRight, LogOut, User2 } from "lucide-react";
 import { SessionProvider, signOut, useSession } from "next-auth/react";
@@ -33,8 +33,8 @@ const Page = () => {
 
     const getAssessments = async () => {
       try {
-        attachHeaders(session!.user!.token);
-        const res = await localAxios.get("/assessment/student-assessments", {
+        const api = await getAxios();
+        const res = await api.get("/assessment/student-assessments", {
           signal: controller.signal,
         });
 

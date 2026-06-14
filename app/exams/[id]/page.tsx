@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/dialog";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Checkbox } from "@/components/ui/checkbox";
-import { attachHeaders, localAxios } from "@/lib/axios";
+import { getAxios } from "@/lib/axios";
 import shuffleArray from "@/utils/array-shuffler";
 
 import {
@@ -127,8 +127,8 @@ const Page = ({ id }: { id: string }) => {
     console.log(formData);
     setLoading("submitTest");
     try {
-      attachHeaders(session!.user!.token);
-      const res = await localAxios.post(
+      const api = await getAxios();
+      const res = await api.post(
         `/assessment/submit-test/${id}`,
         formData,
         {
@@ -163,8 +163,8 @@ const Page = ({ id }: { id: string }) => {
   const submitPardonCode = async () => {
     setLoading("pardon");
     try {
-      attachHeaders(session!.user!.token);
-      const res = await localAxios.post("/assessment/unlock", {
+      const api = await getAxios();
+      const res = await api.post("/assessment/unlock", {
         pardonCode,
         assessmentId: id,
       });
@@ -234,11 +234,11 @@ const Page = ({ id }: { id: string }) => {
 
     const getAssessment = async () => {
       try {
-        attachHeaders(session!.user!.token);
-        const draftRes = await localAxios.get(`assessment/draft/${id}`, {
+        const api = await getAxios();
+        const draftRes = await api.get(`assessment/draft/${id}`, {
           signal: controller.signal,
         });
-        const startRes = await localAxios.post(`/assessment/start-test/${id}`, {
+        const startRes = await api.post(`/assessment/start-test/${id}`, {
           signal: controller.signal,
         });
 
@@ -272,7 +272,7 @@ const Page = ({ id }: { id: string }) => {
         }
 
         if (startRes.data.data.allowBrowserRestriction) {
-          const violationsRes = await localAxios.get(
+          const violationsRes = await api.get(
             `/assessment/violations/${id}?studentId=${session!.user!.id}`,
             { signal: controller.signal },
           );
@@ -359,7 +359,7 @@ const Page = ({ id }: { id: string }) => {
         abortRef.current?.abort();
         abortRef.current = new AbortController();
 
-        attachHeaders(session!.user!.token);
+        const api = await getAxios();
 
         if (
           Object.values(latestDataRef.current.answers).length < 1 ||
@@ -369,7 +369,7 @@ const Page = ({ id }: { id: string }) => {
             "Draft Save Cancelled: No data to save, Time not reading yet or time expired.",
           );
         } else if (!pauseTimeRef.current) {
-          const res = await localAxios.post(
+          const res = await api.post(
             `assessment/submit-draft/${id}`,
             formData,
             {
@@ -482,50 +482,71 @@ const Page = ({ id }: { id: string }) => {
 
   // Web Sockets
   useEffect(() => {
+    if (socketRef.current) return;
     if (!session?.user?.id) return;
 
-    const socket = io("https://womenlegacyacademy.com", {
-      path: "/socket.io",
-      transports: ["websocket"],
-      query: {
-        token: `Bearer ${session.user.token}`,
-      },
-    });
+    let cancelled = false;
 
-    socketRef.current = socket;
+    const initSocket = async () => {
+      const res = await fetch(`${window.location.origin}/api/config`);
+      const { clientApiUrl } = await res.json();
+      const socketUrl = new URL(clientApiUrl).origin;
 
-    socket.on("connect", () => {
-      console.log("Connected to socket");
-      socket.emit("join-assessment", {
-        assessmentId: id,
-        studentId: session?.user?.id,
-        name: session?.user?.fullName ?? "",
+      if (cancelled || socketRef.current) return;
+
+      const socket = io(socketUrl, {
+        path: "/socket.io",
+        transports: ["websocket"],
+        query: {
+          token: `Bearer ${session?.user?.token}`,
+        },
       });
-    });
 
-    socket.on("connect_error", (err) => {
-      console.error("[ExamSocket] connection error:", err.message);
-    });
+      socketRef.current = socket;
 
-    socket.on("unlock", () => {
-      violationCountRef.current = 0;
-      setViolationCount(0);
-      setPauseTime(false);
-      setPardonCode("");
-      setServerBlocked(false);
-    });
-
-    socket.io.on("reconnect", () => {
-      socket.emit("join-assessment", {
-        assessmentId: id,
-        studentId: session?.user?.id,
-        name: session?.user?.fullName ?? "",
+      socket.on("connect", () => {
+        console.log("Connected to socket");
+        socket.emit("join-assessment", {
+          assessmentId: id,
+          studentId: session?.user?.id,
+          name: session?.user?.fullName ?? "",
+        });
       });
-    });
+
+      socket.on("connect_error", (err) => {
+        console.error("[ExamSocket] connection error:", err.message);
+      });
+
+      socket.on("unlock", () => {
+        violationCountRef.current = 0;
+        setViolationCount(0);
+        setPauseTime(false);
+        setPardonCode("");
+        setServerBlocked(false);
+      });
+
+      socket.io.on("reconnect", () => {
+        socket.emit("join-assessment", {
+          assessmentId: id,
+          studentId: session?.user?.id,
+          name: session?.user?.fullName ?? "",
+        });
+      });
+    };
+
+    initSocket();
 
     return () => {
-      socket.disconnect();
+      cancelled = true;
+      const socket = socketRef.current;
       socketRef.current = null;
+      if (socket) {
+        if (socket.connected) {
+          socket.disconnect();
+        } else {
+          socket.once("connect", () => socket.disconnect());
+        }
+      }
     };
   }, [session?.user?.id, id]);
 

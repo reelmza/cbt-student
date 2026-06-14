@@ -6,21 +6,10 @@ import { usePathname } from "next/navigation";
 import Spacer from "../spacer";
 import { LogOut } from "lucide-react";
 import { signOut } from "next-auth/react";
-import { useEffect, useState } from "react";
-import getEnv from "@/lib/getEnv";
 import { getSchool } from "@/utils/schools";
 
-const SideBar = () => {
+const SideBar = ({ schoolName }: { schoolName?: string | null }) => {
   const path = usePathname();
-  const [schoolName, setSchoolName] = useState<string | null>(null);
-
-  useEffect(() => {
-    const getVars = async () => {
-      const vars = await getEnv();
-      if (vars) setSchoolName(vars.schoolName);
-    };
-    getVars();
-  }, []);
 
   // Hide sidebar on pre-auth pages
   if (

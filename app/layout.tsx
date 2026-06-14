@@ -3,6 +3,7 @@ import { Inter, Merriweather } from "next/font/google";
 import "./globals.css";
 import SideBar from "@/components/sections/side-bar";
 import { Toaster } from "@/components/ui/sonner";
+import { fetchSchoolName } from "@/lib/getSchoolName";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -21,21 +22,23 @@ export const metadata: Metadata = {
     "An offline CBT web application for conducting and managing exams in Nigerian tertiary institutions.",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const schoolName = await fetchSchoolName();
+
   return (
     <html
       lang="en"
-      data-school={(process.env.SCHOOL_NAME || "default").toLowerCase()}
+      data-school={(schoolName || "default").toLowerCase()}
     >
       <body
         className={`${inter.variable} ${merriweather.variable} antialiased`}
       >
         <div className="flex flex-col lg:flex-row items-center justify-center h-full w-full">
-          <SideBar />
+          <SideBar schoolName={schoolName} />
           {children}
         </div>
         <Toaster theme="dark" />

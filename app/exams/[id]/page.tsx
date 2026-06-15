@@ -128,13 +128,9 @@ const Page = ({ id }: { id: string }) => {
     setLoading("submitTest");
     try {
       const api = await getAxios();
-      const res = await api.post(
-        `/assessment/submit-test/${id}`,
-        formData,
-        {
-          signal: controller.signal,
-        },
-      );
+      const res = await api.post(`/assessment/submit-test/${id}`, formData, {
+        signal: controller.signal,
+      });
 
       console.log(res);
       if (res.status == 200) {
@@ -845,7 +841,7 @@ const Page = ({ id }: { id: string }) => {
 
                                   <label
                                     htmlFor={`r${key + 1}`}
-                                    className="flex items-center gap-2 select-none cursor-pointer text-base"
+                                    className="flex items-start gap-2 select-none cursor-pointer text-base"
                                   >
                                     <span className="font-bold text-base">{`[${opt.label}]`}</span>
                                     <span>{opt.text}</span>

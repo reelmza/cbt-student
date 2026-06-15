@@ -9,8 +9,8 @@ const SideBox = ({ schoolName }: { schoolName?: string | null }) => {
     <div className="col-span-6 bg-neutral-50 flex flex-col items-center justify-center">
       <Image
         src={school.image}
-        width={271}
-        height={271}
+        width={270}
+        height={270}
         alt="School logo"
         priority
         unoptimized

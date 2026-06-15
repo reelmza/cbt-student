@@ -288,39 +288,45 @@ const Page = ({ id }: { id: string }) => {
         if (startRes.status == 200) {
           setPageData(startRes.data.data);
           setQuestions(() => {
-            const allQst = startRes.data.data.sections.reduce(
-              (acc: any, sct: any) => {
-                acc.push(...sct.questions);
+            // Question types eligible for shuffling
+            // (e.g. ["multiple_choice", "theory"]).
+            const shuffleSections: string[] = Array.isArray(
+              startRes.data.data.shuffleQuestions,
+            )
+              ? startRes.data.data.shuffleQuestions
+              : [];
+
+            // Walk sections in order, keeping answered questions first within
+            // each section and only shuffling the unanswered ones for sections
+            // whose question type is listed in shuffleQuestions.
+            return startRes.data.data.sections.reduce(
+              (acc: any[], sct: any) => {
+                const sectionQuestions: any[] = sct.questions ?? [];
+
+                const canShuffle = shuffleSections.includes(
+                  sectionQuestions[0]?.type,
+                );
+
+                const { answered, unanswered } = sectionQuestions.reduce(
+                  (groups: { answered: any[]; unanswered: any[] }, q: any) => {
+                    if (answeredQuestions && answeredQuestions[q._id]) {
+                      groups.answered.push(q);
+                    } else {
+                      groups.unanswered.push(q);
+                    }
+                    return groups;
+                  },
+                  { answered: [], unanswered: [] },
+                );
+
+                acc.push(
+                  ...answered,
+                  ...(canShuffle ? shuffleArray(unanswered) : unanswered),
+                );
                 return acc;
               },
               [],
             );
-
-            if (answeredQuestions) {
-              const { answered, unanswered } = allQst.reduce(
-                (acc: any, q: any) => {
-                  if (answeredQuestions[q._id]) {
-                    acc.answered.push(q);
-                  } else {
-                    acc.unanswered.push(q);
-                  }
-                  return acc;
-                },
-                { answered: [], unanswered: [] },
-              );
-
-              if (!pageData?.shuffleQuestions) {
-                return [...answered, ...unanswered];
-              } else {
-                return [...answered, ...shuffleArray(unanswered)];
-              }
-            }
-
-            if (!pageData?.shuffleQuestions) {
-              return allQst;
-            } else {
-              return shuffleArray(allQst);
-            }
           });
 
           setLoading(null);

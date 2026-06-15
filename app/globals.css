@@ -5,10 +5,10 @@
 
 :root {
 
-  --accent-light: #f1f1ff;
-  --accent-mid: #d3d8e2;
-  --accent: #3c5fac;
-  --accent-dim:#23306d;
+  --accent-light: #d6d6d6;
+  --accent-mid: #cecece;
+  --accent: #292929;
+  --accent-dim:#0e0e0e;
 
   --theme-gray-light: #f0f0f0;
   --theme-gray-mid: #dfdfdf;
@@ -65,6 +65,13 @@
   --accent-light: #f1f1ff;
   --accent-mid: #d6d3e2;
   --accent: #2c187b;
+  --accent-dim:#1b1661;
+}
+
+[data-school="uhr"] {
+  --accent-light: #f1f1ff;
+  --accent-mid: #d6d3e2;
+  --accent: #3f2d88;
   --accent-dim:#1b1661;
 }
 

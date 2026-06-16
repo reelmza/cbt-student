@@ -6,7 +6,7 @@ const SideBox = ({ schoolName }: { schoolName?: string | null }) => {
   const school = getSchool(schoolName);
 
   return (
-    <div className="col-span-6 bg-neutral-50 flex flex-col items-center justify-center">
+    <div className="hidden lg:col-span-6 lg:flex flex-col items-center justify-center bg-neutral-50">
       <Image
         src={school.image}
         width={270}

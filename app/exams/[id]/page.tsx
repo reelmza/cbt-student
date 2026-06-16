@@ -622,7 +622,7 @@ const Page = ({ id }: { id: string }) => {
           }
         >
           {!assSubmited && (
-            <div className="relative grow grid grid-cols-12 min-h-full px-4s sm:px-5 font-sans">
+            <div className="relative grow grid grid-cols-12 min-h-full px-4 sm:px-5 font-sans">
               {/* Main Bar */}
               <div className="h-full col-span-12 lg:col-span-9 flex flex-col justify-between lg:border-r lg:pr-5 pt-5">
                 {/* Upper Content */}
@@ -836,13 +836,13 @@ const Page = ({ id }: { id: string }) => {
                             (opt: any, key: number) => {
                               return (
                                 <div
-                                  className="flex items-center gap-4 mb-2"
+                                  className="flex items-start gap-4 mb-2"
                                   key={key}
                                 >
                                   <RadioGroupItem
                                     value={opt.label}
                                     id={`r${key + 1}`}
-                                    className="cursor-pointer shrink-0"
+                                    className="cursor-pointer shrink-0 mt-1 lg:mt-1"
                                   />
 
                                   <label

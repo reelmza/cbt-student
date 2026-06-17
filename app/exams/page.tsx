@@ -1,16 +1,21 @@
 "use client";
+import {
+  ArrowRight,
+  BookOpen,
+  CalendarDays,
+  LogOut,
+  User2,
+} from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
+import { SessionProvider, signOut, useSession } from "next-auth/react";
+import { useEffect, useState } from "react";
+import Preload from "@/components/preload";
 import Spacer from "@/components/spacer";
 import { Spinner } from "@/components/ui/spinner";
 import { getAxios } from "@/lib/axios";
 import { prettyDate } from "@/lib/dateFormater";
-import { ArrowRight, LogOut, User2 } from "lucide-react";
-import { SessionProvider, signOut, useSession } from "next-auth/react";
-import Link from "next/link";
-import { useEffect, useState } from "react";
-import Image from "next/image";
-
 import restMan from "@/public/images/illustrations/rest_man.svg";
-import Preload from "@/components/preload";
 
 const Page = () => {
   const controller = new AbortController();
@@ -107,37 +112,52 @@ const Page = () => {
             </button>
           </div>
 
-          <div className="col-span-12 lg:col-span-9 flex flex-col lg:itemss-center justify-start h-fit">
-            <div className="text-foreground font-semibold text-2xl font-serif text-left">
-              Scheduled Exams
+          <div className="col-span-12 lg:col-span-9 flex flex-col justify-start h-fit">
+            <div className="flex items-center gap-3">
+              <div className="text-foreground font-semibold text-2xl font-serif text-left">
+                Scheduled Exams
+              </div>
+              <span className="rounded-full bg-accent-light px-2.5 py-0.5 text-xs font-semibold text-accent-dim">
+                {pageData.length}
+              </span>
             </div>
             <Spacer size="md" />
 
             {/* Exams */}
-            <div className="w-full flex flex-wrap items-center gap-4">
+            <div className="w-full flex flex-wrap items-stretch gap-4">
               {pageData.map((ex, key) => {
                 return (
                   <Link
                     href={`/instructions/${ex._id}`}
                     key={key}
-                    className="group flex w-full lg:w-4/10 hover:px-1 transition-all duration-300 lg:hover:text-accent"
+                    className="group flex w-full lg:w-[calc(50%-0.5rem)]"
                   >
-                    <div className="w-full border rounded-md shadow-lg shadow-theme-gray-light/50  p-2 lg:p-5">
+                    <div className="flex w-full flex-col rounded-xl border border-accent-light bg-white p-4 lg:p-5 transition-colors duration-300 group-hover:border-accent/40">
                       {/* Exam Title and Code */}
-                      <div className="text-lg lg:text-2xl font-semibold font-serif">
-                        {ex.title}
-                      </div>
-                      <div className="sm:text-sm text-theme-gray group-hover:text-accent">
-                        {ex.course.title}
+                      <div className="flex items-start gap-3">
+                        <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-accent-light text-accent-dim transition-colors group-hover:bg-accent/15">
+                          <BookOpen size={20} />
+                        </span>
+                        <div className="min-w-0">
+                          <div className="text-lg lg:text-xl font-semibold font-serif leading-snug truncate group-hover:text-accent">
+                            {ex.title}
+                          </div>
+                          <div className="text-sm text-theme-gray truncate">
+                            {ex.course.title}
+                          </div>
+                        </div>
                       </div>
                       <Spacer size="md" />
 
-                      <div className="flex items-center justify-between text-xs lg:text-sm text-theme-gray group-hover:text-accent">
+                      <div className="mt-auto flex items-center justify-between border-t border-accent-light pt-3 text-xs lg:text-sm">
                         {/* Exam Time */}
-                        <div>{prettyDate(ex.dueDate.split("T")[0])}</div>
+                        <div className="flex items-center gap-1.5 text-theme-gray">
+                          <CalendarDays size={14} />
+                          <span>{prettyDate(ex.dueDate.split("T")[0])}</span>
+                        </div>
 
                         {/* Start Icon */}
-                        <div className="flex items-center gap-1">
+                        <div className="flex items-center gap-1.5 font-semibold text-accent-dim transition-all group-hover:gap-2.5">
                           <span>Start</span>
                           <ArrowRight size={14} />
                         </div>

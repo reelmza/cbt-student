@@ -1,23 +1,8 @@
 "use client";
-import Button from "@/components/button";
-import Counter from "@/components/counter";
-
-import Spacer from "@/components/spacer";
-import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Checkbox } from "@/components/ui/checkbox";
-import { getAxios } from "@/lib/axios";
-import shuffleArray from "@/utils/array-shuffler";
 
 import {
   ArrowRight,
+  Calculator as CalculatorIcon,
   Check,
   ChevronRightIcon,
   CircleQuestionMark,
@@ -27,15 +12,31 @@ import {
   Timer,
   User2,
 } from "lucide-react";
-import { SessionProvider, useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
-import { use, useEffect, useRef, useState } from "react";
-import { toast } from "sonner";
 import Image from "next/image";
-import { SecurityMonitor } from "@/components/security-monitor";
-import type { SecurityMonitorHandle } from "@/components/security-monitor";
+import { useRouter } from "next/navigation";
+import { SessionProvider, useSession } from "next-auth/react";
+import { use, useEffect, useRef, useState } from "react";
+import { io, type Socket } from "socket.io-client";
+import { toast } from "sonner";
+import Button from "@/components/button";
+import Calculator from "@/components/calculator";
+import Counter from "@/components/counter";
 import Preload from "@/components/preload";
-import { io, Socket } from "socket.io-client";
+import type { SecurityMonitorHandle } from "@/components/security-monitor";
+import { SecurityMonitor } from "@/components/security-monitor";
+import Spacer from "@/components/spacer";
+import { Checkbox } from "@/components/ui/checkbox";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { getAxios } from "@/lib/axios";
+import shuffleArray from "@/utils/array-shuffler";
 
 const Page = ({ id }: { id: string }) => {
   const controller = new AbortController();
@@ -54,6 +55,9 @@ const Page = ({ id }: { id: string }) => {
     pending: number;
     totalScore: number;
   } | null>(null);
+
+  // Calculator
+  const [showCalculator, setShowCalculator] = useState(false);
 
   // Modal States
   const [showEndExam, setShowEndExam] = useState(false);
@@ -403,7 +407,7 @@ const Page = ({ id }: { id: string }) => {
       const tag = (document.activeElement as HTMLElement)?.tagName;
       if (tag === "TEXTAREA" || tag === "INPUT") return;
 
-      let key = event.key;
+      const key = event.key;
 
       if (key === "ArrowRight") return nextQuestion();
       if (key === "ArrowLeft") return prevQuestion();
@@ -641,6 +645,21 @@ const Page = ({ id }: { id: string }) => {
 
                     {/* Submit & Save Button */}
                     <div className="flex items-center gap-2 w-32 lg:w-fit">
+                      {/* Calculator Toggle */}
+                      <button
+                        type="button"
+                        onClick={() => setShowCalculator((prev) => !prev)}
+                        aria-label="Toggle calculator"
+                        title="Calculator"
+                        className={`flex h-12 lg:h-10 w-12 lg:w-10 shrink-0 items-center justify-center rounded-lg borders transition cursor-pointer ${
+                          showCalculator
+                            ? "border-accent bg-accent-light text-accent-dim"
+                            : "border-accent/25 text-accent-dim hover:bg-accent-light"
+                        }`}
+                      >
+                        <CalculatorIcon size={26} />
+                      </button>
+
                       {/* Update Status — hidden on mobile to save space */}
                       <div className="hidden sm:flex border-l h-10 w-48 text-sm items-center text-theme-gray justify-center gap-2 shrink-0">
                         <CloudCheck size={20} className="mb-0.5" />
@@ -1094,6 +1113,11 @@ const Page = ({ id }: { id: string }) => {
                   ))}
                 </div>
               </div>
+
+              {/* Calculator */}
+              {showCalculator && (
+                <Calculator onClose={() => setShowCalculator(false)} />
+              )}
 
               {/* Dialog - End Exam */}
               <Dialog open={showEndExam} onOpenChange={setShowEndExam}>

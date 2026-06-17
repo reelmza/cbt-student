@@ -265,7 +265,7 @@ const Page = () => {
               src={restMan}
               alt="Empty Exams"
               height={280}
-              className="lg:-ml-10 h-[180px] lg:h-[300px]"
+              className="lg:-ml-10 h-45 lg:h-75"
             />
             <Spacer size="xl" />
 

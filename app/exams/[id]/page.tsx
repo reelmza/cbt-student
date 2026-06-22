@@ -398,7 +398,7 @@ const Page = ({ id }: { id: string }) => {
         }
       } finally {
         if (isMounted.current && !cancelled) {
-          timeoutRef.current = setTimeout(poll, 10_000);
+          timeoutRef.current = setTimeout(poll, 40_000);
         }
       }
     };

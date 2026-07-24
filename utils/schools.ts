@@ -41,8 +41,8 @@ export const schools: Record<string, School> = {
   zing: {
     image: zingLogo,
     shortName: "COE Zing",
-    fullName: "Federal College of Education, Zing",
-    name: "Federal College of Education, Zing",
+    fullName: "College of Education, Zing",
+    name: "College of Education, Zing",
   },
 };
 

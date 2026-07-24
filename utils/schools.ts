@@ -4,6 +4,7 @@ import ebsuLogo from "@/public/images/ebsu-logo-auth.webp";
 import ijbcoeLogo from "@/public/images/ijbcoe-logo-auth.webp";
 import defaultLogo from "@/public/images/school-logo-auth.webp";
 import uhrLogo from "@/public/images/uhr-logo.webp";
+import zingLogo from "@/public/images/zing.png";
 
 export type School = {
   image: StaticImageData;
@@ -36,6 +37,12 @@ export const schools: Record<string, School> = {
     shortName: "UHR Portal",
     fullName: "UHR Consult Kado, Abuja.",
     name: "UHR Consult Kado, Abuja",
+  },
+  zing: {
+    image: zingLogo,
+    shortName: "COE Zing",
+    fullName: "Federal College of Education, Zing",
+    name: "Federal College of Education, Zing",
   },
 };
 

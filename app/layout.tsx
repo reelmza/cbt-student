@@ -30,10 +30,7 @@ export default async function RootLayout({
   const schoolName = await fetchSchoolName();
 
   return (
-    <html
-      lang="en"
-      data-school={(schoolName || "default").toLowerCase()}
-    >
+    <html lang="en" data-school={(schoolName || "default").toLowerCase()}>
       <body
         className={`${inter.variable} ${merriweather.variable} antialiased`}
       >

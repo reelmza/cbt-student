@@ -6,7 +6,9 @@ const SideBox = ({ schoolName }: { schoolName?: string | null }) => {
   const school = getSchool(schoolName);
 
   return (
-    <div className="hidden lg:col-span-6 lg:flex flex-col items-center justify-center bg-neutral-50">
+    <div
+      className={`hidden lg:col-span-6 lg:flex flex-col items-center justify-center ${school.name?.includes("Zing") ? "" : "bg-neutral-50"}`}
+    >
       <Image
         src={school.image}
         width={270}
@@ -18,7 +20,9 @@ const SideBox = ({ schoolName }: { schoolName?: string | null }) => {
       <Spacer size="lg" />
 
       <div className="w-8/10 flex flex-col items-center text-center">
-        <div className="text-3xl font-extrabold leading-tight text-accent-dim w-2/3 font-serif">
+        <div
+          className={`text-3xl font-extrabold leading-tight ${school.name?.includes("Zing") ? "text-foreground" : "text-accent-dim"} w-2/3 font-serif`}
+        >
           {school.name}
         </div>
         <Spacer size="sm" />

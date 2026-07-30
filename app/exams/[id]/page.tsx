@@ -2,13 +2,13 @@
 
 import {
   ArrowRight,
-  Calculator as CalculatorIcon,
   Check,
   ChevronRightIcon,
   CircleQuestionMark,
   Clock2Icon,
   Clock4,
   CloudCheck,
+  Info,
   Timer,
   User2,
 } from "lucide-react";
@@ -19,8 +19,8 @@ import { use, useEffect, useRef, useState } from "react";
 import { io, type Socket } from "socket.io-client";
 import { toast } from "sonner";
 import Button from "@/components/button";
-import Calculator from "@/components/calculator";
 import Counter from "@/components/counter";
+import ExamTools from "@/components/exam-tools";
 import Preload from "@/components/preload";
 import type { SecurityMonitorHandle } from "@/components/security-monitor";
 import { SecurityMonitor } from "@/components/security-monitor";
@@ -37,6 +37,23 @@ import {
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { getAxios } from "@/lib/axios";
 import shuffleArray from "@/utils/array-shuffler";
+
+const OBJECTIVE_TYPES = ["multiple_choice", "multiple_select"];
+
+// The letter a student sees comes from the option's position, not from
+// opt.label. Shuffling therefore only reorders the array: every option keeps
+// its original label, and that label is what gets stored in `answers` and sent
+// to the server, so marking is unaffected by the order options appear in.
+// Option order follows the same shuffleQuestions config as question order.
+const OPTION_LABELS = ["A", "B", "C", "D", "E", "F"];
+
+const shuffleOptions = (question: any) => {
+  if (!OBJECTIVE_TYPES.includes(question?.type)) return question;
+  if (!Array.isArray(question.options) || question.options.length < 2) {
+    return question;
+  }
+  return { ...question, options: shuffleArray(question.options) };
+};
 
 const Page = ({ id }: { id: string }) => {
   const controller = new AbortController();
@@ -55,9 +72,6 @@ const Page = ({ id }: { id: string }) => {
     pending: number;
     totalScore: number;
   } | null>(null);
-
-  // Calculator
-  const [showCalculator, setShowCalculator] = useState(false);
 
   // Modal States
   const [showEndExam, setShowEndExam] = useState(false);
@@ -96,6 +110,13 @@ const Page = ({ id }: { id: string }) => {
   const parts = (text: string) => {
     return text.split(/(\[\d+\])/g);
   };
+
+  // The first array entry holds one or two urls, comma separated
+  const questionImages =
+    questions?.[activeQuestion]?.images?.[0]
+      ?.split(",")
+      .map((url) => url.trim())
+      .filter(Boolean) ?? [];
 
   // Next Question
   const nextQuestion = () => {
@@ -323,9 +344,13 @@ const Page = ({ id }: { id: string }) => {
                   { answered: [], unanswered: [] },
                 );
 
+                // Already answered questions keep both their position and
+                // their option order, so a resumed exam looks unchanged.
                 acc.push(
                   ...answered,
-                  ...(canShuffle ? shuffleArray(unanswered) : unanswered),
+                  ...(canShuffle
+                    ? shuffleArray(unanswered).map(shuffleOptions)
+                    : unanswered),
                 );
                 return acc;
               },
@@ -337,6 +362,28 @@ const Page = ({ id }: { id: string }) => {
         }
       } catch (error: any) {
         if (error?.name !== "CanceledError") {
+          // 401 — session expired or the account is being used elsewhere.
+          // Show the logout screen with a clear message (the 401 body is
+          // empty, so provide our own friendly copy).
+          if (error?.response?.status === 401) {
+            setPageError(
+              "Your Session Has Expired$Please login again to continue.",
+            );
+            setLoading("pageError");
+            return;
+          }
+
+          // 403 — the administrator has not authorized the assessment to
+          // start yet. Show a friendly, non-error info screen (no logout).
+          if (error?.response?.status === 403) {
+            setPageError(
+              error?.response?.data?.message ||
+                "This assessment has not been opened by your administrator yet.",
+            );
+            setLoading("notAuthorized");
+            return;
+          }
+
           if (error?.message) {
             setPageError(error?.response?.data?.message);
           }
@@ -420,7 +467,14 @@ const Page = ({ id }: { id: string }) => {
 
       if (["A", "B", "C", "D", "a", "b", "c", "d"].includes(key)) {
         if (!questions) return;
-        const upperKey = key.toUpperCase();
+
+        // The key names a display position; resolve it to the option actually
+        // sitting there, since shuffling moves labels away from their slot.
+        const pressedLabel =
+          q.options?.[OPTION_LABELS.indexOf(key.toUpperCase())]?.label;
+        if (!pressedLabel) return;
+        const upperKey = pressedLabel;
+
         setAnswers((prev) => {
           if (q.type === "multiple_select") {
             const prevEntry = prev[q._id];
@@ -645,20 +699,8 @@ const Page = ({ id }: { id: string }) => {
 
                     {/* Submit & Save Button */}
                     <div className="flex items-center gap-2 w-32 lg:w-fit">
-                      {/* Calculator Toggle */}
-                      <button
-                        type="button"
-                        onClick={() => setShowCalculator((prev) => !prev)}
-                        aria-label="Toggle calculator"
-                        title="Calculator"
-                        className={`flex h-12 lg:h-10 w-12 lg:w-10 shrink-0 items-center justify-center rounded-lg borders transition cursor-pointer ${
-                          showCalculator
-                            ? "border-accent bg-accent-light text-accent-dim"
-                            : "border-accent/25 text-accent-dim hover:bg-accent-light"
-                        }`}
-                      >
-                        <CalculatorIcon size={26} />
-                      </button>
+                      {/* Exam Tools — calculator, periodic table, etc. */}
+                      <ExamTools />
 
                       {/* Update Status — hidden on mobile to save space */}
                       <div className="hidden sm:flex border-l h-10 w-48 text-sm items-center text-theme-gray justify-center gap-2 shrink-0">
@@ -868,7 +910,7 @@ const Page = ({ id }: { id: string }) => {
                                     htmlFor={`r${key + 1}`}
                                     className="flex items-start gap-2 select-none cursor-pointer text-base"
                                   >
-                                    <span className="font-bold text-base">{`[${opt.label}]`}</span>
+                                    <span className="font-bold text-base">{`[${OPTION_LABELS[key] ?? opt.label}]`}</span>
                                     <span>{opt.text}</span>
                                   </label>
                                 </div>
@@ -929,7 +971,7 @@ const Page = ({ id }: { id: string }) => {
                                     htmlFor={`ms${key + 1}`}
                                     className="flex items-center gap-2 select-none cursor-pointer text-base"
                                   >
-                                    <span className="font-bold text-base">{`[${opt.label}]`}</span>
+                                    <span className="font-bold text-base">{`[${OPTION_LABELS[key] ?? opt.label}]`}</span>
                                     <span>{opt.text}</span>
                                   </label>
                                 </div>
@@ -968,19 +1010,21 @@ const Page = ({ id }: { id: string }) => {
                       )}
                     </div>
 
-                    {/* Question Image */}
-                    {questions[activeQuestion]?.images &&
-                      questions[activeQuestion]?.images.length > 0 && (
-                        <div className="flex w-[40%] shrink-0">
+                    {/* Question Image(s) */}
+                    {questionImages.length > 0 && (
+                      <div className="flex flex-col gap-2 w-[40%] shrink-0">
+                        {questionImages.map((img, key) => (
                           <Image
-                            src={questions[activeQuestion].images[0]}
-                            alt="Question Image"
+                            key={img}
+                            src={img}
+                            alt={`Question Image ${key + 1}`}
                             className="w-full object-contain"
                             width={100}
                             height={100}
                           />
-                        </div>
-                      )}
+                        ))}
+                      </div>
+                    )}
                   </div>
                 </div>
 
@@ -1114,11 +1158,6 @@ const Page = ({ id }: { id: string }) => {
                 </div>
               </div>
 
-              {/* Calculator */}
-              {showCalculator && (
-                <Calculator onClose={() => setShowCalculator(false)} />
-              )}
-
               {/* Dialog - End Exam */}
               <Dialog open={showEndExam} onOpenChange={setShowEndExam}>
                 <DialogContent>
@@ -1242,7 +1281,7 @@ const Page = ({ id }: { id: string }) => {
                     <div className="flex items-center gap-4">
                       <div className="w-full sm:w-48">
                         <Button
-                          title={"Go Back to Dashboard"}
+                          title={"Return to Dashboard"}
                           loading={loading == "submitTest"}
                           variant={"fill"}
                           icon={<ArrowRight size={14} />}
@@ -1301,7 +1340,7 @@ const Page = ({ id }: { id: string }) => {
 
                 <div className="w-full sm:w-72">
                   <Button
-                    title={"Return to my Dashboard"}
+                    title={"Return to Dashboard"}
                     loading={false}
                     variant={"fill"}
                     icon={<ArrowRight size={14} />}
@@ -1314,11 +1353,48 @@ const Page = ({ id }: { id: string }) => {
         </SecurityMonitor>
       )}
 
-      <Preload
-        loading={loading}
-        pageData={pageData ? true : false}
-        errorMessage={pageError}
-      />
+      {/* Friendly info screen — assessment not yet authorized to start (403) */}
+      {loading === "notAuthorized" && (
+        <div className="grow h-full flex flex-col items-center justify-center px-4 font-sans">
+          <div className="bg-accent-light rounded-full p-8 sm:p-10">
+            <Info
+              size={72}
+              strokeWidth={1.8}
+              className="text-accent sm:w-24 sm:h-24"
+            />
+          </div>
+          <Spacer size="lg" />
+
+          <div className="text-2xl sm:text-3xl font-bold text-accent-dim text-center">
+            Assessment not open yet
+          </div>
+          <Spacer size="sm" />
+
+          <div className="text-sm text-theme-gray text-center max-w-md">
+            {pageError ||
+              "Your administrator has not authorized this assessment to start yet. Please check back shortly."}
+          </div>
+          <Spacer size="xl" />
+
+          <div className="w-full sm:w-72">
+            <Button
+              title={"Return to my Dashboard"}
+              loading={false}
+              variant={"fill"}
+              icon={<ArrowRight size={14} />}
+              onClick={() => router.push("/exams")}
+            />
+          </div>
+        </div>
+      )}
+
+      {loading !== "notAuthorized" && (
+        <Preload
+          loading={loading}
+          pageData={pageData ? true : false}
+          errorMessage={pageError}
+        />
+      )}
     </>
   );
 };

@@ -31,6 +31,37 @@ interface Options {
   initialBlocked?: boolean;
 }
 
+/**
+ * Best-effort clipboard wipe, run on every violation.
+ *
+ * The overlay only blocks after maxViolations, so a student could otherwise
+ * copy (violation 1) and paste (violation 2) and get the text across before
+ * being stopped. Emptying the clipboard on any violation closes that window,
+ * and also scrubs anything carried in from before the exam started.
+ */
+const clearClipboard = () => {
+  const wipe = () => {
+    try {
+      return navigator.clipboard?.writeText("");
+    } catch {
+      // No Clipboard API (insecure context or old browser)
+      return undefined;
+    }
+  };
+
+  // writeText rejects while the document is unfocused — precisely the case
+  // for a tab switch — so queue a single retry for when focus comes back.
+  wipe()?.catch(() => {
+    window.addEventListener(
+      "focus",
+      () => {
+        wipe()?.catch(() => {});
+      },
+      { once: true },
+    );
+  });
+};
+
 export function useSecurityMonitor({
   blockOn = ["TAB_SWITCH", "KEYBOARD_SHORTCUT", "FULLSCREEN_EXIT"],
   maxViolations,
@@ -75,6 +106,10 @@ export function useSecurityMonitor({
       timestamp: new Date(),
       ...VIOLATION_TYPES[type],
     };
+
+    // Any violation invalidates whatever is on the clipboard, regardless of
+    // whether this one is enough to raise the blocking overlay.
+    clearClipboard();
 
     setViolations((prev) => {
       const next = [...prev, violation];
@@ -139,12 +174,23 @@ export function useSecurityMonitor({
     return () => document.removeEventListener("keydown", handler);
   }, [report]);
 
-  // Clipboard
+  // Clipboard — preventDefault stops the operation itself. Reporting alone
+  // would still let the text reach the clipboard, since these events fire
+  // before the browser writes to it.
   useEffect(() => {
     if (!optsRef.current.disableClipboard) return;
-    const onCopy = () => report("COPY");
-    const onCut = () => report("CUT");
-    const onPaste = () => report("PASTE");
+    const onCopy = (e: ClipboardEvent) => {
+      e.preventDefault();
+      report("COPY");
+    };
+    const onCut = (e: ClipboardEvent) => {
+      e.preventDefault();
+      report("CUT");
+    };
+    const onPaste = (e: ClipboardEvent) => {
+      e.preventDefault();
+      report("PASTE");
+    };
     document.addEventListener("copy", onCopy);
     document.addEventListener("cut", onCut);
     document.addEventListener("paste", onPaste);

@@ -4,6 +4,7 @@ type QuestionType = {
   question: string;
   options: { label: string; text: string; _id: string }[];
   correctAnswers?: string[];
+  // Single entry holding one or two comma separated urls ("url1,url2")
   images?: string[];
 }[];
 

@@ -8,6 +8,7 @@ import {
   Clock2Icon,
   Clock4,
   CloudCheck,
+  Expand,
   Info,
   Timer,
   User2,
@@ -36,6 +37,7 @@ import {
 } from "@/components/ui/dialog";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { getAxios } from "@/lib/axios";
+import { prettyDate } from "@/lib/dateFormater";
 import shuffleArray from "@/utils/array-shuffler";
 
 const OBJECTIVE_TYPES = ["multiple_choice", "multiple_select"];
@@ -74,6 +76,8 @@ const Page = ({ id }: { id: string }) => {
   } | null>(null);
 
   // Modal States
+  const [previewImage, setPreviewImage] = useState<string | null>(null);
+  const previewImageRef = useRef<string | null>(null);
   const [showEndExam, setShowEndExam] = useState(false);
   const [showTimeUp, setShowTimeUp] = useState(false);
   const [showExamClosed, setShowExamClosed] = useState(false);
@@ -222,6 +226,12 @@ const Page = ({ id }: { id: string }) => {
     questionsRef.current = questions;
     activeQuestionRef.current = activeQuestion;
   }, [questions, activeQuestion]);
+
+  // Mirrored into a ref so the keydown listener can read it without being
+  // torn down and re-registered every time the preview opens or closes.
+  useEffect(() => {
+    previewImageRef.current = previewImage;
+  }, [previewImage]);
 
   // Keep ref updated for polling
   useEffect(() => {
@@ -454,6 +464,10 @@ const Page = ({ id }: { id: string }) => {
       const tag = (document.activeElement as HTMLElement)?.tagName;
       if (tag === "TEXTAREA" || tag === "INPUT") return;
 
+      // While an image is enlarged, arrow keys and option keys would act on
+      // the question hidden behind the modal, so ignore them entirely.
+      if (previewImageRef.current) return;
+
       const key = event.key;
 
       if (key === "ArrowRight") return nextQuestion();
@@ -680,33 +694,30 @@ const Page = ({ id }: { id: string }) => {
           }
         >
           {!assSubmited && (
-            <div className="relative grow grid grid-cols-12 min-h-full px-4 sm:px-5 font-sans">
+            <div className="relative grow grid grid-cols-12 h-full min-h-0 px-4 sm:px-5 font-sans">
               {/* Main Bar */}
-              <div className="h-full col-span-12 lg:col-span-9 flex flex-col justify-between lg:border-r lg:pr-5 pt-5">
-                {/* Upper Content */}
-                <div className="">
+              <div className="h-full min-h-0 col-span-12 lg:col-span-9 flex flex-col lg:pr-5 pt-5">
+                {/* Upper Content — pinned, never scrolls */}
+                <div className="shrink-0">
                   {/* Heading & Submit */}
-                  <div className="flex  sm:flex-row sm:h-14 border-b justify-between gap-3 sm:gap-5 pb-3 sm:pb-0">
+                  <div className="h-14 bg-s flex sm:flex-row border-b justify-between gap-3 p-3">
                     {/* Heading */}
-                    <div className="grow ">
-                      <div className="text-lg sm:text-xl font-semibold leading-snug font-serif">
+                    <div className="grow flex flex-col -mt-1">
+                      <div className="text-lg sm:text-xl font-semibold leading-tight font-serif">
                         {pageData?.title}
                       </div>
-                      <div className="text-theme-gray text-sm">
+                      <div className="text-theme-gray text-xs">
                         {pageData?.course?.title}
                       </div>
                     </div>
 
                     {/* Submit & Save Button */}
                     <div className="flex items-center gap-2 w-32 lg:w-fit">
-                      {/* Exam Tools — calculator, periodic table, etc. */}
-                      <ExamTools />
-
                       {/* Update Status — hidden on mobile to save space */}
-                      <div className="hidden sm:flex border-l h-10 w-48 text-sm items-center text-theme-gray justify-center gap-2 shrink-0">
+                      <div className="hidden sm:flex h-10 w-fit pr-5 text-sm items-center text-theme-gray justify-center gap-2 shrink-0">
                         <CloudCheck size={20} className="mb-0.5" />
                         <span>
-                          Last Saved
+                          Saved
                           {lastSavedRef.current
                             ? " (" +
                               lastSavedRef.current
@@ -717,6 +728,9 @@ const Page = ({ id }: { id: string }) => {
                             : ""}
                         </span>
                       </div>
+
+                      {/* Exam Tools — calculator, periodic table, etc. */}
+                      <ExamTools />
 
                       {/* Submit Button */}
                       <div className="w-full sm:w-42">
@@ -755,10 +769,14 @@ const Page = ({ id }: { id: string }) => {
                     </div>
                   </div>
 
-                  <Spacer size="md" />
+                </div>
 
+                {/* Scroll Region — the only scrollable area on the page.
+                    Laid out as a column so the question block can absorb any
+                    leftover height and hold the nav footer at the bottom. */}
+                <div className="grow min-h-0 overflow-y-auto flex flex-col pt-4">
                   {/* Question Content & Image */}
-                  <div className="flex items-start gap-2">
+                  <div className="grow shrink-0 flex items-start gap-2">
                     {/* Questions */}
                     <div className="grow h-fit">
                       {/* Question */}
@@ -1014,27 +1032,42 @@ const Page = ({ id }: { id: string }) => {
                     {questionImages.length > 0 && (
                       <div className="flex flex-col gap-2 w-[40%] shrink-0">
                         {questionImages.map((img, key) => (
-                          <Image
+                          <button
                             key={img}
-                            src={img}
-                            alt={`Question Image ${key + 1}`}
-                            className="w-full object-contain"
-                            width={100}
-                            height={100}
-                          />
+                            type="button"
+                            title="Click to view full size"
+                            aria-label={`View question image ${key + 1} full size`}
+                            onClick={() => setPreviewImage(img)}
+                            className="group relative w-full cursor-zoom-in overflow-hidden rounded-md"
+                          >
+                            <Image
+                              src={img}
+                              alt={`Question Image ${key + 1}`}
+                              className="w-full object-contain"
+                              width={100}
+                              height={100}
+                            />
+
+                            {/* Affordance — the thumbnail is too narrow to
+                                show detail on wide images */}
+                            <span className="pointer-events-none absolute right-1.5 bottom-1.5 flex items-center gap-1 rounded-md bg-black/65 px-2 py-1 text-[11px] font-medium text-white opacity-0 transition-opacity duration-150 group-hover:opacity-100 group-focus-visible:opacity-100">
+                              <Expand size={12} />
+                              View
+                            </span>
+                          </button>
                         ))}
                       </div>
                     )}
                   </div>
-                </div>
 
-                {/* Footer Content */}
-                <div className="mb-6 sm:mb-10 flex items-center gap-3 sm:gap-4 mt-6">
+                  {/* Footer Content — sits at the bottom of the main bar when
+                      the question is short, and scrolls with it when long */}
+                  <div className="shrink-0 mb-6 sm:mb-10 flex items-center gap-3 sm:gap-4 mt-6">
                   {/* Prev Button */}
                   <div className="w-20 sm:w-24 shrink-0">
                     <Button
                       title="Previous"
-                      variant="fill"
+                      variant="white"
                       type="button"
                       loading={false}
                       onClick={prevQuestion}
@@ -1050,79 +1083,107 @@ const Page = ({ id }: { id: string }) => {
                   <div className="w-20 sm:w-24 shrink-0">
                     <Button
                       title="Next"
-                      variant="fill"
+                      variant="white"
                       type="button"
                       loading={false}
                       icon={<ChevronRightIcon size={16} />}
                       onClick={nextQuestion}
                     />
+                    </div>
                   </div>
                 </div>
               </div>
 
               {/* SideBar — hidden on mobile, shown on lg+ */}
-              <div className="hidden lg:flex col-span-3 flex-col pl-5 pt-5 -mr-5">
-                {/* Time Counter */}
-                <div className="flex h-14 items-center gap-2 text-black/80 border-b w-full">
-                  <Timer
-                    size={38}
-                    className={`${globalTimeLeft && globalTimeLeft < 300 ? "text-theme-warning" : ""}`}
-                  />
-                  <div className="text-2xl font-extrabold leading-none mt-1">
-                    <Counter
-                      durationInSeconds={
-                        examDurationRef.current !== null &&
-                        examDurationRef.current !== 0
-                          ? examDurationRef.current
-                          : Number(pageData.timeLimit * 60)
-                      }
-                      onComplete={handleTimeUp}
-                      timeLeftParams={{ globalTimeLeft, setGlobalTimeLeft }}
-                      timePaused={pauseTime}
+              <div className="hidden lg:flex col-span-3 flex-col pl-5 pt-5 h-full min-h-0 overflow-y-auto">
+                <div className="flex flex-wrap items-start gap-4 lg:flex-col bg-white border rounded-xl overflow-hidden h-fit">
+                  {/* Time Counter — pinned to the top of the sidebar */}
+                  <div className="w-full flex h-14 shrink-0 items-center gap-2 px-5 text-black/80 border-b">
+                    <Timer
+                      size={30}
+                      className={`${globalTimeLeft && globalTimeLeft < 300 ? "text-theme-warning" : ""}`}
                     />
+                    <div className="text-2xl font-extrabold leading-none mt-0.5">
+                      <Counter
+                        durationInSeconds={
+                          examDurationRef.current !== null &&
+                          examDurationRef.current !== 0
+                            ? examDurationRef.current
+                            : Number(pageData.timeLimit * 60)
+                        }
+                        onComplete={handleTimeUp}
+                        timeLeftParams={{ globalTimeLeft, setGlobalTimeLeft }}
+                        timePaused={pauseTime}
+                      />
+                    </div>
                   </div>
-                </div>
-                <Spacer size="md" />
 
-                {/* Profile Picture */}
-                <div className="h-62.5 w-62.5 flex items-center justify-center self-center bg-theme-gray-light rounded-md overflow-hidden">
-                  {!session?.user?.passportPhoto ? (
-                    <User2
-                      size={200}
-                      strokeWidth={0.5}
-                      className="text-theme-gray-mid"
-                    />
-                  ) : (
-                    <Image
-                      src={session?.user?.passportPhoto}
-                      alt="Profile photo"
-                      height={250}
-                      width={250}
-                    />
-                  )}
-                </div>
-                <Spacer size="md" />
-
-                {/* Registration Number */}
-                <div className="border-b pb-2">
-                  <div className="text-sm text-theme-gray">
-                    Registration Number
+                  {/* Profile Picture */}
+                  <div className="h-22 w-22 lg:h-52 lg:w-full flex flex-col items-center justify-center lg:self-center overflow-hidden shrink-0 border-b">
+                    {!session?.user?.passportPhoto ? (
+                      <>
+                        <User2
+                          size={120}
+                          strokeWidth={0.2}
+                          className="text-theme-gray-mid"
+                        />
+                        <span className="text-xs text-theme-gray italic mt-2">
+                          Photo not uploaded
+                        </span>{" "}
+                      </>
+                    ) : (
+                      <Image
+                        src={session?.user?.passportPhoto}
+                        alt="Profile photo"
+                        className="object-cover aspect-square"
+                        height={250}
+                        width={250}
+                      />
+                    )}
                   </div>
-                  <div>{session?.user?.regNumber}</div>
-                </div>
-                <Spacer size="sm" />
 
-                {/* Full Name */}
-                <div className="pb-2 border-b">
-                  <div className="text-sm text-theme-gray">Full Name</div>
-                  <div>{session?.user?.fullName}</div>
-                </div>
-                <Spacer size="sm" />
+                  {/* User details */}
+                  <div className="grow lg:w-full flex flex-col lg:gap-y-2">
+                    {/* Registration Number */}
+                    <div className="px-5 py-2 text-theme-gray text-sm">
+                      {/* Reg Number */}
+                      <div className="text-xs font-light">
+                        Registration Number
+                      </div>
+                      <div className="font-semibold">
+                        {session?.user?.regNumber}
+                      </div>
+                      <Spacer size="md" />
 
-                {/* Level */}
-                <div className="pb-2">
-                  <div className="text-sm text-theme-gray">Level</div>
-                  <div>{session?.user?.level}</div>
+                      {/* Full Name */}
+                      <div className="text-xs font-light">Full Name</div>
+                      <div className="font-semibold">
+                        {session?.user?.fullName}
+                      </div>
+                      <Spacer size="md" />
+
+                      {/* Level*/}
+                      <div className="text-xs font-light">Level</div>
+                      <div className="font-semibold">
+                        {session?.user?.level}
+                      </div>
+                      <Spacer size="md" />
+
+                      {/* User ID*/}
+                      <div className="text-xs font-light">User Id</div>
+                      <div className="font-semibold">
+                        /{session?.user?.id?.slice(-8)}
+                      </div>
+                      <Spacer size="md" />
+
+                      {/* Session */}
+                      <div className="text-xs font-light">Session</div>
+                      <div className="font-semibold">
+                        {session?.expires && prettyDate(session?.expires)}
+                      </div>
+                      <Spacer size="md" />
+                    </div>
+                  </div>
                 </div>
               </div>
 
@@ -1157,6 +1218,41 @@ const Page = ({ id }: { id: string }) => {
                   ))}
                 </div>
               </div>
+
+              {/* Dialog - Image preview. Closes on the X, on the backdrop, or
+                  on the image itself, so a student never needs Escape — that
+                  key drops the browser out of fullscreen and would trip a
+                  FULLSCREEN_EXIT violation. */}
+              <Dialog
+                open={previewImage !== null}
+                onOpenChange={(open) => !open && setPreviewImage(null)}
+              >
+                <DialogContent className="max-w-[95vw] sm:max-w-[95vw] w-[95vw] p-3">
+                  <DialogHeader>
+                    <DialogTitle className="hidden">Question image</DialogTitle>
+                    <DialogDescription className="hidden">
+                      Enlarged view of the current question image
+                    </DialogDescription>
+                  </DialogHeader>
+
+                  {previewImage && (
+                    <button
+                      type="button"
+                      aria-label="Close image"
+                      onClick={() => setPreviewImage(null)}
+                      className="relative h-[82vh] w-full cursor-zoom-out"
+                    >
+                      <Image
+                        src={previewImage}
+                        alt="Question image, full size"
+                        fill
+                        sizes="95vw"
+                        className="object-contain"
+                      />
+                    </button>
+                  )}
+                </DialogContent>
+              </Dialog>
 
               {/* Dialog - End Exam */}
               <Dialog open={showEndExam} onOpenChange={setShowEndExam}>

@@ -20,7 +20,8 @@
   --theme-success:#079b38;
   --theme-error:#dd1414;
   --radius: 0.625rem;
-  --background: oklch(1 0 0);
+    --background: rgb(252, 252, 252);
+
   --foreground: oklch(0.145 0 0);
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.145 0 0);
@@ -87,6 +88,13 @@
   --accent-mid: #b3ddc4;
   --accent: #00913f;
   --accent-dim:#00692e;
+}
+
+[data-school="ascoht"] {
+  --accent-light: #e9f4ec;
+  --accent-mid: #bfdcc9;
+  --accent: #15603a;
+  --accent-dim:#0e4527;
 }
 
 @theme inline {

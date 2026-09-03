@@ -9,7 +9,9 @@ type ButtonType = {
     | "outline"
     | "fillError"
     | "fillErrorOutline"
-    | "fillErrorGhost";
+    | "fillErrorGhost"
+    | "grayOutline"
+    | "white";
   icon?: JSX.Element;
   type?: "submit" | "button";
   onClick?: () => void;
@@ -24,7 +26,7 @@ const Button = ({
   onClick,
 }: ButtonType) => {
   const base =
-    "flex items-center justify-center h-12 lg:h-10 w-full font-semibold rounded-lg leading-none gap-2 cursor-pointer select-none transition duration-150 ease-out text-sm active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2";
+    "flex items-center justify-center h-12 lg:h-10 w-full font-medium rounded-lg leading-none gap-2 cursor-pointer select-none transition duration-150 ease-out text-sm active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2";
 
   const buttonVariants = {
     fill: `${base} bg-accent text-white hover:bg-accent-dim focus-visible:ring-accent/50${
@@ -39,7 +41,13 @@ const Button = ({
     fillErrorGhost: `${base} text-theme-error bg-transparent hover:bg-theme-error/8 focus-visible:ring-theme-error/40${
       loading ? " opacity-60 pointer-events-none" : ""
     }`,
+    grayOutline: `${base} border border-theme-gray/40 text-theme-gray bg-transparent hover:bg-theme-gray/8 focus-visible:ring-theme-gray/40${
+      loading ? " opacity-60 pointer-events-none" : ""
+    }`,
     outline: `${base} bg-transparent text-accent-dim border border-accent/25 hover:bg-accent-light focus-visible:ring-accent/30${
+      loading ? " opacity-60 pointer-events-none" : ""
+    }`,
+    white: `${base} bg-white text-foreground border border-theme-gray-mid hover:bg-theme-gray-light focus-visible:ring-accent/25${
       loading ? " opacity-60 pointer-events-none" : ""
     }`,
   };

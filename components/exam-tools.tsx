@@ -5,7 +5,6 @@ import {
   Calculator as CalculatorIcon,
   Check,
   ChevronDown,
-  Wrench,
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import Calculator from "./calculator";
@@ -47,10 +46,10 @@ const ExamTools = () => {
           className={`flex h-12 lg:h-10 items-center justify-center gap-1 rounded-lg border px-2 transition cursor-pointer ${
             activeTool || openMenu
               ? "border-accent bg-accent-light text-accent-dim"
-              : "border-accent/25 text-accent-dim hover:bg-accent-light"
+              : "border-theme-gray-mid bg-white text-theme-gray hover:bg-theme-gray-light"
           }`}
         >
-          <Wrench size={22} />
+          <span className="px-1 text-sm font-medium">Calculator</span>
           <ChevronDown
             size={14}
             className={`transition ${openMenu ? "rotate-180" : ""}`}

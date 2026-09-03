@@ -24,7 +24,7 @@ const SideBar = ({ schoolName }: { schoolName?: string | null }) => {
   const school = getSchool(schoolName);
 
   return (
-    <div className="hidden lg:flex flex-col w-2/10 h-full shrink-0 border-r border-neutral-200 bg-background py-5 px-5 font-sans">
+    <div className="hidden lg:flex flex-col w-2/10 h-full shrink-0 border-r border-neutral-200 py-5 px-5 font-sans bg-white">
       <div className="h-fit">
         <div className="flex items-center gap-2">
           <Image
@@ -61,14 +61,14 @@ const SideBar = ({ schoolName }: { schoolName?: string | null }) => {
             {/* Main Link */}
             <Link
               href={item.route}
-              className={`h-10 flex items-center w-full gap-2 text-sm px-2 ${
+              className={`h-9 flex items-center w-full gap-2 text-sm px-2 ${
                 path.includes(item.route)
-                  ? "border-l-4 border-accent bg-accent/2 text-accent font-semibold hover:bg-accent-light/70"
-                  : "text-theme-gray hover:bg-theme-gray-light"
-              } `}
+                  ? "bg-accent-light/50 border border-accent-light text-accent-dim hover:bg-accent-light/70"
+                  : "text-theme-gray hover:text-accent hover:bg-theme-gray-light/50"
+              }  rounded-lg animate-all duration-200 ease-in`}
             >
               {item.icon}
-              <span className="font-medium">{item.name}</span>
+              <span className="font-normal">{item.name}</span>
             </Link>
 
             {/* Link Children */}

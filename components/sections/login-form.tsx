@@ -21,8 +21,7 @@ const LOGIN_ERRORS: Record<string, string> = {
     "Incorrect details. Check your registration number and password.",
   server_unavailable:
     "We couldn't reach the exam server. Please try again shortly.",
-  Configuration:
-    "We couldn't reach the exam server. Please try again shortly.",
+  Configuration: "We couldn't reach the exam server. Please try again shortly.",
 };
 
 const LoginForm = ({ schoolName }: { schoolName?: string | null }) => {
@@ -93,11 +92,6 @@ const LoginForm = ({ schoolName }: { schoolName?: string | null }) => {
       {/* Form area */}
       <div className="flex-1 flex flex-col justify-center items-center px-6 py-10 lg:px-0">
         <div className="w-full max-w-sm lg:max-w-none lg:w-3/5">
-          {/* Badge — desktop only */}
-          <div className="hidden lg:block text-xs font-semibold bg-accent-light text-accent-dim w-fit rounded-full px-3.5 mb-6 py-1.5 leading-none">
-            Welcome
-          </div>
-
           {/* Heading */}
           <div className="text-3xl font-bold font-serif leading-tight text-balance mb-1.5 text-accent-dim">
             Sign in to your exam
@@ -131,7 +125,7 @@ const LoginForm = ({ schoolName }: { schoolName?: string | null }) => {
           </form>
 
           <div className="mt-10 text-xs text-theme-gray-dim">
-            OayasTech CBT Platform &middot; v2
+            OayasTech CBT &middot; v2.0.1
           </div>
         </div>
       </div>

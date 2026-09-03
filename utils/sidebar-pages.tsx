@@ -15,9 +15,9 @@ type SideBarPageType = {
 };
 export const sideBarPages: SideBarPageType[] = [
   {
-    name: "Examinations",
+    name: "My Examinations",
     route: "/exams",
-    icon: <Building2Icon size={20} strokeWidth={1.5} />,
+    icon: <Building2Icon size={18} strokeWidth={1.5} />,
   },
   // {
   //   name: "Users",

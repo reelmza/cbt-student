@@ -5,16 +5,19 @@ import {
   Calculator as CalculatorIcon,
   Check,
   ChevronDown,
+  Sigma,
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import Calculator from "./calculator";
 import PeriodicTable from "./periodic-table";
+import FourFigureTable from "./four-figure-table";
 
 // Add a tool by listing it here and rendering its panel below. Only one tool
 // is open at a time, so the panels never fight over screen space.
 const TOOLS = [
   { id: "calculator", name: "Scientific Calculator", icon: CalculatorIcon },
   { id: "periodic-table", name: "Periodic Table", icon: Atom },
+  { id: "four-figure-table", name: "Four Figure Table", icon: Sigma },
 ];
 
 const ExamTools = () => {
@@ -49,7 +52,7 @@ const ExamTools = () => {
               : "border-theme-gray-mid bg-white text-theme-gray hover:bg-theme-gray-light"
           }`}
         >
-          <span className="px-1 text-sm font-medium">Calculator</span>
+          <span className="px-1 text-sm font-medium">Tools</span>
           <ChevronDown
             size={14}
             className={`transition ${openMenu ? "rotate-180" : ""}`}
@@ -89,6 +92,10 @@ const ExamTools = () => {
 
       {activeTool === "periodic-table" && (
         <PeriodicTable onClose={() => setActiveTool(null)} />
+      )}
+
+      {activeTool === "four-figure-table" && (
+        <FourFigureTable onClose={() => setActiveTool(null)} />
       )}
     </>
   );
